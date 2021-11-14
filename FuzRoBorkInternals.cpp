@@ -185,8 +185,8 @@ void FuzRoBorkINIManager::Initialize(const char* INIPath, void* Paramenter)
 std::string MakeSillyName()
 {
 	std::string Out("Fuz Ro ");
-	for (int i = 0; i < 64; i++)
-		Out += "D'oh";
+	for (int i = 0; i < 16; i++)
+		Out += "Bork";
 #ifdef VR_BUILD
 	Out += " (for Skyrim VR)";
 #endif

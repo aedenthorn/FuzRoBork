@@ -38,62 +38,6 @@ extern "C"
 		}
 	}
 
-	bool SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info)
-	{
-		gLog.OpenRelative(CSIDL_MYDOCUMENTS, "\\My Games\\Skyrim Special Edition\\SKSE\\FuzRoBork.log");
-
-		_MESSAGE("%s Initializing...", MakeSillyName().c_str());
-
-		g_papyrus = (SKSEPapyrusInterface*)skse->QueryInterface(kInterface_Papyrus);
-		bool btest = g_papyrus->Register(FuzRoBorkNamespace::RegisterFuncs);
-		if (btest)
-			_MESSAGE("Register Succeeded"); //example error check
-
-		// populate info structure
-		info->infoVersion = PluginInfo::kInfoVersion;
-		info->name = "Fuz Ro D'oh";
-		info->version = PACKED_SME_VERSION;
-
-		interfaces::kPluginHandle = skse->GetPluginHandle();
-		interfaces::kMsgInterface = (SKSEMessagingInterface*)skse->QueryInterface(kInterface_Messaging);
-
-		if (skse->isEditor)
-			return false;
-		else if (skse->runtimeVersion != RUNTIME_VERSION)
-		{
-			_MESSAGE("Unsupported runtime version %08X", skse->runtimeVersion);
-			return false;
-		}
-		else if (!interfaces::kMsgInterface)
-		{
-			_MESSAGE("Couldn't initialize messaging interface");
-			return false;
-		}
-		else if (interfaces::kMsgInterface->interfaceVersion < 2)
-		{
-			_MESSAGE("Messaging interface too old (%d expected %d)", interfaces::kMsgInterface->interfaceVersion, 2);
-			return false;
-		}
-		// supported runtime version
-		return true;
-	}
-
-	bool SKSEPlugin_Load(const SKSEInterface * skse)
-	{
-		_MESSAGE("Initializing INI Manager");
-		FuzRoBorkINIManager::Instance.Initialize("Data\\SKSE\\Plugins\\FuzRoBork.ini", nullptr);
-
-		if (interfaces::kMsgInterface->RegisterListener(interfaces::kPluginHandle, "SKSE", MessageHandler) == false)
-		{
-			_MESSAGE("Couldn't register message listener");
-			return false;
-		}
-		else if (InstallHooks() == false)
-			return false;
-
-		return true;
-	}
-
 	class SKSEScaleform_BorkFunction : public GFxFunctionHandler
 	{
 	public:
@@ -102,6 +46,8 @@ extern "C"
 
 	void SKSEScaleform_BorkFunction::Invoke(Args* args)
 	{
+
+
 		GFxValue* a = args->args;
 
 		const char* speech = "";
@@ -160,6 +106,8 @@ extern "C"
 		}
 		*/
 
+		_MESSAGE(("SKSEScaleform_BorkFunction received " + type).c_str());
+
 		if (type == "DIALOGUE_CLICK") {
 			FuzRoBorkNamespace::stopSpeaking();
 			FuzRoBorkNamespace::startPlayerSpeech(speech);
@@ -187,12 +135,86 @@ extern "C"
 		}
 	}
 
-
 	bool RegisterScaleform(GFxMovieView* view, GFxValue* root)
 	{
 		RegisterFunction <SKSEScaleform_BorkFunction>(root, view, "BorkFunction");
 		return true;
 	}
+
+	bool SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info)
+	{
+		gLog.OpenRelative(CSIDL_MYDOCUMENTS, "\\My Games\\Skyrim Special Edition\\SKSE\\FuzRoBork.log");
+
+		_MESSAGE("%s Initializing...", MakeSillyName().c_str());
+
+		// populate info structure
+		info->infoVersion = PluginInfo::kInfoVersion;
+		info->name = "Fuz Ro D'oh";
+		info->version = PACKED_SME_VERSION;
+
+		interfaces::kPluginHandle = skse->GetPluginHandle();
+		interfaces::kMsgInterface = (SKSEMessagingInterface*)skse->QueryInterface(kInterface_Messaging);
+
+		if (skse->isEditor)
+			return false;
+		else if (skse->runtimeVersion != RUNTIME_VERSION)
+		{
+			_MESSAGE("Unsupported runtime version %08X", skse->runtimeVersion);
+			return false;
+		}
+		else if (!interfaces::kMsgInterface)
+		{
+			_MESSAGE("Couldn't initialize messaging interface");
+			return false;
+		}
+		else if (interfaces::kMsgInterface->interfaceVersion < 2)
+		{
+			_MESSAGE("Messaging interface too old (%d expected %d)", interfaces::kMsgInterface->interfaceVersion, 2);
+			return false;
+		}
+
+		g_scaleform = static_cast<SKSEScaleformInterface*>(skse->QueryInterface(kInterface_Scaleform));
+		if (!g_scaleform)
+		{
+			_FATALERROR("couldn't get scaleform interface");
+			return false;
+		}
+
+		g_papyrus = static_cast<SKSEPapyrusInterface*>(skse->QueryInterface(kInterface_Papyrus));
+		if (!g_papyrus)
+		{
+			_FATALERROR("couldn't get papyrus interface");
+			return false;
+		}
+		return true;
+	}
+
+	bool SKSEPlugin_Load(const SKSEInterface * skse)
+	{
+		bool btest = g_papyrus->Register(FuzRoBorkNamespace::RegisterFuncs);
+		if (btest)
+			_MESSAGE("Register papyrus methods Succeeded");
+
+		btest = g_scaleform->Register("FuzRoBork", RegisterScaleform);
+		if (btest)
+			_MESSAGE("Register scaleform method Succeeded");
+
+
+
+		_MESSAGE("Initializing INI Manager");
+		FuzRoBorkINIManager::Instance.Initialize("Data\\SKSE\\Plugins\\FuzRoBork.ini", nullptr);
+
+		if (interfaces::kMsgInterface->RegisterListener(interfaces::kPluginHandle, "SKSE", MessageHandler) == false)
+		{
+			_MESSAGE("Couldn't register message listener");
+			return false;
+		}
+		else if (InstallHooks() == false)
+			return false;
+
+		return true;
+	}
+
 };
 
 
