@@ -1,0 +1,82 @@
+﻿<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://qconsulting.ca/fo3/ModConfig5.0.xsd">
+  <moduleName>Fuz Ro Bork - Text-To-Speech Mod for Skyrim</moduleName>
+  <installSteps order="Explicit">
+    <installStep name="Custom">
+      <optionalFileGroups order="Explicit">
+        <group name="Options" type="SelectAny">
+          <plugins order="Explicit">
+			<plugin name="Install custom dialoguemenu.swf">
+              <description>
+                Keep this checked if you want to hear audio for dialogue. Only uncheck if you have a dialogue layout and would prefer it over audible dialogue.
+              </description>
+			  <image path="fomod\images\if.jpg"/>
+              <files>
+                <file source="Interface\dialoguemenu.swf" destination="Interface\dialoguemenu.swf"/>
+              </files>
+              <typeDescriptor>
+                <type name="Recommended"/>
+              </typeDescriptor>
+            </plugin>
+			<plugin name="Install custom book.swf">
+              <description>
+                Keep this checked if you want to have the mod be able to read books aloud to you. Only uncheck if you have a custom book layout and would prefer it over audible book reading.
+              </description>
+			  <image path="fomod\images\always.jpg"/>
+              <files>
+                <file source="Interface\book.swf" destination="Interface\book.swf"/>
+              </files>
+              <typeDescriptor>
+                <type name="Recommended"/>
+              </typeDescriptor>
+            </plugin>
+			<plugin name="Install custom loadingscreen.swf">
+              <description>
+                Keep this checked if you want to have the mod read loading screen text out loud. Only uncheck if you use a custom loadingscreen.swf, or don't want the mod to read loading screen text.
+              </description>
+			  <image path="fomod\images\bork.png"/>
+              <files>
+                <file source="Interface\book.swf" destination="Interface\book.swf"/>
+              </files>
+              <typeDescriptor>
+                <type name="Optional"/>
+              </typeDescriptor>
+            </plugin>
+		</plugins>
+	  </group>
+	 </optionalFileGroups>
+	</installStep>
+	<installStep name="That's all folks">
+		<optionalFileGroups>
+			<group name="That's All, Folks!" type="SelectExactlyOne">
+				<plugins order="Explicit">
+					<plugin name="Bork, Bork, Bork!">
+						<description>Wi nøt trei a høliday in Sweden this yer? See the løveli lakes The wonderful telephøne system And mani interesting furry animalsIncluding the majestic møøse A Møøse once bit my sister ... No realli!  She was Karving her initials on the møøse with the sharpened end of an interspace tøøthbrush given her by Svenge - her brother-in-law - an Oslo dentist and star of many Norwegian møvies:  "The Høt Hands of an Oslo Dentist", "Fillings of Passion", "The Huge Mølars of Horst Nordfink".</description>
+						<image path="fomod\images\gerb.jpg"/>
+						<files>
+							<file source="Interface\FuzRoBork\bork_logo.dds" destination="Interface\FuzRoBork\bork_logo.dds"/>
+							<file source="scripts\BorkMCM.pex" destination="scripts\BorkMCM.pex"/>
+							<file source="scripts\Source\BorkMCM.psc" destination="scripts\Source\BorkMCM.psc"/>
+							<file source="SKSE\Plugins\FuzRoBork.xml" destination="SKSE\Plugins\FuzRoBork.xml"/>
+							<file source="SKSE\Plugins\FuzRoBork.dll" destination="SKSE\Plugins\FuzRoBork.dll"/>
+							<file source="sound\Voice\Fuz Ro Doh\Stock_1.fuz" destination="sound\Voice\Fuz Ro Doh\Stock_1.fuz"/>
+							<file source="sound\Voice\Fuz Ro Doh\Stock_2.fuz" destination="sound\Voice\Fuz Ro Doh\Stock_2.fuz"/>
+							<file source="sound\Voice\Fuz Ro Doh\Stock_3.fuz" destination="sound\Voice\Fuz Ro Doh\Stock_3.fuz"/>
+							<file source="sound\Voice\Fuz Ro Doh\Stock_4.fuz" destination="sound\Voice\Fuz Ro Doh\Stock_4.fuz"/>
+							<file source="sound\Voice\Fuz Ro Doh\Stock_5.fuz" destination="sound\Voice\Fuz Ro Doh\Stock_5.fuz"/>
+							<file source="sound\Voice\Fuz Ro Doh\Stock_6.fuz" destination="sound\Voice\Fuz Ro Doh\Stock_6.fuz"/>
+							<file source="sound\Voice\Fuz Ro Doh\Stock_7.fuz" destination="sound\Voice\Fuz Ro Doh\Stock_7.fuz"/>
+							<file source="sound\Voice\Fuz Ro Doh\Stock_8.fuz" destination="sound\Voice\Fuz Ro Doh\Stock_8.fuz"/>
+							<file source="sound\Voice\Fuz Ro Doh\Stock_9.fuz" destination="sound\Voice\Fuz Ro Doh\Stock_9.fuz"/>
+							<file source="sound\Voice\Fuz Ro Doh\Stock_10.fuz" destination="sound\Voice\Fuz Ro Doh\Stock_10.fuz"/>
+							<file source="FuzRoBork.esp" destination="FuzRoBork.esp"/>
+						</files>
+						<typeDescriptor>
+							<type name="Recommended"/>
+						</typeDescriptor>
+					</plugin>
+				</plugins>
+			</group>
+		</optionalFileGroups>
+	</installStep>
+  </installSteps>
+</config>

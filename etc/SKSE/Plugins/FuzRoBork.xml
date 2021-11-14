@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<settings>
+		<SkipEmptyResponses>1</SkipEmptyResponses><!-- 0 = false, 1 = true -->
+		<PlayPlayerDialogue>1</PlayPlayerDialogue>	
+		<PlayNPCDialogue>1</PlayNPCDialogue>	
+		<PlayBookPages>1</PlayBookPages><!-- uses Narrator voice -->
+		<PlayLoadingScreenText>0</PlayLoadingScreenText><!-- uses Narrator voice -->
+		<VoicePlayerActions>0</VoicePlayerActions><!-- uses Player voice -->
+
+		<SpeakParentheses>0</SpeakParentheses><!-- set to 1 to say things like "(Persuade)" or "(10 Gold)" -->
+		<EnableHotKeys>0</EnableHotKeys><!-- defined below, no matter whether using overrides or not -->
+
+		<MsPerWordSilence>300</MsPerWordSilence><!-- used for lip synching NPCs; adjusted according to individual voice rates below -->
+
+		<!-- for language strings below, look in the registry under the following locations:
+		HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Speech Server\v11.0\Voices\Tokens (for new MS voices on 64-bit systems)
+		HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech Server\v11.0\Voices\Tokens (for new MS voices on 32-bit systems)
+		HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Speech\Voices\Tokens (for 64-bit systems)
+		HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens (for 32-bit systems)
+		and look in the attributes key for the name of your voice. -->
+
+		<PlayerLanguage>IVONA 2 Gwyneth</PlayerLanguage>
+		<FemaleLanguage>Microsoft Server Speech Text to Speech Voice (en-US, ZiraPro)</FemaleLanguage>
+		<MaleLanguage>IVONA 2 Eric</MaleLanguage>
+		<NarratorLanguage>eSpeak-en</NarratorLanguage>
+
+		<PlayerVoiceRate>0</PlayerVoiceRate><!-- 0 is normal, 10 is fastest, -10 is slowest -->
+		<FemaleVoiceRate>1</FemaleVoiceRate>
+		<MaleVoiceRate>-1</MaleVoiceRate>
+		<NarratorVoiceRate>1</NarratorVoiceRate>
+
+		<PlayerVolume>50.0</PlayerVolume><!-- 0-100% -->
+		<FemaleVolume>50.0</FemaleVolume>
+		<MaleVolume>30.0</MaleVolume>
+		<NarratorVolume>30.0</NarratorVolume>
+
+		<PlayerVoicePitch>0</PlayerVoicePitch><!-- 0 is normal, 10 is highest, -10 is lowest -->
+		<FemaleVoicePitch>1</FemaleVoicePitch>
+		<MaleVoicePitch>-2</MaleVoicePitch>
+		<NarratorVoicePitch>-1</NarratorVoicePitch>
+
+		
+	</settings>
+	<npcs>
+		<npc name="Delphine"><!-- this should work -->
+			<language>IVONA 2 Amy</language>
+			<volume>30.0</volume>
+			<pitch>-1</pitch>
+		</npc>
+		<npc name=".*Guard"><!-- make sure if you use Regular Expressions that you don't mess up or it's CTD for you! -->
+			<language>IVONA 2 Brian</language>
+			<volume>50.0</volume>
+			<pitch>-3</pitch>
+		</npc>
+		<npc race="Argonian"><!-- this should work -->
+			<language>Microsoft Server Speech Text to Speech Voice (it-IT, Lucia)</language>
+			<volume>50.0</volume>
+			<pitch>1</pitch>
+			<rate>2</rate>
+		</npc>
+	</npcs>
+	<pcs>
+		<pc name="Standard"><!-- for now it just takes the first pc, so the name is useless -->
+			<topic name="hurt">
+				<option>[pitch absmiddle="3"][rate absspeed="4"]Ouch![/rate][/pitch]</option> <!-- for info on these modified XML tags, see https://msdn.microsoft.com/en-us/library/ms717077%28v=vs.85%29.aspx -->
+				<option>[rate absspeed="5"]Tis but a scratch![/rate]</option>
+				<option>[rate absspeed="5"]Hey, that hurt![/rate]</option>
+				<option>[rate absspeed="4"]Jerk![/rate]</option>
+			</topic>
+			<topic name="hurt_bad">
+				<option>[rate absspeed="4"]Ouch ouch ouch![/rate]</option>
+				<option>[rate absspeed="3"]Damn it![/rate]</option>
+				<option>[rate absspeed="4"]Ow ow ow ow ow![/rate]</option>
+				<option>[rate absspeed="3"]Son of a...[/rate]</option>
+			</topic>
+			<topic name="dying">
+				<option>[rate absspeed="-10"]Dear god![/rate]</option>
+				<option>[rate absspeed="-10"]Help![/rate]</option>
+				<option>[rate absspeed="-10"]No![/rate]</option>
+			</topic>
+			<topic name="loaded">
+				<option>Another day, another chance to kick some bad guy ass.</option>
+				<option>I love the smell of Skooma in the morning.</option>
+			</topic>
+			<topic name="punch">
+				<option>Boom!</option>
+				<option>Kahblam!</option>
+				<option>Pow!</option>
+			</topic>
+			<topic name="swing">
+				<option>[rate absspeed="4"]Take that![/rate]</option>
+				<option>[rate absspeed="4"]Eat it![/rate]</option>
+				<option>[rate absspeed="2"]For the win![/rate]</option>
+				<option>[rate absspeed="4"]Die, damn you![/rate]</option>
+			</topic>
+			<topic name="cast_spell">
+				<option>Abracadabra</option>
+				<option>Hocus Pocus</option>
+				<option>Bibbidy bobbedy boo</option>
+			</topic>
+			<topic name="fire_staff">
+			</topic>
+			<topic name="fire_bow">
+			</topic>
+			<topic name="draw_weapon">
+				<option>ong garde!</option>
+				<option>Let's get it on!</option>
+				<option>Time to kick some Drow Gur butt!</option>
+			</topic>
+			<topic name="sheathe_weapon">
+				<option>That's enough of that.</option>
+				<option>All in a day's work.</option>
+			</topic>
+			<topic name="dead">
+				<option>Oh, what a cruel, cruel, world.</option>
+				<option>Sovengarde awaits!</option>
+				<option>To reload, or not to reload, that is the question.</option>
+				<option>Well, that sucked horse's bottom.</option>
+				<option>Way to go, you but monkey.</option>
+				<option>You know what, dude? You suck, and now I'm dead because of it. Thanks... just... thanks.</option>
+			</topic>
+			<topic name="sit">
+				<option>Yep, time to take a load off.</option>
+			</topic>
+			<topic name="stand">
+				<option>Back to work!</option>
+			</topic>
+			<topic name="nap">
+				<option>Just a short nap!</option>
+			</topic>
+			<topic name="sleep">
+				<option>Time to sleep!</option>
+			</topic>
+			<topic name="hibernate">
+				<option>Time to hibernate!</option>
+			</topic>
+			<topic name="sleep_interrupted">
+				<option>Who dares disturb my slumber?</option>
+				<option>Buzz off, I'm trying to sleep here.</option>
+			</topic>
+			<topic name="sleep_ended">
+				<option>Wakey, wakey.</option>
+			</topic>
+<!--
+			<topic name="power_swing">
+				<option>On your knees!</option>
+				<option>Can you feel that?</option>
+			</topic>
+-->
+			<topic name="equip_better_weapon">
+				<option>Oh yeah!</option>
+			</topic>
+			<topic name="equip_bow">
+				<option>I'll show 'em where they can take an arrow.</option>
+				<option>Just call me Robin Hood.</option>
+			</topic>
+			<topic name="equip_weapon">
+				<option></option>
+			</topic>
+			<topic name="Sneak">
+				<option>Be vewy, vewy quiet.</option>
+				<option>I'm hunting Wah bits.</option>
+				<option>It's Wah bit season.</option>
+				<option></option>
+				<option></option>
+				<option></option>
+			</topic>
+			<topic name="Kill">
+				<option>Another notch in my belt!</option>
+				<option>Who duh man now?</option>
+				<option>Another useless piece of trash bites the dust!</option>
+			</topic>
+			<topic name="level">
+				<option>I [emph]am[/emph] Dovakin.</option>
+				<option>Thank you, thank you, no applause, please.</option>
+			</topic>
+			<topic name="pick_lock">
+				<option>Piece of cake.</option>
+				<option>Ahem, can anyone say Master Thief?</option>
+			</topic>
+		</pc>
+	</pcs>
+	<hotkeys><!-- currently eight hot keys are used, set the key here (if using xml overrides) or in MCM. For codes, see here http://www.creationkit.com/Input_Script#DXScanCodes -->
+		<hotkey key="2">)Hey, baby, if I (Persuade) told you you had a beautiful body, would you hold it against me?</hotkey><!-- 1 -->
+		<hotkey key="3">[pitch absmiddle="-10"]Knock knock.[/pitch]</hotkey><!-- 2 -->
+		<hotkey key="4">[pitch absmiddle="10"]Who's there?[/pitch]</hotkey><!-- 3 -->
+		<hotkey key="5">[pitch absmiddle="-10"]Dovakin.[/pitch]</hotkey><!-- 4 -->
+		<hotkey key="6">[pitch absmiddle="10"]Dovakin [emph]who?[/emph][/pitch]</hotkey><!-- 5 -->
+		<hotkey key="7">[pitch absmiddle="-10"]Dovakin door is locked; let me in![/pitch]</hotkey><!-- 6 -->
+		<hotkey key="8">[pitch absmiddle="-10"]Ulfric[/pitch]</hotkey><!-- 7 -->
+		<hotkey key="9">[pitch absmiddle="10"]Ulfric who?[/pitch]</hotkey><!-- 8 -->
+		<hotkey key="10">[pitch absmiddle="-10"]Ulfrickin bust this door down if you don't open up![/pitch]</hotkey><!-- 9 -->
+	</hotkeys>
+</config>
