@@ -44,8 +44,6 @@ namespace interfaces
 	extern SKSEMessagingInterface*		kMsgInterface;
 }
 
-
-
 extern SME::INI::INISetting				kWordsPerSecondSilence;
 extern SME::INI::INISetting				kSkipEmptyResponses;
 extern SME::INI::INISetting				kMsPerWordSilence;
@@ -57,8 +55,6 @@ extern SME::INI::INISetting				kVoicePlayerActions;
 
 extern SME::INI::INISetting				kSpeakParentheses;
 extern SME::INI::INISetting				kEnableHotKeys;
-
-extern SME::INI::INISetting				kUseXMLOverrides;
 
 extern SME::INI::INISetting				kPlayerLanguage;
 extern SME::INI::INISetting				kFemaleLanguage;
@@ -306,6 +302,7 @@ namespace FuzRoBorkNamespace {
 			int pitch;
 	};
 
+	void LoadXML();
 	void storeBookSpeech(string text);
 	void storeFirstPagesSpeech(string text);
 	void storePagesSpeech(string text);

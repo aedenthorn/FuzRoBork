@@ -33,6 +33,7 @@ extern "C"
 
 				_MESSAGE("Scheduled cleanup thread");
 				_MESSAGE("%s Initialized!", MakeSillyName().c_str());
+				FuzRoBorkNamespace::LoadXML();
 			}
 			break;
 		}
@@ -59,52 +60,6 @@ extern "C"
 
 		if (a[1].GetType() == GFxValue::kType_String) // call type
 			type = a[1].GetString();
-
-		/*
-		if (type == "SET_VARS") {
-		int x = 2; // start with third argument
-		if (a[x].GetType() == GFxValue::kType_Number)
-		kMsPerWordSilence = a[x++].GetNumber(); // msVal
-		if (a[x].GetType() == GFxValue::kType_Bool)
-		kSkipEmptyResponses = a[x++].GetBool(); // skipVal
-		if (a[x].GetType() == GFxValue::kType_Bool)
-		kPlayPlayerDialogue = a[x++].GetBool(); // playPlayerVal
-		if (a[x].GetType() == GFxValue::kType_Bool)
-		kPlayNPCDialogue = a[x++].GetBool(); // playNPCVal
-		if (a[x].GetType() == GFxValue::kType_Bool)
-		kPlayBookPages = a[x++].GetBool(); // playBookVal
-		if (a[x].GetType() == GFxValue::kType_Bool)
-		kPlayHUDMessages = a[x++].GetBool(); // playHUDVal
-		if (a[x].GetType() == GFxValue::kType_Bool)
-		kUseXMLOverrides = a[x++].GetBool(); // useXMLVal
-		if (a[x].GetType() == GFxValue::kType_String)
-		kPlayerLanguageLCID = a[x++].GetString(); // pLangVal
-		if (a[x].GetType() == GFxValue::kType_String)
-		kFemaleLanguageLCID = a[x++].GetString(); // fLangVal
-		if (a[x].GetType() == GFxValue::kType_String)
-		kMaleLanguageLCID = a[x++].GetString(); // mLangVal
-		if (a[x].GetType() == GFxValue::kType_String)
-		kNarratorLanguageLCID = a[x++].GetString(); // nLangVal
-		if (a[x].GetType() == GFxValue::kType_Number)
-		kPlayerVoiceRate = a[x++].GetNumber(); // pRateVal
-		if (a[x].GetType() == GFxValue::kType_Number)
-		kFemaleVoiceRate = a[x++].GetNumber(); // fRateVal
-		if (a[x].GetType() == GFxValue::kType_Number)
-		kMaleVoiceRate = a[x++].GetNumber(); // mRateVal
-		if (a[x].GetType() == GFxValue::kType_Number)
-		kNarratorVoiceRate = a[x++].GetNumber(); // nRateVal
-		if (a[x].GetType() == GFxValue::kType_Number)
-		kPlayerVoiceVolume = a[x++].GetNumber(); // pVolVal
-		if (a[x].GetType() == GFxValue::kType_Number)
-		kFemaleVoiceVolume = a[x++].GetNumber(); // fVolVal
-		if (a[x].GetType() == GFxValue::kType_Number)
-		kMaleVoiceVolume = a[x++].GetNumber(); // mVolVal
-		if (a[x].GetType() == GFxValue::kType_Number)
-		kNarratorVoiceVolume = a[x++].GetNumber(); // nVolVal
-		if (a[x].GetType() == GFxValue::kType_Number)
-		kNarratorSex = a[x++].GetNumber(); // nSexVal
-		}
-		*/
 
 		_MESSAGE(("SKSEScaleform_BorkFunction received " + type).c_str());
 

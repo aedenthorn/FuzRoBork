@@ -185,8 +185,6 @@ void FuzRoBorkINIManager::Initialize(const char* INIPath, void* Paramenter)
 		Save();
 }
 
-
-
 std::string MakeSillyName()
 {
 	std::string Out("Fuz Ro ");
@@ -321,7 +319,118 @@ namespace FuzRoBorkNamespace {
 		pitch = _pitch;
 	}
 
+	map< int, string > hotkeyTexts;
+	map<string, vector<string>> actionList;
+	vector< string[2] >  fixes;
+	const char* lastTopic = "";
+	clock_t lastTime = clock();
+	int rLast = -1;
 
+	void LoadXML()
+	{
+		tinyxml2::XMLDocument doc;
+
+		if (doc.LoadFile("Data\\skse\\plugins\\FuzRoBork.xml") != tinyxml2::XMLError::XML_SUCCESS) {
+			OutputDebugString("XML file not found; exiting\n");
+			return;
+		}
+
+		XMLElement* root = doc.FirstChildElement("config");
+
+		if (!root) {
+			OutputDebugString("root tag not found in XML; exiting\n");
+			return;
+		}
+
+		// hotkeys
+
+		XMLElement* xKeys = root->FirstChildElement("hotkeys");
+
+		if (xKeys) {
+			XMLElement* xKey = xKeys->FirstChildElement("hotkey");
+			UInt32 idx = 1;
+			while (xKey) {
+				string text = string(xKey->GetText());
+				text = findReplace(text, "[", "<");
+				text = findReplace(text, "]", ">");
+				hotkeyTexts[idx] = text;
+				xKey = xKey->NextSiblingElement("hotkey");
+				idx++;
+			}
+		}
+
+
+		// fixes
+
+		XMLElement* xFixes = root->FirstChildElement("fixes");
+
+		if (xFixes) {
+			XMLElement* xFix = xFixes->FirstChildElement("fix");
+			UInt32 idx = 1;
+			while (xFix) {
+
+				XMLElement* xFind = xFix->FirstChildElement("find");
+				XMLElement* xReplace = xFix->FirstChildElement("replace");
+
+				if (!xFind || !xFix)
+					continue;
+
+				string find = string(xFind->GetText());
+				string replace = string(xReplace->GetText());
+				replace = findReplace(replace, "[", "<");
+				replace = findReplace(replace, "]", ">");
+				fixes.push_back({find, replace});
+				xFix = xFix->NextSiblingElement("hotkey");
+				idx++;
+			}
+		}
+
+		// actions
+
+		OutputDebugString("Rebuilding action list from xml\n");
+
+		XMLElement* pcs = root->FirstChildElement("pcs");
+
+		if (!pcs) {
+			OutputDebugString("No PCS tag found, exiting\n");
+			return;
+		}
+
+
+		XMLElement* xPC = pcs->FirstChildElement("pc");
+		XMLElement* xTopic = xPC->FirstChildElement("topic");
+
+		while (xTopic) {
+
+			OutputDebugString("got a topic\n");
+
+			vector<string> optionList;
+
+			XMLElement* xOption = xTopic->FirstChildElement("option");
+
+			string aName = (const char*)xTopic->Attribute("name");
+
+			OutputDebugString(aName.c_str());
+			OutputDebugString("\n");
+
+			while (xOption) {
+				if (xOption->GetText()) {
+					OutputDebugString(string(xOption->GetText()).c_str());
+					OutputDebugString("\n");
+					optionList.push_back(string(xOption->GetText()));
+				}
+				else
+					optionList.push_back(" "); // add empties to make less common
+
+				xOption = xOption->NextSiblingElement("option");
+			}
+
+			if (optionList.size() != 0) {
+				actionList[aName] = optionList;
+			}
+			xTopic = xTopic->NextSiblingElement("topic");
+		}
+	}
 
 	bool findSpeechToken(ISpObjectToken** pelt, wstring name, LPCWSTR key) {
 
@@ -377,17 +486,12 @@ namespace FuzRoBorkNamespace {
 		return str;
 	}
 
-	string unspeakables[][2] = {
-		{ string("Whiterun"), string("White Run") },
-		{ string("Jarl"), string("Yarl") },
-		{ string("Draugr"), string("Drow Gur") },
-		{ string("..."), string("... ") }
-	};
 
 	void replaceUnspeakables(string& str) {
 
-		for (int i = 0; i < size(unspeakables); i++) {
-			str = findReplace(str, unspeakables[i][0], unspeakables[i][1]);
+
+		for (int i = 0; i < size(fixes); i++) {
+			str = findReplace(str, fixes[i][0], fixes[i][1]);
 		}
 
 		// remove parenthesis and brackets if option ticked
@@ -806,7 +910,7 @@ namespace FuzRoBorkNamespace {
 			kNarratorLanguage.SetDataAsString(stringV[3].c_str());
 		}
 
-		if (boolV.size() == 10) {
+		if (boolV.size() == 9) {
 			OutputDebugString("Bools correct size\n");
 			kSkipEmptyResponses.SetInt(boolV[0].compare("TRUE") == 0 ? 1 : 0);
 			kPlayPlayerDialogue.SetInt(boolV[1].compare("TRUE") == 0 ? 1 : 0);
@@ -817,7 +921,6 @@ namespace FuzRoBorkNamespace {
 			kVoicePlayerActions.SetInt(boolV[6].compare("TRUE") == 0 ? 1 : 0);
 			kSpeakParentheses.SetInt(boolV[7].compare("TRUE") == 0 ? 1 : 0);
 			kEnableHotKeys.SetInt(boolV[8].compare("TRUE") == 0 ? 1 : 0);
-			//kUseXMLOverrides.SetInt(boolV[8].compare("TRUE") == 0?1:0);
 		}
 
 		if (floatV.size() == 13) {
@@ -909,51 +1012,22 @@ namespace FuzRoBorkNamespace {
 		if (kEnableHotKeys.GetData().i == 0)
 			return;
 
+		if (hotkeyTexts.count(_which) == 0) {
+			_MESSAGE("Hotkey %d not found", _which);
+			return;
+		}
+
 		stopSpeaking();
 
-		tinyxml2::XMLDocument doc;
+		string text = hotkeyTexts.at(_which);
 
-		if (doc.LoadFile("Data\\skse\\plugins\\FuzRoBork.xml") != tinyxml2::XMLError::XML_SUCCESS) {
-			OutputDebugString("XML file not found; exiting\n");
-			return;
-		}
-
-		XMLElement* root = doc.FirstChildElement("config");
-
-		if (!root) {
-			OutputDebugString("root tag not found in XML; exiting\n");
-			return;
-		}
-
-		XMLElement* xKeys = root->FirstChildElement("hotkeys");
-
-		if (!xKeys) {
-			OutputDebugString("No hotkeys tag found, exiting\n");
-			return;
-		}
-
-		XMLElement* xKey = xKeys->FirstChildElement("hotkey");
-		UInt32 idx = 1;
-		while (xKey) {
-
-			if (idx == _which) {
-				string text = string(xKey->GetText());
-				text = findReplace(text, "[", "<");
-				text = findReplace(text, "]", ">");
-				startPlayerSpeech(text.c_str());
-				break;
-			}
-			xKey = xKey->NextSiblingElement("hotkey");
-			idx++;
-		}
+		text = findReplace(text, "[", "<");
+		text = findReplace(text, "]", ">");
+		startPlayerSpeech(text.c_str());
 	}
 
 
-	map<string, vector<string>> topicList;
-	const char* lastTopic = "";
-	clock_t lastTime = clock();
 
-	int rLast = -1;
 
 	void actionSpeech(StaticFunctionTag* base, BSFixedString _which) {
 
@@ -977,83 +1051,21 @@ namespace FuzRoBorkNamespace {
 
 		lastTime = nowTime;
 
-		if (topicList.size() == 0) { // populate once per game load
-
-			OutputDebugString("Rebuilding topic list from xml\n");
-
-			tinyxml2::XMLDocument doc;
-
-			if (doc.LoadFile("Data\\skse\\plugins\\FuzRoBork.xml") != tinyxml2::XMLError::XML_SUCCESS) {
-				OutputDebugString("XML file not found; exiting\n");
-				return;
-			}
-
-			XMLElement* root = doc.FirstChildElement("config");
-
-			if (!root) {
-				OutputDebugString("root tag not found in XML; exiting\n");
-				return;
-			}
-
-			XMLElement* pcs = root->FirstChildElement("pcs");
-
-			// per-NPC settings
-			if (!pcs) {
-				OutputDebugString("No PCS tag found, exiting\n");
-				return;
-			}
-
-
-			XMLElement* xPC = pcs->FirstChildElement("pc");
-			XMLElement* xTopic = xPC->FirstChildElement("topic");
-
-			while (xTopic) {
-
-				OutputDebugString("got a topic\n");
-
-				vector<string> optionList;
-
-				XMLElement* xOption = xTopic->FirstChildElement("option");
-
-				string aName = (const char*)xTopic->Attribute("name");
-
-				OutputDebugString(aName.c_str());
-				OutputDebugString("\n");
-
-				while (xOption) {
-					if (xOption->GetText()) {
-						OutputDebugString(string(xOption->GetText()).c_str());
-						OutputDebugString("\n");
-						optionList.push_back(string(xOption->GetText()));
-					}
-					else
-						optionList.push_back(" "); // add empties to make less common
-
-					xOption = xOption->NextSiblingElement("option");
-				}
-
-				if (optionList.size() != 0) {
-					topicList[aName] = optionList;
-				}
-				xTopic = xTopic->NextSiblingElement("topic");
-			}
-		}
-
 		string which = string(_which.data);
 
-		if (topicList.find(which) != topicList.end()) {
+		if (actionList.find(which) != actionList.end()) {
 
 			int r = 0;
-			if (topicList[which].size() > 1) {
-				r = static_cast<double>(rand()) / RAND_MAX * topicList[which].size();
+			if (actionList[which].size() > 1) {
+				r = static_cast<double>(rand()) / RAND_MAX * actionList[which].size();
 
 				while (strcmp(_lastTopic, _which.data) == 0 && r == rLast) // prevent duplicates
-					r = static_cast<double>(rand()) / RAND_MAX * topicList[which].size();
+					r = static_cast<double>(rand()) / RAND_MAX * actionList[which].size();
 			}
 
 			actionSpeaking = true;
 			stopSpeaking();
-			string text = topicList[which][r];
+			string text = actionList[which][r];
 			text = findReplace(text, "[", "<");
 			text = findReplace(text, "]", ">");
 			startPlayerSpeech(text.c_str());
