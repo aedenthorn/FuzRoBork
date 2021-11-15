@@ -16,6 +16,8 @@ int fLangVal = 0
 int mLangVal = 0
 int nLangVal = 0
 
+int xVoiceVal = 0
+
 int nSexVal = 0
 
 int bookReadKeyVal = 157
@@ -49,11 +51,12 @@ float mPitchVal = 0.0
 float nPitchVal = 0.0
 
 string[] LangList
+string[] VoiceList
 string[] LCIDList
 string[] SexList
 
 int function GetVersion()
-    return 18
+    return 19
 endFunction
 
 event OnVersionUpdate(int a_version)
@@ -68,7 +71,7 @@ Function FuzRoBork_storedBookSpeech() global native
 Function FuzRoBork_testSpeech(string which) global native
 Function FuzRoBork_hotSpeech(int which) global native
 Function FuzRoBork_stopSpeech() global native
-Function FuzRoBork_getLanguages(string[] langs) global native
+Function FuzRoBork_getLanguages(string[] langs, string[] voices) global native
 Function FuzRoBork_reloadXML() global native
 
 event OnGameReload()
@@ -93,9 +96,10 @@ event OnGameReload()
 endEvent
 
 Event OnConfigInit()
-    Pages = new string[2]
-    Pages[0] = "Main"
-    Pages[1] = "Voices"
+    Pages = new string[3]
+    Pages[0] = "Settings"
+    Pages[1] = "Voice Selection"
+    Pages[2] = "xVASynth Options"
 
     SexList  = new string[2]
     SexList[0] = "Male"
@@ -111,12 +115,15 @@ event OnPageReset(string page)
     {Called when a new page is selected, including the initial empty page}
     if(page == "")
         LoadCustomContent("FuzRoBork/bork_logo.dds", 0,0)
+        LangList = new string[100]
+        VoiceList = new string[100]
+        FuzRoBork_getLanguages(LangList, VoiceList)
         return
     else
         UnloadCustomContent()
     endIf
 
-    if(page == "Main")
+    if(page == "Settings")
     
         SetCursorFillMode(TOP_TO_BOTTOM)
 
@@ -157,47 +164,53 @@ event OnPageReset(string page)
         AddKeyMapOptionST("HotKey8ST", "HotKey 8", HotKey8Val,flag)
         AddKeyMapOptionST("HotKey9ST", "HotKey 9", HotKey9Val,flag)
 
-    elseIf(page == "Voices")    
+    elseIf(page == "xVASynth Options")    
 
-        LangList = new string[100]
-        
-        FuzRoBork_getLanguages(LangList)
+        SetCursorFillMode(TOP_TO_BOTTOM)
+
+        SetCursorPosition(0) ; Move cursor to top right position
+
+        AddHeaderOption("xVASynth Options")
+        AddMenuOptionST("xVoiceST","", VoiceList[xVoiceVal])
+        AddTextOptionST("xVoiceTST","", "[Test]")
+		
+	elseIf(page == "Voice Selection")    
 
         SetCursorFillMode(TOP_TO_BOTTOM)
 
         SetCursorPosition(0) ; Move cursor to top right position
 
         AddHeaderOption("Player Character")
-        AddMenuOptionST("pLangST","Player Language", pLangVal)
-        AddSliderOptionST("pRateST","Player Speech Rate", pRateVal, "{1}x")
-        AddSliderOptionST("pVolST","Player Volume", pVolVal, "{0}%")
-        AddSliderOptionST("pPitchST","Player Pitch", pPitchVal)
-        AddTextOptionST("pLangTST","", "[Test]")
+        AddMenuOptionST("pLangST","", LangList[pLangVal])
+        AddSliderOptionST("pRateST","Speech Rate", pRateVal, "{1}x")
+        AddSliderOptionST("pVolST","Volume", pVolVal, "{0}%")
+        AddSliderOptionST("pPitchST","Pitch", pPitchVal)
+        AddTextOptionST("pLangTST","Voice", "[Test]")
 
         AddHeaderOption("Female NPCs")
 
-        AddMenuOptionST("fLangST","Female NPC Language", fLangVal)
-        AddSliderOptionST("fRateST","Female Speech Rate", fRateVal, "{1}x")
-        AddSliderOptionST("fVolST","Female NPC Volume", fVolVal, "{0}%")
-        AddSliderOptionST("fPitchST","Female NPC Pitch", fPitchVal)
+        AddMenuOptionST("fLangST","", LangList[fLangVal])
+        AddSliderOptionST("fRateST","Speech Rate", fRateVal, "{1}x")
+        AddSliderOptionST("fVolST","Volume", fVolVal, "{0}%")
+        AddSliderOptionST("fPitchST","Pitch", fPitchVal)
         AddTextOptionST("fLangTST","", "[Test]")
 
         SetCursorPosition(1)
         
         AddHeaderOption("Male NPCs")
 
-        AddMenuOptionST("mLangST","Male NPC Language", mLangVal)
-        AddSliderOptionST("mRateST","Male Speech Rate", mRateVal, "{1}x")
-        AddSliderOptionST("mVolST","Male NPC Volume", mVolVal, "{0}%")
-        AddSliderOptionST("mPitchST","Male NPC Pitch", mPitchVal)
+        AddMenuOptionST("mLangST","", LangList[mLangVal])
+        AddSliderOptionST("mRateST","Speech Rate", mRateVal, "{1}x")
+        AddSliderOptionST("mVolST","Volume", mVolVal, "{0}%")
+        AddSliderOptionST("mPitchST","Pitch", mPitchVal)
         AddTextOptionST("mLangTST", "", "[Test]")
 
         AddHeaderOption("Book Narrator")
 
-        AddMenuOptionST("nLangST","Narrator Language", nLangVal)
-        AddSliderOptionST("nRateST","Narrator Speech Rate", nRateVal, "{1}x")
-        AddSliderOptionST("nVolST","Narrator Volume", nVolVal, "{0}%")
-        AddSliderOptionST("nPitchST","Narrator Pitch", nPitchVal)
+        AddMenuOptionST("nLangST","", LangList[nLangVal])
+        AddSliderOptionST("nRateST","Speech Rate", nRateVal, "{1}x")
+        AddSliderOptionST("nVolST","Volume", nVolVal, "{0}%")
+        AddSliderOptionST("nPitchST","Pitch", nPitchVal)
         AddTextOptionST("nLangTST", "", "[Test]")
     endIf
 
@@ -399,6 +412,35 @@ state enableKeysST; TOGGLE
 endState
 
 
+state xVoiceST; Menu
+    event OnMenuOpenST()
+        If(xVoiceVal < 0)
+            xVoiceVal = 0
+        EndIf
+        SetMenuDialogStartIndex(xVoiceVal)
+        SetMenuDialogDefaultIndex(0)
+        SetMenuDialogOptions(VoiceList)
+    endEvent
+
+    event OnMenuAcceptST(int a_index)
+        If(a_index < 0)
+            a_index = 0
+        EndIf
+        xVoiceVal = a_index
+        SetMenuOptionValueST(VoiceList[xVoiceVal])
+    endEvent
+
+    event OnDefaultST()
+        xVoiceVal = 0
+        SetMenuOptionValueST(VoiceList[xVoiceVal])
+    endEvent
+
+    event OnHighlightST()
+        SetInfoText("Voice for xVASynth: " + VoiceList[xVoiceVal])
+    endEvent
+endState
+
+
 state pLangST; Menu
     event OnMenuOpenST()
         If(pLangVal < 0)
@@ -414,12 +456,12 @@ state pLangST; Menu
             a_index = 0
         EndIf
         pLangVal = a_index
-        SetMenuOptionValueST(pLangVal)
+        SetMenuOptionValueST(LangList[pLangVal])
     endEvent
 
     event OnDefaultST()
         pLangVal = 0
-        SetMenuOptionValueST(pLangVal)
+        SetMenuOptionValueST(LangList[pLangVal])
     endEvent
 
     event OnHighlightST()
@@ -442,12 +484,12 @@ state fLangST; Menu
             a_index = 0
         EndIf
         fLangVal = a_index
-        SetMenuOptionValueST(fLangVal)
+        SetMenuOptionValueST(LangList[fLangVal])
     endEvent
 
     event OnDefaultST()
         fLangVal = 0
-        SetMenuOptionValueST(fLangVal)
+        SetMenuOptionValueST(LangList[fLangVal])
     endEvent
 
     event OnHighlightST()
@@ -470,12 +512,12 @@ state mLangST; Menu
             a_index = 0
         EndIf
         mLangVal = a_index
-        SetMenuOptionValueST(mLangVal)
+        SetMenuOptionValueST(LangList[mLangVal])
     endEvent
 
     event OnDefaultST()
         mLangVal = 0
-        SetMenuOptionValueST(mLangVal)
+        SetMenuOptionValueST(LangList[mLangVal])
     endEvent
 
     event OnHighlightST()
@@ -499,12 +541,12 @@ state nLangST; Menu
             a_index = 0
         EndIf
         nLangVal = a_index
-        SetMenuOptionValueST(nLangVal)
+        SetMenuOptionValueST(LangList[nLangVal])
     endEvent
 
     event OnDefaultST()
         nLangVal = 0
-        SetMenuOptionValueST(nLangVal)
+        SetMenuOptionValueST(LangList[nLangVal])
     endEvent
 
     event OnHighlightST()
@@ -532,6 +574,16 @@ state nGenderST; TEXT
     endEvent
 endState
 
+
+state xVoiceTST; TEXT
+    event OnSelectST()
+        doSendVals()
+        FuzRoBork_testSpeech("x")
+    endEvent
+    event OnHighlightST()
+        SetInfoText("Test xVASynth voice")
+    endEvent
+endState
 
 state pLangTST; TEXT
     event OnSelectST()
@@ -592,7 +644,7 @@ state msST ; SLIDER
     endEvent
 
     event OnHighlightST()
-        SetInfoText("Number of milliseconds it takes to say a word of NPC text (doesn't affect audio or PC text)") 
+        SetInfoText("Number of milliseconds it takes to say a word of NPC text (doesn't affect audio or player text)") 
     endEvent
 endState
 
@@ -1255,11 +1307,15 @@ Function doSendVals()
 	If(nLangVal < 0)
 		nLangVal = 0
     EndIf
+	If(xVoiceVal < 0)
+		xVoiceVal = 0
+    EndIf
 
     strings += LangList[pLangVal]
     strings += "^"+LangList[fLangVal]
     strings += "^"+LangList[mLangVal]
     strings += "^"+LangList[nLangVal]
+    strings += "^"+xVoiceVal
     
     string booleans = ""
 

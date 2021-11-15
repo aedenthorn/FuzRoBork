@@ -4,6 +4,7 @@
 #include "skse64/skse64_common/skse_version.h"
 
 #include "tinyxml2.h"
+#include "json/single_include/nlohmann/json.hpp"
 
 #include <sapi.h>
 #include <sphelper.h>
@@ -11,6 +12,11 @@
 #include <thread>
 #include <chrono>
 #include <unordered_set>
+#include <iomanip>
+#include <direct.h>
+#include <iostream>
+#include <string>
+#include <filesystem>
 
 #include "skse64/GameAPI.h"
 #include "skse64/GameData.h"
@@ -33,6 +39,7 @@
 #include <StringHelpers.h>
 #include <MiscGunk.h>
 
+using json = nlohmann::json;
 using namespace std;
 using namespace tinyxml2;
 
@@ -303,7 +310,12 @@ namespace FuzRoBorkNamespace {
 	};
 
 	string findReplace(string str, const string oldStr, const string newStr);
+	void ReloadXML();
 	void LoadXML();
+	bool RegisterFuncs(VMClassRegistry* registry);
+
+	void sendToxVASynth(SpeakObj obj);
+	void sendLanguages(StaticFunctionTag* t, VMArray<BSFixedString> names);
 	void storeBookSpeech(string text);
 	void storeFirstPagesSpeech(string text);
 	void storePagesSpeech(string text);
@@ -313,13 +325,10 @@ namespace FuzRoBorkNamespace {
 	void startNPCSpeech(const char * text);
 	void startPlayerSpeech(const char* _title);
 	void startNarratorSpeech(string text);
+	void speakLoadingScreen(string text);
 
 	boolean isSpeaking();
 	void stopSpeaking(void);
 
-	void speakLoadingScreen(string text);
 
-	bool RegisterFuncs(VMClassRegistry* registry);
-
-	void sendLanguages(StaticFunctionTag* t, VMArray<BSFixedString> names);
 }

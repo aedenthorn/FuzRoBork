@@ -56,7 +56,7 @@
 							<file source="Interface\FuzRoBork\bork_logo.dds" destination="Interface\FuzRoBork\bork_logo.dds"/>
 							<file source="scripts\BorkMCM.pex" destination="scripts\BorkMCM.pex"/>
 							<file source="scripts\Source\BorkMCM.psc" destination="scripts\Source\BorkMCM.psc"/>
-							<file source="SKSE\Plugins\FuzRoBork.xml" destination="SKSE\Plugins\FuzRoBork.xml"/>
+							<file source="SKSE\Plugins\EXAMPLE_FuzRoBork.xml" destination="SKSE\Plugins\EXAMPLE_FuzRoBork.xml"/>
 							<file source="SKSE\Plugins\FuzRoBork.dll" destination="SKSE\Plugins\FuzRoBork.dll"/>
 							<file source="sound\Voice\Fuz Ro Doh\Stock_1.fuz" destination="sound\Voice\Fuz Ro Doh\Stock_1.fuz"/>
 							<file source="sound\Voice\Fuz Ro Doh\Stock_2.fuz" destination="sound\Voice\Fuz Ro Doh\Stock_2.fuz"/>

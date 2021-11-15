@@ -130,6 +130,11 @@ SME::INI::INISetting	kNarratorVoicePitch("NarratorVoicePitch",
 	"BLEH",
 	(SInt32)-99);
 
+SME::INI::INISetting	kxVASynthVoice("xVASynthVoice",
+	"General",
+	"BLEH",
+	(UInt32)0);
+
 void FuzRoBorkINIManager::Initialize(const char* INIPath, void* Paramenter)
 {
 	this->INIFilePath = INIPath;
@@ -323,9 +328,12 @@ namespace FuzRoBorkNamespace {
 	map< int, string > hotkeyTexts;
 	map<string, vector<string>> actionList;
 	map< string, string > fixes;
+	vector< string > voices;
+
 	const char* lastTopic = "";
 	clock_t lastTime = clock();
 	int rLast = -1;
+	bool sendingXVAS = false;
 
 	void ReloadXML(StaticFunctionTag* base) {
 		LoadXML();
@@ -549,6 +557,12 @@ namespace FuzRoBorkNamespace {
 	{
 		//_MESSAGE("speakTask: '%s'", nSpeech.speech);
 
+		if (nSpeech.lang == "xVASynth") {
+			_MESSAGE("Sending text to xVASynth");
+			sendToxVASynth(nSpeech);
+			return;
+		}
+
 
 		if (FAILED(::CoInitialize(NULL))) {
 			_MESSAGE("failed to coinitialize");
@@ -710,6 +724,33 @@ namespace FuzRoBorkNamespace {
 			startNarratorSpeech(text);
 		}
 	}
+	void sendToxVASynth(SpeakObj obj) {
+		if (sendingXVAS || voices.size() == 0)
+			return;
+		sendingXVAS = true;
+		_MESSAGE("Writing speech to file for xVASynth");
+
+		UInt32 idx = kxVASynthVoice.GetData().u;
+		if (idx >= voices.size())
+			idx = 0;
+
+		regex tags("<[^>]*>");
+		string s = obj.speech;
+		s = regex_replace(s, tags, "");
+		json j;
+		j["voiceId"] = voices[idx];
+		j["gameId"] = "skyrim";
+		j["pitch"] = obj.pitch;
+		j["rate"] = obj.rate;
+		j["vol"] = obj.vol;
+		j["text"] = s;
+
+
+		ofstream o("Data\\SKSE\\Plugins\\xVASynthText.json");
+		o << setw(4) << j << endl;
+
+		sendingXVAS = false;
+	}
 
 	void speakLoadingScreen(string text) {
 		startNarratorSpeech(text);
@@ -848,6 +889,13 @@ namespace FuzRoBorkNamespace {
 			thread t3(speakTask, pSpeech);
 			t3.detach();
 		}
+		else if (which.compare("X") == 0 || which.compare("x") == 0) {
+			if (sendingXVAS)
+				return;
+			SpeakObj pSpeech(speech, "xVASynth", kPlayerVoiceRate.GetData().f, kPlayerVoiceVolume.GetData().f, kPlayerVoicePitch.GetData().i);
+			thread t1(speakTask, pSpeech);
+			t1.detach();
+		}
 
 	}
 
@@ -920,12 +968,13 @@ namespace FuzRoBorkNamespace {
 		vector<string> boolV = explode("^", booleans);
 		vector<string> floatV = explode("^", floats);
 
-		if (stringV.size() == 4) {
+		if (stringV.size() == 5) {
 			OutputDebugString("Strings correct size\n");
 			kPlayerLanguage.SetDataAsString(stringV[0].c_str());
 			kFemaleLanguage.SetDataAsString(stringV[1].c_str());
 			kMaleLanguage.SetDataAsString(stringV[2].c_str());
 			kNarratorLanguage.SetDataAsString(stringV[3].c_str());
+			kxVASynthVoice.SetUInt(stoi(stringV[4].c_str()));
 		}
 
 		if (boolV.size() == 9) {
@@ -1091,7 +1140,7 @@ namespace FuzRoBorkNamespace {
 
 		}
 	}
-	void sendLanguages(StaticFunctionTag* t, VMArray<BSFixedString> names) {
+	void sendLanguages(StaticFunctionTag* t, VMArray<BSFixedString> names, VMArray<BSFixedString> xVANames) {
 
 		vector<LPWSTR> nameA;
 
@@ -1112,9 +1161,69 @@ namespace FuzRoBorkNamespace {
 
 			BSFixedString bst;
 			bst.data = nameBuffer;
-			_MESSAGE(nameBuffer);
+			_MESSAGE("adding language %s", nameBuffer);
 
 			names.Set(&bst, i);
+		}
+
+
+		// xVASynth
+
+		string path = "Data\\SKSE\\Plugins\\xVASynthVoices.json";
+
+		_MESSAGE("Path %s", path.c_str());
+
+		std::ifstream i(path);
+
+		if (i.good()) {
+			_MESSAGE("File exists %s", path.c_str());
+
+			json j;
+			i >> j;
+			if (j.is_object()) {
+
+				_MESSAGE("adding xVASynth voices from %s", path.c_str());
+
+				json jg = j["games"];
+				if (jg.is_object()) {
+					_MESSAGE("got games");
+					json jgs = jg["skyrim"];
+					if (jgs.is_array()) {
+						_MESSAGE("got skyrim %d", jgs.size());
+						for (UINT32 i = 0; i < jgs.size(); i++) {
+
+							voices.push_back(jgs[i]["id"]);
+
+							string ostr = jgs[i]["name"];
+							const char * orig = ostr.c_str();
+
+							//_MESSAGE("got string %s", orig);
+
+							size_t newsize = strlen(orig) + 1;
+							wchar_t* wcstring = new wchar_t[newsize];
+
+							// Convert char* string to a wchar_t* string.
+							size_t convertedChars = 0;
+							mbstowcs_s(&convertedChars, wcstring, newsize, orig, _TRUNCATE);
+
+							char nameBuffer[500];
+							// First arg is the pointer to destination char, second arg is
+							// the pointer to source wchar_t, last arg is the size of char buffer
+							wcstombs(nameBuffer, wcstring, 500);
+
+							BSFixedString bst;
+							bst.data = nameBuffer;
+							_MESSAGE("adding xVASynth voice %s", nameBuffer);
+
+							xVANames.Set(&bst, i);
+						}
+
+						BSFixedString vs;
+						vs.data = "xVASynth";
+						names.Set(&vs, nameA.size());
+					}
+				}
+			}
 		}
 	}
 
@@ -1131,7 +1240,7 @@ namespace FuzRoBorkNamespace {
 		registry->RegisterFunction(new NativeFunction0 <StaticFunctionTag, void>("FuzRoBork_storedPagesSpeech", "BorkMCM", startStoredPagesSpeech, registry));
 		registry->RegisterFunction(new NativeFunction3 <StaticFunctionTag, void, BSFixedString, BSFixedString, BSFixedString>("FuzRoBork_setMCMConfig", "BorkMCM", setMCMConfig, registry));
 		registry->RegisterFunction(new NativeFunction0 <StaticFunctionTag, void>("FuzRoBork_stopSpeech", "BorkMCM", pStopSpeech, registry));
-		registry->RegisterFunction(new NativeFunction1 <StaticFunctionTag, void, VMArray<BSFixedString>>("FuzRoBork_getLanguages", "BorkMCM", sendLanguages, registry));
+		registry->RegisterFunction(new NativeFunction2 <StaticFunctionTag, void, VMArray<BSFixedString>, VMArray<BSFixedString>>("FuzRoBork_getLanguages", "BorkMCM", sendLanguages, registry));
 		registry->RegisterFunction(new NativeFunction0 <StaticFunctionTag, void>("FuzRoBork_reloadXML", "BorkMCM", ReloadXML, registry));
 
 		return true;
