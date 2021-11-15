@@ -302,6 +302,7 @@ namespace FuzRoBorkNamespace {
 			int pitch;
 	};
 
+	string findReplace(string str, const string oldStr, const string newStr);
 	void LoadXML();
 	void storeBookSpeech(string text);
 	void storeFirstPagesSpeech(string text);

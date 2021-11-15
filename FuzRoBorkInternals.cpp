@@ -321,10 +321,14 @@ namespace FuzRoBorkNamespace {
 
 	map< int, string > hotkeyTexts;
 	map<string, vector<string>> actionList;
-	vector< string[2] >  fixes;
+	map< string, string > fixes;
 	const char* lastTopic = "";
 	clock_t lastTime = clock();
 	int rLast = -1;
+
+	void ReloadXML(StaticFunctionTag* base) {
+		LoadXML();
+	}
 
 	void LoadXML()
 	{
@@ -342,11 +346,14 @@ namespace FuzRoBorkNamespace {
 			return;
 		}
 
+		_MESSAGE("Loading XML file");
+
 		// hotkeys
 
 		XMLElement* xKeys = root->FirstChildElement("hotkeys");
 
 		if (xKeys) {
+			hotkeyTexts.clear();
 			XMLElement* xKey = xKeys->FirstChildElement("hotkey");
 			UInt32 idx = 1;
 			while (xKey) {
@@ -357,6 +364,7 @@ namespace FuzRoBorkNamespace {
 				xKey = xKey->NextSiblingElement("hotkey");
 				idx++;
 			}
+			_MESSAGE("Loaded hotkeys");
 		}
 
 
@@ -365,8 +373,9 @@ namespace FuzRoBorkNamespace {
 		XMLElement* xFixes = root->FirstChildElement("fixes");
 
 		if (xFixes) {
+			fixes.clear();
+
 			XMLElement* xFix = xFixes->FirstChildElement("fix");
-			UInt32 idx = 1;
 			while (xFix) {
 
 				XMLElement* xFind = xFix->FirstChildElement("find");
@@ -379,10 +388,10 @@ namespace FuzRoBorkNamespace {
 				string replace = string(xReplace->GetText());
 				replace = findReplace(replace, "[", "<");
 				replace = findReplace(replace, "]", ">");
-				fixes.push_back({find, replace});
-				xFix = xFix->NextSiblingElement("hotkey");
-				idx++;
+				fixes[find] = replace;
+				xFix = xFix->NextSiblingElement("fix");
 			}
+			_MESSAGE("Loaded fixes");
 		}
 
 		// actions
@@ -391,45 +400,49 @@ namespace FuzRoBorkNamespace {
 
 		XMLElement* pcs = root->FirstChildElement("pcs");
 
-		if (!pcs) {
-			OutputDebugString("No PCS tag found, exiting\n");
-			return;
-		}
+		if (pcs) {
 
 
-		XMLElement* xPC = pcs->FirstChildElement("pc");
-		XMLElement* xTopic = xPC->FirstChildElement("topic");
+			XMLElement* xPC = pcs->FirstChildElement("pc");
 
-		while (xTopic) {
+			if (xPC) 
+			{
 
-			OutputDebugString("got a topic\n");
+				XMLElement* xTopic = xPC->FirstChildElement("topic");
 
-			vector<string> optionList;
+				while (xTopic) {
 
-			XMLElement* xOption = xTopic->FirstChildElement("option");
+					vector<string> optionList;
 
-			string aName = (const char*)xTopic->Attribute("name");
+					XMLElement* xOption = xTopic->FirstChildElement("option");
 
-			OutputDebugString(aName.c_str());
-			OutputDebugString("\n");
+					string aName = (const char*)xTopic->Attribute("name");
 
-			while (xOption) {
-				if (xOption->GetText()) {
-					OutputDebugString(string(xOption->GetText()).c_str());
+					OutputDebugString(aName.c_str());
 					OutputDebugString("\n");
-					optionList.push_back(string(xOption->GetText()));
+
+					while (xOption) {
+						if (xOption->GetText()) {
+							OutputDebugString(string(xOption->GetText()).c_str());
+							OutputDebugString("\n");
+							optionList.push_back(string(xOption->GetText()));
+						}
+						else
+							optionList.push_back(" "); // add empties to make less common
+
+						xOption = xOption->NextSiblingElement("option");
+					}
+
+					if (optionList.size() != 0) {
+						actionList[aName] = optionList;
+					}
+					xTopic = xTopic->NextSiblingElement("topic");
 				}
-				else
-					optionList.push_back(" "); // add empties to make less common
 
-				xOption = xOption->NextSiblingElement("option");
+				_MESSAGE("Loaded actions");
 			}
-
-			if (optionList.size() != 0) {
-				actionList[aName] = optionList;
-			}
-			xTopic = xTopic->NextSiblingElement("topic");
 		}
+
 	}
 
 	bool findSpeechToken(ISpObjectToken** pelt, wstring name, LPCWSTR key) {
@@ -490,9 +503,13 @@ namespace FuzRoBorkNamespace {
 	void replaceUnspeakables(string& str) {
 
 
-		for (int i = 0; i < size(fixes); i++) {
-			str = findReplace(str, fixes[i][0], fixes[i][1]);
+		map<string, string>::iterator it;
+
+		for (it = fixes.begin(); it != fixes.end(); it++)
+		{
+			str = findReplace(str, it->first, it->second);
 		}
+
 
 		// remove parenthesis and brackets if option ticked
 
@@ -1113,6 +1130,7 @@ namespace FuzRoBorkNamespace {
 		registry->RegisterFunction(new NativeFunction3 <StaticFunctionTag, void, BSFixedString, BSFixedString, BSFixedString>("FuzRoBork_setMCMConfig", "BorkMCM", setMCMConfig, registry));
 		registry->RegisterFunction(new NativeFunction0 <StaticFunctionTag, void>("FuzRoBork_stopSpeech", "BorkMCM", pStopSpeech, registry));
 		registry->RegisterFunction(new NativeFunction1 <StaticFunctionTag, void, VMArray<BSFixedString>>("FuzRoBork_getLanguages", "BorkMCM", sendLanguages, registry));
+		registry->RegisterFunction(new NativeFunction0 <StaticFunctionTag, void>("FuzRoBork_reloadXML", "BorkMCM", ReloadXML, registry));
 
 		return true;
 	}

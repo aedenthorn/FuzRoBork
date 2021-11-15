@@ -1,47 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
-	<settings>
-		<SkipEmptyResponses>1</SkipEmptyResponses><!-- 0 = false, 1 = true -->
-		<PlayPlayerDialogue>1</PlayPlayerDialogue>	
-		<PlayNPCDialogue>1</PlayNPCDialogue>	
-		<PlayBookPages>1</PlayBookPages><!-- uses Narrator voice -->
-		<PlayLoadingScreenText>0</PlayLoadingScreenText><!-- uses Narrator voice -->
-		<VoicePlayerActions>0</VoicePlayerActions><!-- uses Player voice -->
-
-		<SpeakParentheses>0</SpeakParentheses><!-- set to 1 to say things like "(Persuade)" or "(10 Gold)" -->
-		<EnableHotKeys>0</EnableHotKeys><!-- defined below, no matter whether using overrides or not -->
-
-		<MsPerWordSilence>300</MsPerWordSilence><!-- used for lip synching NPCs; adjusted according to individual voice rates below -->
-
-		<!-- for language strings below, look in the registry under the following locations:
-		HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Speech Server\v11.0\Voices\Tokens (for new MS voices on 64-bit systems)
-		HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech Server\v11.0\Voices\Tokens (for new MS voices on 32-bit systems)
-		HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Speech\Voices\Tokens (for 64-bit systems)
-		HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens (for 32-bit systems)
-		and look in the attributes key for the name of your voice. -->
-
-		<PlayerLanguage>IVONA 2 Gwyneth</PlayerLanguage>
-		<FemaleLanguage>Microsoft Server Speech Text to Speech Voice (en-US, ZiraPro)</FemaleLanguage>
-		<MaleLanguage>IVONA 2 Eric</MaleLanguage>
-		<NarratorLanguage>eSpeak-en</NarratorLanguage>
-
-		<PlayerVoiceRate>0</PlayerVoiceRate><!-- 0 is normal, 10 is fastest, -10 is slowest -->
-		<FemaleVoiceRate>1</FemaleVoiceRate>
-		<MaleVoiceRate>-1</MaleVoiceRate>
-		<NarratorVoiceRate>1</NarratorVoiceRate>
-
-		<PlayerVolume>50.0</PlayerVolume><!-- 0-100% -->
-		<FemaleVolume>50.0</FemaleVolume>
-		<MaleVolume>30.0</MaleVolume>
-		<NarratorVolume>30.0</NarratorVolume>
-
-		<PlayerVoicePitch>0</PlayerVoicePitch><!-- 0 is normal, 10 is highest, -10 is lowest -->
-		<FemaleVoicePitch>1</FemaleVoicePitch>
-		<MaleVoicePitch>-2</MaleVoicePitch>
-		<NarratorVoicePitch>-1</NarratorVoicePitch>
-
-		
-	</settings>
 	<npcs>
 		<npc name="Delphine"><!-- this should work -->
 			<language>IVONA 2 Amy</language>
@@ -181,8 +139,26 @@
 			</topic>
 		</pc>
 	</pcs>
+	<fixes>
+		<fix>
+			<find>Whiterun</find>
+			<replace>White Run</replace>
+		</fix>
+		<fix>
+			<find>Jarl</find>
+			<replace>Yarl</replace>
+		</fix>
+		<fix>
+			<find>Draugr</find>
+			<replace>Drow Gur</replace>
+		</fix>
+		<fix>
+			<find>...</find>
+			<replace>... </replace>
+		</fix>
+	</fixes>
 	<hotkeys><!-- currently eight hot keys are used, set the key here (if using xml overrides) or in MCM. For codes, see here http://www.creationkit.com/Input_Script#DXScanCodes -->
-		<hotkey key="2">Hey, baby, if I told you you had a beautiful body, would you hold it against me?</hotkey><!-- 1 -->
+		<hotkey key="2">The Jarl says there are no Draugr in Whiterun...Is that true?</hotkey><!-- 1 -->
 		<hotkey key="3">[pitch absmiddle="-10"]Knock knock.[/pitch]</hotkey><!-- 2 -->
 		<hotkey key="4">[pitch absmiddle="10"]Who's there?[/pitch]</hotkey><!-- 3 -->
 		<hotkey key="5">[pitch absmiddle="-10"]Dovakin.[/pitch]</hotkey><!-- 4 -->
