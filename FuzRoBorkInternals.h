@@ -306,8 +306,13 @@ namespace FuzRoBorkNamespace {
 			int pitch;
 	};
 
+	void storeBookSpeech(string text);
+	void storeFirstPagesSpeech(string text);
+	void storePagesSpeech(string text);
+	void startStoredPagesSpeech(StaticFunctionTag* base);
+	void startStoredBookSpeech(StaticFunctionTag* base);
 	void startBookSpeech(string text);
-	void startNPCSpeech(string a);
+	void startNPCSpeech(const char * text);
 	void startPlayerSpeech(const char* _title);
 	void startNarratorSpeech(string text);
 

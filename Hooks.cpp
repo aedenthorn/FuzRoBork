@@ -66,11 +66,7 @@ void SneakAtackVoicePath(CachedResponseData* Data, char* VoicePathBuffer)
 	gLog.Outdent();
 #endif
 
-#ifndef NDEBUG
-	if (!(WAVStream->valid == 0 && FUZStream->valid == 0 && XWMStream->valid == 0))
-#else
 	if (WAVStream->valid == 0 && FUZStream->valid == 0 && XWMStream->valid == 0)
-#endif
 	{
 		static const int kWordsPerSecond = kWordsPerSecondSilence.GetData().i;
 		static const int kMaxSeconds = 10;
@@ -105,7 +101,6 @@ void SneakAtackVoicePath(CachedResponseData* Data, char* VoicePathBuffer)
 #ifndef NDEBUG
 			_MESSAGE("Missing Asset - Switching to '%s'", ShimAssetFilePath);
 #endif
-			FuzRoBorkNamespace::startNPCSpeech(ResponseText);
 		}
 	}
 
@@ -124,6 +119,7 @@ bool ShouldForceSubs(NPCChatterData* ChatterData, UInt32 ForceRegardless, const 
 		_MESSAGE("Found a match for %s - Forcing subs", Subtitle);
 #endif
 		Result = true;
+
 	}
 	else if (ForceRegardless || (ChatterData && ChatterData->forceSubtitles))
 		Result = true;
@@ -153,6 +149,28 @@ bool ShouldForceSubs(NPCChatterData* ChatterData, UInt32 ForceRegardless, const 
 
 	return Result;
 }
+
+bool ShouldForceSubs1(NPCChatterData* ChatterData, UInt32 ForceRegardless, const char* Subtitle)
+{
+	return ShouldForceSubs(ChatterData, ForceRegardless, Subtitle);
+}
+bool ShouldForceSubs2(NPCChatterData* ChatterData, UInt32 ForceRegardless, const char* Subtitle)
+{
+	return ShouldForceSubs(ChatterData, ForceRegardless, Subtitle);
+}
+bool ShouldForceSubs3(NPCChatterData* ChatterData, UInt32 ForceRegardless, const char* Subtitle)
+{
+	return ShouldForceSubs(ChatterData, ForceRegardless, Subtitle);
+}
+bool ShouldForceSubs4(NPCChatterData* ChatterData, UInt32 ForceRegardless, const char* Subtitle)
+{
+	if (Subtitle && SubtitleHasher::Instance.HasMatch(Subtitle))		// force if the subtitle is for a voiceless response
+	{
+		FuzRoBorkNamespace::startNPCSpeech(Subtitle);
+	}
+	return ShouldForceSubs(ChatterData, ForceRegardless, Subtitle);
+}
+
 
 #define PUSH_VOLATILE		push(rcx); push(rdx); push(r8);
 #define POP_VOLATILE		pop(r8); pop(rdx); pop(rcx);

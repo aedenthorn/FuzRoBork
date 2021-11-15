@@ -34,7 +34,11 @@ SME::INI::INISetting	kPlayNPCDialogue("PlayNPCDialogue",
 SME::INI::INISetting	kPlayBookPages("PlayBookPages",
 	"General",
 	"BLEH",
-	(SInt32)1);
+	(SInt32)0);
+SME::INI::INISetting	kPlayBooks("PlayBooks",
+	"General",
+	"BLEH",
+	(SInt32)0);
 SME::INI::INISetting	kPlayLoadingScreenText("PlayLoadingScreenText",
 	"General",
 	"BLEH",
@@ -150,6 +154,7 @@ void FuzRoBorkINIManager::Initialize(const char* INIPath, void* Paramenter)
 	RegisterSetting(&kPlayPlayerDialogue);
 	RegisterSetting(&kPlayNPCDialogue);
 	RegisterSetting(&kPlayBookPages);
+	RegisterSetting(&kPlayBooks);
 	RegisterSetting(&kPlayLoadingScreenText);
 	RegisterSetting(&kVoicePlayerActions);
 
@@ -279,6 +284,9 @@ override::MenuTopicManager* override::MenuTopicManager::GetSingleton(void)
 namespace FuzRoBorkNamespace {
 
 	PluginHandle g_pluginHandle;
+	
+	string storedBookSpeech = "";
+	string storedPagesSpeech = "";
 
 	//SubtitleHasher			SubtitleHasher::Instance;
 	//const double			SubtitleHasher::kPurgeInterval = 1000.0 * 60.0f;
@@ -417,10 +425,11 @@ namespace FuzRoBorkNamespace {
 
 	void speakTask(SpeakObj nSpeech)
 	{
-		OutputDebugString("SpeakTask Begun\n");
+		//_MESSAGE("speakTask: '%s'", nSpeech.speech);
+
 
 		if (FAILED(::CoInitialize(NULL))) {
-			OutputDebugString("failed to coinitialize");
+			_MESSAGE("failed to coinitialize");
 			return;
 		}
 
@@ -440,8 +449,8 @@ namespace FuzRoBorkNamespace {
 
 		if (SUCCEEDED(hr))
 		{
-			OutputDebugString("searching for voices in registry\n");
-
+			//_MESSAGE("searching for voices in registry");
+			
 			for (int i = 0; i < size(speechPaths); i++) {
 				found = findSpeechToken(&cpToken, wideLang, speechPaths[i]);
 				if (found)
@@ -459,27 +468,27 @@ namespace FuzRoBorkNamespace {
 		{
 
 			hr = pVoice->SetVoice(cpToken);
-			OutputDebugString("Set voice\n");
+			//_MESSAGE("set voice");
 
 		}
 		if (SUCCEEDED(hr))
 		{
 			hr = pVoice->SetRate(nSpeech.rate);
-			OutputDebugString("Set rate\n");
+			//_MESSAGE("set rate");
 
 		}
 		if (SUCCEEDED(hr))
 		{
 
 			hr = pVoice->SetVolume(nSpeech.vol);
-			OutputDebugString("Set volume\n");
+			//_MESSAGE("set volume");
 		}
 		if (SUCCEEDED(hr))
 		{
 			replaceUnspeakables(nSpeech.speech);
 
 			if (nSpeech.speech.length() < 1) {
-				OutputDebugString("No speech string\n");
+				//_MESSAGE("No speech string");
 				return;
 			}
 
@@ -489,30 +498,27 @@ namespace FuzRoBorkNamespace {
 
 			const char* nChar = speech.c_str();
 
-			OutputDebugString("Speaking ");
-			OutputDebugString(nChar);
-			OutputDebugString("\n");
+			//_MESSAGE("Speaking '%s'", nChar);
 
 			wchar_t* lSpeech = new wchar_t[4096];
 			MultiByteToWideChar(CP_ACP, 0, nChar, -1, lSpeech, 4096);
 
 			if (pVoice == NULL) {
-				OutputDebugString("No pVoice\n");
+				_MESSAGE("No pVoice");
 				return;
 			}
 			else {
 				SPVOICESTATUS   pStatus;
 				pVoice->GetStatus(&pStatus, NULL);
 				if (pStatus.dwRunningState == SPRS_IS_SPEAKING) {
-					OutputDebugString("Still speaking\n");
+					_MESSAGE("Still speaking");
 					return;
 				}
 
 			}
 			hr = pVoice->Speak(lSpeech, SPF_PURGEBEFORESPEAK | SPF_ASYNC, NULL);
 			actionSpeaking = false;
-
-			OutputDebugString("Spoke\n");
+			//_MESSAGE("Spoke");
 		}
 
 
@@ -535,20 +541,67 @@ namespace FuzRoBorkNamespace {
 		t1.detach();
 	}
 
+	void startStoredBookSpeech(StaticFunctionTag* base) {
+		if (storedBookSpeech.size() == 0)
+			return;
+		stopSpeaking();
+		OutputDebugString("Starting stored book speech\n");
+		startNarratorSpeech(storedBookSpeech);
+	}
+	void startStoredPagesSpeech(StaticFunctionTag* base) {
+		if (storedPagesSpeech.size() == 0)
+			return;
+		stopSpeaking();
+		OutputDebugString("Starting stored book speech\n");
+		startNarratorSpeech(storedPagesSpeech);
+	}
 	void startBookSpeech(string text) {
+		stopSpeaking();
+		storeBookSpeech(text);
 		OutputDebugString("Starting book speech\n");
 		startNarratorSpeech(text);
+	}
+	
+	void storeBookSpeech(string text) {
+		OutputDebugString("Storing book speech\n");
+		storedBookSpeech = text;
+		if (kPlayBooks.GetData().i == 1) {
+			stopSpeaking();
+			startNarratorSpeech(text);
+		}
+	}
+
+	void storeFirstPagesSpeech(string text) {
+		OutputDebugString("Storing first pages speech\n");
+		storedPagesSpeech = text;
+		if (kPlayBookPages.GetData().i == 1 && kPlayBooks.GetData().i == 0) {
+			stopSpeaking();
+			startNarratorSpeech(text);
+		}
+	}
+	
+	void storePagesSpeech(string text) {
+		OutputDebugString("Storing pages speech\n");
+		storedPagesSpeech = text;
+		if (kPlayBookPages.GetData().i == 1) {
+			stopSpeaking();
+			startNarratorSpeech(text);
+		}
 	}
 
 	void speakLoadingScreen(string text) {
 		startNarratorSpeech(text);
 	}
 
-	void startNPCSpeech(string text) {
-		_MESSAGE("test");
+	void startNPCSpeech(const char * text) {
 
-		if (kPlayNPCDialogue.GetData().i == 0)
+		if (kPlayNPCDialogue.GetData().i == 0) {
+			_MESSAGE("No dialogue");
 			return;
+		}
+
+		//_MESSAGE("NPC Speaking '%s'", text);
+
 
 		TESObjectREFR* refr = MenuTopicManager::GetSingleton()->GetDialogueTarget();
 
@@ -563,6 +616,7 @@ namespace FuzRoBorkNamespace {
 
 		TESNPC* npc = DYNAMIC_CAST(refr->baseForm, TESForm, TESNPC);
 
+
 		sex = npc ? CALL_MEMBER_FN(npc, GetSex)() : 1;
 
 		string lang = sex == 0 ? kMaleLanguage.GetData().s : kFemaleLanguage.GetData().s;
@@ -576,38 +630,42 @@ namespace FuzRoBorkNamespace {
 
 		// specific NPC override
 
-		string nName(npc->fullName.GetName());
-		string nRace(npc->race.race->fullName.GetName());
+		if (npc) {
+			const char* nName(npc->fullName.GetName());
+			const char* nRace(npc->race.race->fullName.GetName());
 
-		//Console_Print(nName.c_str());
-		//Console_Print(nRace.c_str());
+			//Console_Print(nName.c_str());
+			//Console_Print(nRace.c_str());
 
-		for (vector<NPCObj>::size_type i = 0; i != NPCList.size(); i++) {
-			regex npcxname(NPCList[i].name);
-			regex npcxrace(NPCList[i].race);
-			if (NPCList[i].name.compare(nName) == 0 || (NPCList[i].name.length() > 0 && regex_match(nName, npcxname)) || NPCList[i].race.compare(nRace) == 0 || (NPCList[i].race.length() > 0 && regex_match(nRace, npcxrace))) {
+			for (vector<NPCObj>::size_type i = 0; i < NPCList.size(); i++) {
 
-				if (NPCList[i].lang.length() > 0)
-					lang = NPCList[i].lang;
-				if (NPCList[i].rate > -11 && NPCList[i].rate < 11)
-					rate = NPCList[i].rate;
-				if (NPCList[i].vol > -1 && NPCList[i].vol < 101)
-					volume = NPCList[i].vol;
-				if (NPCList[i].pitch > -11 && NPCList[i].pitch < 11)
-					pitch = NPCList[i].pitch;
+				//_MESSAGE(NPCList[i].name.c_str());
+
+				regex npcxname(NPCList[i].name);
+				regex npcxrace(NPCList[i].race);
+				if (NPCList[i].name.compare(nName) == 0 || (NPCList[i].name.length() > 0 && regex_match(nName, npcxname)) || NPCList[i].race.compare(nRace) == 0 || (NPCList[i].race.length() > 0 && regex_match(nRace, npcxrace))) {
+
+					if (NPCList[i].lang.length() > 0)
+						lang = NPCList[i].lang;
+					if (NPCList[i].rate > -11 && NPCList[i].rate < 11)
+						rate = NPCList[i].rate;
+					if (NPCList[i].vol > -1 && NPCList[i].vol < 101)
+						volume = NPCList[i].vol;
+					if (NPCList[i].pitch > -11 && NPCList[i].pitch < 11)
+						pitch = NPCList[i].pitch;
+				}
 			}
 		}
-
-
 
 		SpeakObj pSpeech(text, lang, rate, volume, pitch);
 
 		thread t1(speakTask, pSpeech);
 		t1.detach();
+		//_MESSAGE("NPC Speaking initiated successfully");
 	}
 
 	void startPlayerSpeech(const char* _title) {
-		OutputDebugString("Starting PC Speech\n");
+		//OutputDebugString("Starting PC Speech\n");
 
 		TESNPC* pc = DYNAMIC_CAST((*g_thePlayer)->baseForm, TESForm, TESNPC);
 
@@ -748,16 +806,17 @@ namespace FuzRoBorkNamespace {
 			kNarratorLanguage.SetDataAsString(stringV[3].c_str());
 		}
 
-		if (boolV.size() == 9) {
+		if (boolV.size() == 10) {
 			OutputDebugString("Bools correct size\n");
 			kSkipEmptyResponses.SetInt(boolV[0].compare("TRUE") == 0 ? 1 : 0);
 			kPlayPlayerDialogue.SetInt(boolV[1].compare("TRUE") == 0 ? 1 : 0);
 			kPlayNPCDialogue.SetInt(boolV[2].compare("TRUE") == 0 ? 1 : 0);
 			kPlayBookPages.SetInt(boolV[3].compare("TRUE") == 0 ? 1 : 0);
-			kPlayLoadingScreenText.SetInt(boolV[4].compare("TRUE") == 0 ? 1 : 0);
-			kVoicePlayerActions.SetInt(boolV[5].compare("TRUE") == 0 ? 1 : 0);
-			kSpeakParentheses.SetInt(boolV[6].compare("TRUE") == 0 ? 1 : 0);
-			kEnableHotKeys.SetInt(boolV[7].compare("TRUE") == 0 ? 1 : 0);
+			kPlayBooks.SetInt(boolV[4].compare("TRUE") == 0 ? 1 : 0);
+			kPlayLoadingScreenText.SetInt(boolV[5].compare("TRUE") == 0 ? 1 : 0);
+			kVoicePlayerActions.SetInt(boolV[6].compare("TRUE") == 0 ? 1 : 0);
+			kSpeakParentheses.SetInt(boolV[7].compare("TRUE") == 0 ? 1 : 0);
+			kEnableHotKeys.SetInt(boolV[8].compare("TRUE") == 0 ? 1 : 0);
 			//kUseXMLOverrides.SetInt(boolV[8].compare("TRUE") == 0?1:0);
 		}
 
@@ -901,7 +960,7 @@ namespace FuzRoBorkNamespace {
 		if (kVoicePlayerActions.GetData().i == 0)
 			return;
 
-		Console_Print(_which.data);
+		_MESSAGE("Player action: %s", _which.data);
 
 		// preventing duplicates
 
@@ -1037,7 +1096,8 @@ namespace FuzRoBorkNamespace {
 		registry->RegisterFunction(new NativeFunction1 <StaticFunctionTag, void, BSFixedString>("FuzRoBork_testSpeech", "BorkMCM", testSpeech, registry));
 		registry->RegisterFunction(new NativeFunction1 <StaticFunctionTag, void, UInt32>("FuzRoBork_hotSpeech", "BorkMCM", hotSpeech, registry));
 		registry->RegisterFunction(new NativeFunction1 <StaticFunctionTag, void, BSFixedString>("FuzRoBork_actionSpeech", "BorkPC", actionSpeech, registry));
-
+		registry->RegisterFunction(new NativeFunction0 <StaticFunctionTag, void>("FuzRoBork_storedBookSpeech", "BorkMCM", startStoredBookSpeech, registry));
+		registry->RegisterFunction(new NativeFunction0 <StaticFunctionTag, void>("FuzRoBork_storedPagesSpeech", "BorkMCM", startStoredPagesSpeech, registry));
 		registry->RegisterFunction(new NativeFunction3 <StaticFunctionTag, void, BSFixedString, BSFixedString, BSFixedString>("FuzRoBork_setMCMConfig", "BorkMCM", setMCMConfig, registry));
 		registry->RegisterFunction(new NativeFunction0 <StaticFunctionTag, void>("FuzRoBork_stopSpeech", "BorkMCM", pStopSpeech, registry));
 		registry->RegisterFunction(new NativeFunction1 <StaticFunctionTag, void, VMArray<BSFixedString>>("FuzRoBork_getLanguages", "BorkMCM", sendLanguages, registry));

@@ -12,7 +12,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>FuzRoBork</ProjectName>
-    <Skyrim64Path>H:\tmp\ga\The Elder Scrolls V Skyrim</Skyrim64Path>
+    <PluginPath>H:\tmp\ga\MO2Mods\SkyrimSE\mods\Fuz Ro Bork - Text-To-Speech Mod for Skyrim\SKSE\Plugins\</PluginPath>
     <ProjectGuid>{FC9A1EE6-D9DB-47F6-B0ED-8867439C43CE}</ProjectGuid>
     <RootNamespace>FuzRoBork</RootNamespace>
     <Keyword>Win32Proj</Keyword>
@@ -78,7 +78,7 @@
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetDir)$(TargetFileName)" "$(Skyrim64Path)\Data\SKSE\Plugins\$(TargetFileName)"</Command>
+      <Command>copy "$(TargetDir)$(TargetFileName)" "$(PluginPath)$(TargetFileName)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Installing DLL...</Message>
@@ -110,7 +110,7 @@
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetDir)$(TargetFileName)" "$(Skyrim64Path)\Data\SKSE\Plugins\$(TargetFileName)"</Command>
+      <Command>copy "$(TargetDir)$(TargetFileName)" "$(PluginPath)$(TargetFileName)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Installing DLL...</Message>

@@ -114,15 +114,20 @@ extern "C"
 		}
 		else if (type == "DIALOGUE" && kPlayPlayerDialogue.GetData().i == 1)
 			FuzRoBorkNamespace::startPlayerSpeech(speech);
-		else if (type == "BOOK_PAGE" && kPlayBookPages.GetData().i == 1) {
+		else if (type == "BOOK_READ" && kPlayBookPages.GetData().i == 1) {
 			FuzRoBorkNamespace::stopSpeaking();
 			FuzRoBorkNamespace::startBookSpeech(speech);
 		}
-		else if (type == "BOOK_CLICK") {
-			FuzRoBorkNamespace::stopSpeaking();
-			FuzRoBorkNamespace::startBookSpeech(speech);
+		else if (type == "BOOK_BOOK") {
+			FuzRoBorkNamespace::storeBookSpeech(speech);
 		}
-		if (type == "LOADING_SCREEN" && kPlayLoadingScreenText.GetData().i == 1) {
+		else if (type == "BOOK_PAGES_FIRST") {
+			FuzRoBorkNamespace::storeFirstPagesSpeech(speech);
+		}
+		else if (type == "BOOK_PAGES") {
+			FuzRoBorkNamespace::storePagesSpeech(speech);
+		}
+		else if (type == "LOADING_SCREEN" && kPlayLoadingScreenText.GetData().i == 1) {
 			FuzRoBorkNamespace::speakLoadingScreen(speech);
 		}
 		else if (type == "CHECK_DONE") { // check whether speech is finished
