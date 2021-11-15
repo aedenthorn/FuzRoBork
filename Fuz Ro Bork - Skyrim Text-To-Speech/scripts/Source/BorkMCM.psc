@@ -7,7 +7,6 @@ bool playBookVal = false
 bool playPagesVal = false
 bool playLoadVal = false
 bool PlayActionsVal = false
-bool useXMLVal = false
 bool overrideAllVal = false
 bool playParaVal = false
 bool enableKeysVal = false
@@ -70,6 +69,7 @@ Function FuzRoBork_testSpeech(string which) global native
 Function FuzRoBork_hotSpeech(int which) global native
 Function FuzRoBork_stopSpeech() global native
 Function FuzRoBork_getLanguages(string[] langs) global native
+Function FuzRoBork_reloadXML() global native
 
 event OnGameReload()
     parent.OnGameReload() ; Don't forget to call the parent!
@@ -129,10 +129,10 @@ event OnPageReset(string page)
         AddToggleOptionST("playActionsST","Voice Player Actions", PlayActionsVal)
 
         AddHeaderOption("Options")
-        AddToggleOptionST("useXMLST","Use XML Override file", useXMLVal)
         AddSliderOptionST("msST","Text duration", msVal, "{0} ms / word")
         AddToggleOptionST("playParaST","Speak Parentheticals", playParaVal)
         AddToggleOptionST("enableKeysST","Enable Keys", enableKeysVal)
+        AddTextOptionST("reloadXMLST", "", "Reload XML")
 
         SetCursorPosition(1)
 
@@ -315,6 +315,17 @@ state playParaST; TOGGLE
     endEvent
 endState
 
+state reloadXMLST; TEXT
+    event OnSelectST()
+		FuzRoBork_reloadXML()
+    endEvent
+
+    event OnHighlightST()
+        SetInfoText("Reload XML from file")
+    endEvent
+endState
+
+
 state enableKeysST; TOGGLE
     event OnSelectST()
         enableKeysVal= !enableKeysVal
@@ -386,24 +397,6 @@ state enableKeysST; TOGGLE
         SetInfoText("Play parenthetical speech, e.g. (Persuade) or (10 Gold)")
     endEvent
 endState
-
-
-state useXMLST; TOGGLE
-    event OnSelectST()
-        useXMLVal= !useXMLVal
-        SetToggleOptionValueST(useXMLVal)
-    endEvent
-
-    event OnDefaultST()
-        useXMLVal= false
-        SetToggleOptionValueST( useXMLVal)
-    endEvent
-
-    event OnHighlightST()
-        SetInfoText("Use custom XML file to override voice settings Data\\skse\\Plugins\\FuzRoBork.xml")
-    endEvent
-endState
-
 
 
 state pLangST; Menu
@@ -1279,7 +1272,6 @@ Function doSendVals()
     booleans += "^"+playActionsVal
     booleans += "^"+playParaVal
     booleans += "^"+enableKeysVal
-    booleans += "^"+useXMLVal
 
     string floats = ""
 
