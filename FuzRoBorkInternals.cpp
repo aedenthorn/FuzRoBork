@@ -379,9 +379,9 @@ namespace FuzRoBorkNamespace {
 
 	string unspeakables[][2] = {
 		{ string("Whiterun"), string("White Run") },
-	{ string("Jarl"), string("Yarl") },
-	{ string("Draugr"), string("Drow Gur") },
-	{ string("..."), string("... ") }
+		{ string("Jarl"), string("Yarl") },
+		{ string("Draugr"), string("Drow Gur") },
+		{ string("..."), string("... ") }
 	};
 
 	void replaceUnspeakables(string& str) {

@@ -182,7 +182,7 @@
 		</pc>
 	</pcs>
 	<hotkeys><!-- currently eight hot keys are used, set the key here (if using xml overrides) or in MCM. For codes, see here http://www.creationkit.com/Input_Script#DXScanCodes -->
-		<hotkey key="2">)Hey, baby, if I (Persuade) told you you had a beautiful body, would you hold it against me?</hotkey><!-- 1 -->
+		<hotkey key="2">Hey, baby, if I told you you had a beautiful body, would you hold it against me?</hotkey><!-- 1 -->
 		<hotkey key="3">[pitch absmiddle="-10"]Knock knock.[/pitch]</hotkey><!-- 2 -->
 		<hotkey key="4">[pitch absmiddle="10"]Who's there?[/pitch]</hotkey><!-- 3 -->
 		<hotkey key="5">[pitch absmiddle="-10"]Dovakin.[/pitch]</hotkey><!-- 4 -->
