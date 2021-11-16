@@ -239,7 +239,7 @@ bool InstallHooks()
 #else
 				mov(r8, r14);	// subtitle
 #endif
-				mov(rax, (uintptr_t)ShouldForceSubs);
+				mov(rax, (uintptr_t)ShouldForceSubs1);
 				call(rax);
 				POP_VOLATILE;
 				test(al, al);
@@ -279,7 +279,7 @@ bool InstallHooks()
 				mov(rcx, r14);
 				xor(rdx, rdx);
 				mov(r8, ptr[r14 + 0x8]);	// subtitle
-				mov(rax, (uintptr_t)ShouldForceSubs);
+				mov(rax, (uintptr_t)ShouldForceSubs2);
 				call(rax);
 				POP_VOLATILE;
 				test(al, al);
@@ -319,7 +319,7 @@ bool InstallHooks()
 				mov(rcx, r14);
 				xor (rdx, rdx);
 				mov(r8, ptr[r14 + 0x8]);	// subtitle
-				mov(rax, (uintptr_t)ShouldForceSubs);
+				mov(rax, (uintptr_t)ShouldForceSubs3);
 				call(rax);
 				POP_VOLATILE;
 				test(al, al);
@@ -359,7 +359,7 @@ bool InstallHooks()
 				xor(rcx, rcx);
 				mov(rdx, r12d);
 				mov(r8, rbp);	// subtitle
-				mov(rax, (uintptr_t)ShouldForceSubs);
+				mov(rax, (uintptr_t)ShouldForceSubs4);
 				call(rax);
 				POP_VOLATILE;
 				test(al, al);
