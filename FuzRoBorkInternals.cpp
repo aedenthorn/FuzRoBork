@@ -864,7 +864,9 @@ namespace FuzRoBorkNamespace {
 		//Console_Print("testing speech");
 
 		int r = static_cast<double>(rand()) / RAND_MAX * size(randSpeech);
-		string speech = randSpeech[r].c_str();
+		string speech = randSpeech[r];
+
+		_MESSAGE("Speaking random %s text: %s", which.c_str(), speech.c_str());
 
 		if (which.compare("P") == 0 || which.compare("p") == 0) {
 			startPlayerSpeech(speech.c_str());
