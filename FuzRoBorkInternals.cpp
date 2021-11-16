@@ -763,7 +763,7 @@ namespace FuzRoBorkNamespace {
 			return;
 		}
 
-		//_MESSAGE("NPC Speaking '%s'", text);
+		_MESSAGE("NPC Speaking '%s'", text);
 
 
 		TESObjectREFR* refr = MenuTopicManager::GetSingleton()->GetDialogueTarget();
@@ -828,7 +828,7 @@ namespace FuzRoBorkNamespace {
 	}
 
 	void startPlayerSpeech(const char* _title) {
-		//OutputDebugString("Starting PC Speech\n");
+		_MESSAGE("Starting Player Speech: %s", _title);
 
 		TESNPC* pc = DYNAMIC_CAST((*g_thePlayer)->baseForm, TESForm, TESNPC);
 

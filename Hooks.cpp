@@ -115,11 +115,7 @@ bool ShouldForceSubs(NPCChatterData* ChatterData, UInt32 ForceRegardless, const 
 
 	if (Subtitle && SubtitleHasher::Instance.HasMatch(Subtitle))		// force if the subtitle is for a voiceless response
 	{
-#ifndef NDEBUG
-		_MESSAGE("Found a match for %s - Forcing subs", Subtitle);
-#endif
 		Result = true;
-
 	}
 	else if (ForceRegardless || (ChatterData && ChatterData->forceSubtitles))
 		Result = true;
@@ -166,6 +162,7 @@ bool ShouldForceSubs4(NPCChatterData* ChatterData, UInt32 ForceRegardless, const
 {
 	if (Subtitle && SubtitleHasher::Instance.HasMatch(Subtitle))		// force if the subtitle is for a voiceless response
 	{
+		_MESSAGE("Found a match for %s - playing TTS", Subtitle);
 		FuzRoBorkNamespace::startNPCSpeech(Subtitle);
 	}
 	return ShouldForceSubs(ChatterData, ForceRegardless, Subtitle);
