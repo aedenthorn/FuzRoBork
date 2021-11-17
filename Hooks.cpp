@@ -115,6 +115,7 @@ bool ShouldForceSubs(NPCChatterData* ChatterData, UInt32 ForceRegardless, const 
 
 	if (Subtitle && SubtitleHasher::Instance.HasMatch(Subtitle))		// force if the subtitle is for a voiceless response
 	{
+		_MESSAGE("No voice file, forcing subs");
 		Result = true;
 	}
 	else if (ForceRegardless || (ChatterData && ChatterData->forceSubtitles))
@@ -148,18 +149,22 @@ bool ShouldForceSubs(NPCChatterData* ChatterData, UInt32 ForceRegardless, const 
 
 bool ShouldForceSubs1(NPCChatterData* ChatterData, UInt32 ForceRegardless, const char* Subtitle)
 {
+	_MESSAGE("ShouldForceSubs1");
 	return ShouldForceSubs(ChatterData, ForceRegardless, Subtitle);
 }
 bool ShouldForceSubs2(NPCChatterData* ChatterData, UInt32 ForceRegardless, const char* Subtitle)
 {
+	_MESSAGE("ShouldForceSubs2");
 	return ShouldForceSubs(ChatterData, ForceRegardless, Subtitle);
 }
 bool ShouldForceSubs3(NPCChatterData* ChatterData, UInt32 ForceRegardless, const char* Subtitle)
 {
+	_MESSAGE("ShouldForceSubs3");
 	return ShouldForceSubs(ChatterData, ForceRegardless, Subtitle);
 }
 bool ShouldForceSubs4(NPCChatterData* ChatterData, UInt32 ForceRegardless, const char* Subtitle)
 {
+	_MESSAGE("ShouldForceSubs4");
 	if (Subtitle && SubtitleHasher::Instance.HasMatch(Subtitle))		// force if the subtitle is for a voiceless response
 	{
 		_MESSAGE("Found a match for %s - playing TTS", Subtitle);

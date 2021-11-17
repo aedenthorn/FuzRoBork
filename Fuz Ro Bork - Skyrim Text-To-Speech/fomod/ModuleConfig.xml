@@ -35,7 +35,7 @@
               </description>
 			  <image path="fomod\images\bork.png"/>
               <files>
-                <file source="Interface\book.swf" destination="Interface\book.swf"/>
+                <file source="Interface\loadingmenu.swf" destination="Interface\loadingmenu.swf"/>
               </files>
               <typeDescriptor>
                 <type name="Optional"/>

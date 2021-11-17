@@ -663,6 +663,9 @@ namespace FuzRoBorkNamespace {
 
 
 	void startNarratorSpeech(string text) { // unchecked
+
+		_MESSAGE("Starting narrator speech %s", text.c_str());
+
 		string lang = kNarratorLanguage.GetData().s;
 
 		float rate = kNarratorVoiceRate.GetData().f;
@@ -866,7 +869,7 @@ namespace FuzRoBorkNamespace {
 		int r = static_cast<double>(rand()) / RAND_MAX * size(randSpeech);
 		string speech = randSpeech[r];
 
-		_MESSAGE("Speaking random %s text: %s", which.c_str(), speech.c_str());
+		_MESSAGE("Speaking random %s text: %s", which.c_str());
 
 		if (which.compare("P") == 0 || which.compare("p") == 0) {
 			startPlayerSpeech(speech.c_str());
@@ -1232,8 +1235,8 @@ namespace FuzRoBorkNamespace {
 	bool RegisterFuncs(VMClassRegistry* registry)
 	{
 		// register the function with the game
-		// note you need to have the actual function name for the 3rd argument, but I am calling it
-		// "MyPlugin_DoMathFun" for the name it will be used as in papyrus scripts to avoid conflicts
+		// note you need to have the actual function name for the 3rd argument, but use  
+		// "MyNameSpace_MyFunction" for the name it will be used as in papyrus scripts to avoid conflicts
 		// since you can't use the namespace in your scripts like we can in the plugin
 		registry->RegisterFunction(new NativeFunction1 <StaticFunctionTag, void, BSFixedString>("FuzRoBork_testSpeech", "BorkMCM", testSpeech, registry));
 		registry->RegisterFunction(new NativeFunction1 <StaticFunctionTag, void, UInt32>("FuzRoBork_hotSpeech", "BorkMCM", hotSpeech, registry));
