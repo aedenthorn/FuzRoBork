@@ -118,8 +118,11 @@ bool ShouldForceSubs(NPCChatterData* ChatterData, UInt32 ForceRegardless, const 
 		_MESSAGE("No voice file, forcing subs");
 		Result = true;
 	}
-	else if (ForceRegardless || (ChatterData && ChatterData->forceSubtitles))
+	else if (ForceRegardless || (ChatterData && ChatterData->forceSubtitles)) {
+		_MESSAGE("Forcing subs regardless");
+
 		Result = true;
+	}
 	else
 	{
 		TESTopicInfo* CurrentTopicInfo = nullptr;
@@ -139,8 +142,11 @@ bool ShouldForceSubs(NPCChatterData* ChatterData, UInt32 ForceRegardless, const 
 
 		if (CurrentTopicInfo)
 		{
-			if ((CurrentTopicInfo->dialogFlags >> 9) & 1)		// force subs flag's set
+			if ((CurrentTopicInfo->dialogFlags >> 9) & 1) {// force subs flag's set
+				_MESSAGE("Forcing subs because dialogue says to");
+
 				Result = true;
+			}
 		}
 	}
 
@@ -160,16 +166,21 @@ bool ShouldForceSubs2(NPCChatterData* ChatterData, UInt32 ForceRegardless, const
 bool ShouldForceSubs3(NPCChatterData* ChatterData, UInt32 ForceRegardless, const char* Subtitle)
 {
 	_MESSAGE("ShouldForceSubs3");
+	if (Subtitle && SubtitleHasher::Instance.HasMatch(Subtitle))		// force if the subtitle is for a voiceless response
+	{
+		if (ChatterData->speaker != (*g_invalidRefHandle) && ChatterData->speaker != 0) {
+			NiPointer<TESObjectREFR> refr;
+			LookupREFRByHandle(ChatterData->speaker, refr);
+			_MESSAGE("Found a match for %s - playing TTS", Subtitle);
+			FuzRoBorkNamespace::startNPCSpeech(Subtitle, refr);
+		}
+
+	}
 	return ShouldForceSubs(ChatterData, ForceRegardless, Subtitle);
 }
 bool ShouldForceSubs4(NPCChatterData* ChatterData, UInt32 ForceRegardless, const char* Subtitle)
 {
 	_MESSAGE("ShouldForceSubs4");
-	if (Subtitle && SubtitleHasher::Instance.HasMatch(Subtitle))		// force if the subtitle is for a voiceless response
-	{
-		_MESSAGE("Found a match for %s - playing TTS", Subtitle);
-		FuzRoBorkNamespace::startNPCSpeech(Subtitle);
-	}
 	return ShouldForceSubs(ChatterData, ForceRegardless, Subtitle);
 }
 

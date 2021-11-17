@@ -759,7 +759,7 @@ namespace FuzRoBorkNamespace {
 		startNarratorSpeech(text);
 	}
 
-	void startNPCSpeech(const char * text) {
+	void startNPCSpeech(const char * text, TESObjectREFR * refr) {
 
 		if (kPlayNPCDialogue.GetData().i == 0) {
 			_MESSAGE("No dialogue");
@@ -768,8 +768,6 @@ namespace FuzRoBorkNamespace {
 
 		_MESSAGE("NPC Speaking '%s'", text);
 
-
-		TESObjectREFR* refr = MenuTopicManager::GetSingleton()->GetDialogueTarget();
 
 		// standard values
 

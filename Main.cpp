@@ -61,7 +61,8 @@ extern "C"
 		if (a[1].GetType() == GFxValue::kType_String) // call type
 			type = a[1].GetString();
 
-		_MESSAGE(("SKSEScaleform_BorkFunction received " + type).c_str());
+		if (type != "CHECK_DONE")
+			_MESSAGE(("SKSEScaleform_BorkFunction received " + type).c_str());
 
 		if (type == "DIALOGUE_CLICK") {
 			FuzRoBorkNamespace::stopSpeaking();

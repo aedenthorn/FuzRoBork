@@ -322,7 +322,7 @@ namespace FuzRoBorkNamespace {
 	void startStoredPagesSpeech(StaticFunctionTag* base);
 	void startStoredBookSpeech(StaticFunctionTag* base);
 	void startBookSpeech(string text);
-	void startNPCSpeech(const char * text);
+	void startNPCSpeech(const char * text, TESObjectREFR * refr);
 	void startPlayerSpeech(const char* _title);
 	void startNarratorSpeech(string text);
 	void speakLoadingScreen(string text);

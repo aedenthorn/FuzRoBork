@@ -29,18 +29,6 @@
                 <type name="Recommended"/>
               </typeDescriptor>
             </plugin>
-			<plugin name="Install custom loadingscreen.swf">
-              <description>
-                Keep this checked if you want to have the mod read loading screen text out loud. Only uncheck if you use a custom loadingscreen.swf, or don't want the mod to read loading screen text.
-              </description>
-			  <image path="fomod\images\bork.png"/>
-              <files>
-                <file source="Interface\loadingmenu.swf" destination="Interface\loadingmenu.swf"/>
-              </files>
-              <typeDescriptor>
-                <type name="Optional"/>
-              </typeDescriptor>
-            </plugin>
 		</plugins>
 	  </group>
 	 </optionalFileGroups>
