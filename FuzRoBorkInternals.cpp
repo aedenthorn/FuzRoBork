@@ -1148,6 +1148,8 @@ namespace FuzRoBorkNamespace {
 	}
 
 	void stopSpeaking() {
+		PlaySound(NULL, NULL, SND_SYNC);
+		playingXVAS = false;
 		if (pVoice == NULL)
 			return;
 		pVoice->Speak(NULL, SPF_PURGEBEFORESPEAK | SPF_ASYNC, 0);
