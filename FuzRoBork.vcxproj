@@ -117,48 +117,12 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\skse64\skse64\GameAPI.cpp" />
-    <ClCompile Include="..\skse64\skse64\GameBSExtraData.cpp" />
-    <ClCompile Include="..\skse64\skse64\GameData.cpp" />
-    <ClCompile Include="..\skse64\skse64\GameExtraData.cpp" />
-    <ClCompile Include="..\skse64\skse64\GameFormComponents.cpp" />
-    <ClCompile Include="..\skse64\skse64\GameForms.cpp" />
-    <ClCompile Include="..\skse64\skse64\GameObjects.cpp" />
-    <ClCompile Include="..\skse64\skse64\GameReferences.cpp" />
-    <ClCompile Include="..\skse64\skse64\GameRTTI.cpp" />
-    <ClCompile Include="..\skse64\skse64\GameSettings.cpp" />
-    <ClCompile Include="..\skse64\skse64\GameStreams.cpp" />
-    <ClCompile Include="..\skse64\skse64\GameTypes.cpp" />
-    <ClCompile Include="..\skse64\skse64\GameUtilities.cpp" />
-    <ClCompile Include="..\skse64\skse64\HashUtil.cpp" />
-    <ClCompile Include="..\skse64\skse64\NiObjects.cpp" />
-    <ClCompile Include="..\skse64\skse64\NiTypes.cpp" />
     <ClCompile Include="FuzRoBorkInternals.cpp" />
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\skse64\skse64\GameAPI.h" />
-    <ClInclude Include="..\skse64\skse64\GameBSExtraData.h" />
-    <ClInclude Include="..\skse64\skse64\GameData.h" />
-    <ClInclude Include="..\skse64\skse64\GameExtraData.h" />
-    <ClInclude Include="..\skse64\skse64\GameFormComponents.h" />
-    <ClInclude Include="..\skse64\skse64\GameForms.h" />
-    <ClInclude Include="..\skse64\skse64\GameObjects.h" />
-    <ClInclude Include="..\skse64\skse64\GameReferences.h" />
-    <ClInclude Include="..\skse64\skse64\GameRTTI.h" />
-    <ClInclude Include="..\skse64\skse64\GameSettings.h" />
-    <ClInclude Include="..\skse64\skse64\GameStreams.h" />
-    <ClInclude Include="..\skse64\skse64\GameTypes.h" />
-    <ClInclude Include="..\skse64\skse64\GameUtilities.h" />
-    <ClInclude Include="..\skse64\skse64\HashUtil.h" />
-    <ClInclude Include="..\skse64\skse64\NiObjects.h" />
-    <ClInclude Include="..\skse64\skse64\NiTypes.h" />
-    <ClInclude Include="..\skse64\xbyak\xbyak.h" />
-    <ClInclude Include="..\skse64\xbyak\xbyak_bin2hex.h" />
-    <ClInclude Include="..\skse64\xbyak\xbyak_mnemonic.h" />
-    <ClInclude Include="..\skse64\xbyak\xbyak_util.h" />
     <ClInclude Include="BuildInfo.h" />
     <ClInclude Include="FuzRoBorkInternals.h" />
     <ClInclude Include="Hooks.h" />

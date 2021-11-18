@@ -34,7 +34,8 @@ extern "C"
 				_MESSAGE("Scheduled cleanup thread");
 				_MESSAGE("%s Initialized!", MakeSillyName().c_str());
 				FuzRoBorkNamespace::LoadXML();
-			}
+				FuzRoBorkNamespace::ImportTranslationFiles();
+		}
 			break;
 		}
 	}
@@ -87,7 +88,7 @@ extern "C"
 			FuzRoBorkNamespace::speakLoadingScreen(speech);
 		}
 		else if (type == "CHECK_DONE") { // check whether speech is finished
-			bool isDone = !FuzRoBorkNamespace::isSpeaking();
+			bool isDone = !FuzRoBorkNamespace::isSpeaking() && !FuzRoBorkNamespace::isXVASpeaking();
 			args->result->type = GFxValue::kType_String;
 			args->result->data.string = isDone ? "YES" : "NO";
 		}
@@ -133,6 +134,7 @@ extern "C"
 			_MESSAGE("Messaging interface too old (%d expected %d)", interfaces::kMsgInterface->interfaceVersion, 2);
 			return false;
 		}
+
 
 		g_scaleform = static_cast<SKSEScaleformInterface*>(skse->QueryInterface(kInterface_Scaleform));
 		if (!g_scaleform)

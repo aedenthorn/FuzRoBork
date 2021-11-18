@@ -145,6 +145,10 @@
 			<replace>White Run</replace>
 		</fix>
 		<fix>
+			<find>Candlehearth</find>
+			<replace>Candle hearth</replace>
+		</fix>
+		<fix>
 			<find>Jarl</find>
 			<replace>Yarl</replace>
 		</fix>

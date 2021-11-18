@@ -1,7 +1,5 @@
 #pragma once
-
-#include "skse64/PluginAPI.h"
-#include "skse64/skse64_common/skse_version.h"
+#pragma comment( lib, "Winmm.lib" )
 
 #include "tinyxml2.h"
 #include "json/single_include/nlohmann/json.hpp"
@@ -17,18 +15,26 @@
 #include <iostream>
 #include <string>
 #include <filesystem>
+#include <IFileStream.h>
+#include <shlobj.h>
+#include <filesystem>
+#include <cstdio>
 
-#include "skse64/GameAPI.h"
+#include "skse64/PluginAPI.h"
+#include "skse64/skse64_common/skse_version.h"
 #include "skse64/GameData.h"
 #include <skse64/GameForms.h>
 #include "skse64/GameInput.h"
 #include "skse64/GameObjects.h"
 #include <skse64/GameRTTI.h>
 #include <skse64/GameSettings.h>
+#include <skse64/GameStreams.h>
+#include <skse64/GameUtilities.h>
 #include "skse64/PapyrusArgs.h"
 #include "skse64/PapyrusNativeFunctions.h"
 #include <skse64/PluginAPI.h>
 #include <skse64/ScaleformMovie.h>
+#include <skse64/ScaleformState.h>
 
 #include "skse64_common/Utilities.h"
 
@@ -82,6 +88,9 @@ extern SME::INI::INISetting				kPlayerVoicePitch;
 extern SME::INI::INISetting				kFemaleVoicePitch;
 extern SME::INI::INISetting				kMaleVoicePitch;
 extern SME::INI::INISetting				kNarratorVoicePitch;
+
+extern SME::INI::INISetting				kxVASynthGame;
+extern SME::INI::INISetting				kxVASynthVoice;
 
 
 #define MAKE_RVA(addr)		addr - 0x140000000i64
@@ -310,6 +319,8 @@ namespace FuzRoBorkNamespace {
 	};
 
 	string findReplace(string str, const string oldStr, const string newStr);
+	void ImportTranslationFiles();
+	void ParseTranslation(string name);
 	void ReloadXML();
 	void LoadXML();
 	bool RegisterFuncs(VMClassRegistry* registry);
@@ -328,6 +339,7 @@ namespace FuzRoBorkNamespace {
 	void speakLoadingScreen(string text);
 
 	boolean isSpeaking();
+	boolean isXVASpeaking();
 	void stopSpeaking(void);
 
 

@@ -1,5 +1,7 @@
 Scriptname BorkMCM extends SKI_ConfigBase  
 
+Import StringUtil
+
 bool skipVal = true
 bool playPlayerVal = true
 bool playNPCVal = true
@@ -16,6 +18,8 @@ int fLangVal = 0
 int mLangVal = 0
 int nLangVal = 0
 
+int xGameVal = 0
+string xGameName = ""
 int xVoiceVal = 0
 
 int nSexVal = 0
@@ -51,6 +55,7 @@ float mPitchVal = 0.0
 float nPitchVal = 0.0
 
 string[] LangList
+string[] GameList
 string[] VoiceList
 string[] LCIDList
 string[] SexList
@@ -71,13 +76,25 @@ Function FuzRoBork_storedBookSpeech() global native
 Function FuzRoBork_testSpeech(string which) global native
 Function FuzRoBork_hotSpeech(int which) global native
 Function FuzRoBork_stopSpeech() global native
-Function FuzRoBork_getLanguages(string[] langs, string[] voices) global native
+Function FuzRoBork_getLanguages(string[] langs) global native
+Function FuzRoBork_getXGames(string[] voices) global native
+Function FuzRoBork_getXVoices(string game, string[] voices) global native
 Function FuzRoBork_reloadXML() global native
 
 event OnGameReload()
     parent.OnGameReload() ; Don't forget to call the parent!
     doSendVals()
-
+	GameList = new string[100]
+	VoiceList = new string[100]
+	FuzRoBork_getXGames(GameList)
+	if GameList[xGameVal]
+		xGameName = GameList[xGameVal]
+		FuzRoBork_getXVoices(xGameName, VoiceList)
+		if VoiceList[xVoiceVal]
+			doSendVals()
+			FuzRoBork_testSpeech("xx")
+		endIf
+	endIf
     If(enableKeysVal)
 		RegisterForKey(entrySpeakKeyVal)
 		RegisterForKey(bookReadKeyVal)
@@ -104,7 +121,6 @@ Event OnConfigInit()
     SexList  = new string[2]
     SexList[0] = "Male"
     SexList[1] = "Female"
-
 EndEvent
 
 Event OnConfigClose()
@@ -116,8 +132,18 @@ event OnPageReset(string page)
     if(page == "")
         LoadCustomContent("FuzRoBork/bork_logo.dds", 0,0)
         LangList = new string[100]
+        GameList = new string[100]
         VoiceList = new string[100]
-        FuzRoBork_getLanguages(LangList, VoiceList)
+        FuzRoBork_getLanguages(LangList)
+        FuzRoBork_getXGames(GameList)
+		if GameList[xGameVal]
+			xGameName = GameList[xGameVal]
+			FuzRoBork_getXVoices(xGameName, VoiceList)
+			if VoiceList[xVoiceVal]
+				doSendVals()
+				FuzRoBork_testSpeech("xx")
+			endIf
+		endIf
         return
     else
         UnloadCustomContent()
@@ -171,8 +197,20 @@ event OnPageReset(string page)
         SetCursorPosition(0) ; Move cursor to top right position
 
         AddHeaderOption("xVASynth Options")
-        AddMenuOptionST("xVoiceST","", VoiceList[xVoiceVal])
-        AddTextOptionST("xVoiceTST","", "[Test]")
+
+		if(GameList.length > 0)
+			if(xGameVal > GameList.length - 1)
+				xGameVal = 0
+			endIf
+			xGameName = GameList[xGameVal]
+			AddMenuOptionST("xGameST","", xGameName)
+			FuzRoBork_getXVoices(xGameName, VoiceList)
+			if(xVoiceVal >	VoiceList.length - 1)
+				xVoiceVal = 0
+			endIf
+			AddMenuOptionST("xVoiceST","", VoiceList[xVoiceVal])
+			AddTextOptionST("xVoiceTST","", "[Test]")
+		endIf
 		
 	elseIf(page == "Voice Selection")    
 
@@ -185,7 +223,7 @@ event OnPageReset(string page)
         AddSliderOptionST("pRateST","Speech Rate", pRateVal, "{1}x")
         AddSliderOptionST("pVolST","Volume", pVolVal, "{0}%")
         AddSliderOptionST("pPitchST","Pitch", pPitchVal)
-        AddTextOptionST("pLangTST","Voice", "[Test]")
+        AddTextOptionST("pLangTST","", "[Test]")
 
         AddHeaderOption("Female NPCs")
 
@@ -411,6 +449,36 @@ state enableKeysST; TOGGLE
     endEvent
 endState
 
+
+state xGameST; Menu
+    event OnMenuOpenST()
+        If(xGameVal < 0)
+            xGameVal = 0
+        EndIf
+        SetMenuDialogStartIndex(xGameVal)
+        SetMenuDialogDefaultIndex(0)
+        SetMenuDialogOptions(GameList)
+    endEvent
+
+    event OnMenuAcceptST(int a_index)
+        If(a_index < 0)
+            a_index = 0
+        EndIf
+        xGameVal = a_index
+		xGameName = GameList[xGameVal]
+        SetMenuOptionValueST(xGameName)
+    endEvent
+
+    event OnDefaultST()
+        xGameVal = 0
+		xGameName = GameList[xGameVal]
+        SetMenuOptionValueST(xGameName)
+    endEvent
+
+    event OnHighlightST()
+        SetInfoText("Game for xVASynth: " + xGameName)
+    endEvent
+endState
 
 state xVoiceST; Menu
     event OnMenuOpenST()
@@ -1311,10 +1379,21 @@ Function doSendVals()
 		xVoiceVal = 0
     EndIf
 
+	if pLangVal > LangList.length - 1
+		pLangVal = 0
+	endIf
+	if fLangVal > LangList.length - 1
+		fLangVal = 0
+	endIf
+	if nLangVal > LangList.length - 1
+		nLangVal = 0
+	endIf
+
     strings += LangList[pLangVal]
     strings += "^"+LangList[fLangVal]
     strings += "^"+LangList[mLangVal]
     strings += "^"+LangList[nLangVal]
+    strings += "^"+xGameName
     strings += "^"+xVoiceVal
     
     string booleans = ""
