@@ -15,6 +15,7 @@ class DialogueMenu extends MovieClip
 	static var TOPIC_CLICKED: Number = 2;
 	static var TRANSITIONING: Number = 3;
 	
+	
 	var ExitButton: CrossPlatformButtons;
 	var SpeakerName: TextField;
 	var SubtitleText: TextField;
@@ -30,7 +31,6 @@ class DialogueMenu extends MovieClip
     var checkStart = false;
     var xx = 0;
 	var timer: Number;
-
 
 	function DialogueMenu()
 	{
@@ -73,12 +73,14 @@ class DialogueMenu extends MovieClip
 		TopicListHolder.PanelCopy_mc._visible = false;
 		
 		FocusHandler.instance.setFocus(TopicList, 0);
-		
+
 		SubtitleText.verticalAutoSize = "top";
 		SubtitleText.SetText(" ");
 		
 		SpeakerName.verticalAutoSize = "top";
 		SpeakerName.SetText(" ");
+		
+//		GlobalFunc.getInstance().Deebug("DialogueMenu::InitExtensions() done.");
 	}
 
 	function AdjustForPALSD(): Void
@@ -99,6 +101,7 @@ class DialogueMenu extends MovieClip
 
 	function handleInput(details: InputDetails, pathToFocus: Array): Boolean
 	{
+//GlobalFunc.getInstance().Deebug("handleInput() DialogueMenu");
 		if (bFadedIn && GlobalFunc.IsKeyPressed(details)) {
 			if (details.navEquivalent == NavigationCode.TAB) {
 				onCancelPress();
@@ -185,11 +188,17 @@ class DialogueMenu extends MovieClip
 		TopicListHolder.PanelCopy_mc._visible = abCopyVisible;
 	}
 
+	/**
+	 * onPress() from MovieClip has event.keyboardOrMouse == 0.
+	 *
+	 * If mouse or keyboard (handleInput), keyboardOrMouse is undefined.
+	 *
+	 */
 	function onItemSelect(event: Object): Void
 	{
 		if (bAllowProgress && event.keyboardOrMouse != 0) {
 			if (eMenuState == DialogueMenu.TOPIC_LIST_SHOWN) {
-				onSelectionClick();
+				onSelectionClick(event && event.mouseClick);
 			} else if (eMenuState == DialogueMenu.TOPIC_CLICKED || eMenuState == DialogueMenu.SHOW_GREETING) {
 				SkipText();
 			}
@@ -205,11 +214,16 @@ class DialogueMenu extends MovieClip
 		}
 	}
 
+	/**
+	 * Responds to clicks at the DialogueMenu MovieClip level (whole screen).
+	 * 
+	 * Does not result in selection because aiKeyboardOrMouse is undefined.
+	 */
 	function onMouseDown(): Void
 	{
 		++DialogueMenu.iMouseDownExecutionCount;
 		if (DialogueMenu.iMouseDownExecutionCount % 2 != 0) {
-			onItemSelect();
+			onItemSelect({mouseClick: true});
 		}
 	}
 
@@ -246,8 +260,14 @@ class DialogueMenu extends MovieClip
 		}
 	}
 
-	function onSelectionClick(): Void
+	function onSelectionClick(abMouseClick: Boolean): Void
 	{
+		// If it's a mouse click, set the selected index now
+		if (abMouseClick) {
+			TopicList.SetSelectedIndexByMouse(false);
+//			GlobalFunc.getInstance().Deebug("now selectedIndex = " + TopicList.selectedIndex);
+		}
+
 		if (eMenuState == DialogueMenu.TOPIC_LIST_SHOWN) {
 			eMenuState = DialogueMenu.TOPIC_CLICKED;
 		}
@@ -260,9 +280,9 @@ class DialogueMenu extends MovieClip
 		TopicListHolder.TextCopy_mc.textField.SetText(TopicListHolder.List_mc.selectedEntry.text);
 		var textFieldyOffset: Number = TopicListHolder.TextCopy_mc._y - TopicListHolder.List_mc._y - TopicListHolder.List_mc.Entry4._y;
 		TopicListHolder.TextCopy_mc.textField._y = 6.25 - textFieldyOffset;
-//		GameDelegate.call("TopicClicked", [TopicList.selectedEntry.topicIndex]);
-
-	// Fuz Ro Bork
+		//GameDelegate.call("TopicClicked", [TopicList.selectedEntry.topicIndex]);
+		
+		// Fuz Ro Bork
 
 		this.TTS_doBorkFunction(this.TopicListHolder.List_mc.selectedEntry.text,"DIALOGUE");
 		this.checkStart = false;
@@ -274,7 +294,7 @@ class DialogueMenu extends MovieClip
 	{
 		GameDelegate.call("FadeDone", []);
 	}
-
+	
 	// Fuz Ro Bork
 
 	function TTS_checkForSpeechDone()

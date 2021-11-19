@@ -330,12 +330,13 @@ namespace FuzRoBorkNamespace {
 	}
 
 	map< int, string > hotkeyTexts;
+	vector< string > randomTexts;
 	map<string, vector<string>> actionList;
 	map< string, string > fixes;
 	map< string, string > transMap;
 	map<string, json > gameVoices;
 
-	string SSEFolder = "";
+	string XVAFolder = "";
 
 	int checkWavCount = 0;
 	const char* lastTopic = "";
@@ -351,48 +352,47 @@ namespace FuzRoBorkNamespace {
 			while (true)
 			{
 				auto x = std::chrono::steady_clock::now() + std::chrono::milliseconds(interval);
-				if (func() || checkWavCount > 50)
+				if (func() || checkWavCount > 50) {
+					_MESSAGE("finished playing xVASynth wav %d", checkWavCount);
+					playingXVAS = false;
 					return;
+				}
 				std::this_thread::sleep_until(x);
 
 			}
 		}).detach();
 	}
 
-	string GetSSEFolder() {
-		if (SSEFolder == "") {
-			CHAR my_documents[MAX_PATH];
-			HRESULT result = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, my_documents);
+	string GetXVAFolder() {
+		if (XVAFolder == "") {
+			wchar_t* folder = NULL;
+			::SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_CREATE, NULL, &folder);
 
-			string path;
-			if (result != S_OK) {
-				return "";
-			}
-			else
-				path = my_documents;
-			SSEFolder = path + "\\My Games\\Skyrim Special Edition\\SKSE\\";
+			char str[128];
+			wcstombs(str, folder, 128);
+			::CoTaskMemFree(folder);
+			
+			XVAFolder = string(str) + "/xVASynth/realTimeTTS/";
+			_MESSAGE("Folder set to %s", XVAFolder.c_str());
 		}
-		return SSEFolder;
+		return XVAFolder;
 	}
 
 	bool CheckForWav() {
-		string path = GetSSEFolder();
+		string path = GetXVAFolder();
 
 		if (path == "") {
 			return false;
 		}
 
-		path += "xVASynthCurrent.wav";
-		playingXVAS = true;
+		path += "output.wav";
 		if(PlaySound(path.c_str(), NULL, SND_FILENAME | SND_NODEFAULT)) {
-			_MESSAGE("finished playing xVASynth wav");
 			playingXVAS = false;
 			remove(path.c_str());
 			return true;
 		}
-		playingXVAS = false;
-		return false;
 		checkWavCount++;
+		return false;
 	}
 
 	void ImportTranslationFiles()
@@ -525,17 +525,19 @@ namespace FuzRoBorkNamespace {
 
 	void LoadXML()
 	{
+		randomTexts = { "I <emph>used</emph> to be an adventurer like you. Then I took an <emph>arrow</emph> in the knee.","What is better - to be <emph>born</emph> good, or to <emph>overcome</emph> your evil nature through <emph>great</emph> effort?","Let me <emph>guess</emph>, Someone stole your <emph>sweetroll</emph>!","My cousin is out <emph> fighting dragons.</emph> And what do <emph>I</emph> get? <emph>Guard</emph> duty.","Oh, there <emph>once</emph> was a hero named <emph>Ragnar</emph> the Red, who came <emph>riding</emph> to Whiterun from old <emph>Rorikstead</emph>. ","And the <emph>braggart</emph> did swagger and <emph>brandish</emph> his blade as he <emph>told</emph> of bold battles and <emph>gold</emph> he had made. ","But <emph>then</emph> he went quiet, did <emph>Ragnar</emph> the Red when he <emph>met</emph> the shield-maiden <emph>Matilda</emph>, who said; ","Oh, you <emph>talk</emph> and you <emph>lie</emph> and you <emph>drink</emph> all our mead; now I <emph>think</emph> it's high time that you <emph>lie</emph> down and <emph>bleed</emph>!. ","And so <emph>then</emph> came <emph>clashing</emph> and <emph>slashing</emph> of steel, as the <emph>brave</emph> lass Matilda <emph>charged</emph> in, full of zeal. ","And the <emph>braggart</emph> named <emph>Ragnar</emph> was boastful no more... when his <emph>ugly</emph> red <emph>head</emph> rolled <emph>around</emph> on the <emph>floor</emph>!","There are <emph>formalities</emph> that must be observed, at the first meeting of two of the <emph>dov</emph>. ","My <emph>favorite</emph> drinking buddy! Let's get some <emph>mead</emph>.","Perhaps we should find a random stranger to murder. Practice <emph>does</emph> make perfect.","You stink of <emph>death</emph> my friend. I <emph>salute</emph> you.","You <emph>never</emph> should have <emph>come</emph> here.","Babette, my girl - <emph>pack</emph> your things. We're <emph>moving</emph>!","<emph>Enough</emph>! I will <emph>not</emph> stand idly by while a <emph>dragon</emph> burns my hold and <emph>slaughters</emph> my <emph>people</emph>!","I'm told they call me <emph>Dirge</emph> because I'm the <emph>last</emph> thing you hear before they put you in the ground.","Been so long since I killed a Stormcloak, my sword arm's getting <emph>flabby</emph>.","If these ruins frighten you, take comfort from the knowledge that <emph>I</emph> am here.","Look at <emph>that</emph>. Am I <emph>drunk</emph>? I must be <emph>drunk</emph>.","I used to be the <emph>top</emph> soldier for the Stormcloaks, then i took a <emph>sword</emph> to the chest","And who are <emph>you</emph> to challenge <emph>me</emph>? I've conquered <emph>mortality</emph> itself. ","I've <emph>spat</emph> in the eyes of the <emph>Daedric Lords</emph>! ","This is <emph>my</emph> realm now, I've <emph>sacrificed</emph> too much to let you <emph>take</emph> it from me!","I'll see you <emph>burn</emph>!","You do not even know our <emph>tongue</emph>, do you? ","Such <emph>arrogance</emph>, to <emph>dare</emph> take for yourself the name of <emph>Dovah</emph>!","Well well... Another <emph>maggot</emph> to <emph>squash</emph> beneath my boot!","Either <emph>I'm</emph> drunk, or <emph>you're</emph> naked. Possibly both.","I'll see you in pieces!","I've been hunting and fishing in these parts for <emph>years</emph>.","I've got my <emph>eyes</emph> on you.","We're one of the <emph>same</emph> kind, you and I. I'm <emph>happy</emph> to have met you.","Looking to <emph>protect</emph> yourself? Or <emph>deal</emph> some damage?","I got to <emph>thinking</emph>, maybe <emph>I'm</emph> the Dragonborn and I <emph>just</emph> don't <emph>know</emph> it yet.","It's a <emph>fine</emph> day with <emph>you</emph> around!","My father said I should go to <emph>college</emph>, but he didnt say <emph>which</emph> one.","I'd be a lot <emph>happier</emph> and a lot <emph>warmer</emph> with a <emph>belly</emph> full of <emph>mead</emph>.","I heard about <emph>you</emph> and your <emph>honeyed</emph> words.","I guess you don't have potatoes in your ears <emph>after</emph> all." };
+
 		tinyxml2::XMLDocument doc;
 
 		if (doc.LoadFile("Data\\skse\\plugins\\FuzRoBork.xml") != tinyxml2::XMLError::XML_SUCCESS) {
-			OutputDebugString("XML file not found; exiting\n");
+			_MESSAGE("XML file not found; exiting");
 			return;
 		}
 
 		XMLElement* root = doc.FirstChildElement("config");
 
 		if (!root) {
-			OutputDebugString("root tag not found in XML; exiting\n");
+			_MESSAGE("root tag not found in XML; exiting");
 			return;
 		}
 
@@ -558,6 +560,24 @@ namespace FuzRoBorkNamespace {
 				idx++;
 			}
 			_MESSAGE("Loaded hotkeys");
+		}
+
+		
+		// random text
+
+		XMLElement* xRandoms = root->FirstChildElement("random");
+
+		if (xKeys) {
+			randomTexts.clear();
+			XMLElement* xRand = xRandoms->FirstChildElement("text");
+			while (xRand) {
+				string text = string(xRand->GetText());
+				text = findReplace(text, "[", "<");
+				text = findReplace(text, "]", ">");
+				randomTexts.push_back(text);
+				xRand = xRand->NextSiblingElement("text");
+			}
+			_MESSAGE("Loaded random texts");
 		}
 
 
@@ -588,8 +608,6 @@ namespace FuzRoBorkNamespace {
 		}
 
 		// actions
-
-		OutputDebugString("Rebuilding action list from xml\n");
 
 		XMLElement* pcs = root->FirstChildElement("pcs");
 
@@ -751,6 +769,7 @@ namespace FuzRoBorkNamespace {
 	{
 
 		//_MESSAGE("speakTask: '%s'", nSpeech.speech);
+		replaceUnspeakables(nSpeech.speech);
 
 		if (nSpeech.lang == "xVASynth") {
 			_MESSAGE("Sending text to xVASynth");
@@ -816,7 +835,6 @@ namespace FuzRoBorkNamespace {
 		}
 		if (SUCCEEDED(hr))
 		{
-			replaceUnspeakables(nSpeech.speech);
 
 			if (nSpeech.speech.length() < 1) {
 				//_MESSAGE("No speech string");
@@ -932,10 +950,12 @@ namespace FuzRoBorkNamespace {
 
 		if (gameVoices.count(game) == 0) {
 			_MESSAGE("Game %s not found", game.c_str());
+			sendingXVAS = false;
 			return;
 		}
 		if (gameVoices[game].size() == 0) {
 			_MESSAGE("Game %s has no voices", game.c_str());
+			sendingXVAS = false;
 			return;
 		}
 
@@ -943,6 +963,15 @@ namespace FuzRoBorkNamespace {
 
 		if (idx >= gameVoices[game].size())
 			idx = 0;
+
+		_MESSAGE("Voice id is %d", idx);
+
+		if (idx >= gameVoices[game].size()) {
+			_MESSAGE("Index %d out of bounds for game %s", idx, game.c_str());
+			return;
+		}
+
+		_MESSAGE("Voice name is %s", string(gameVoices[game][idx]["id"]).c_str());
 
 		regex tags("<[^>]*>");
 		string s = obj.speech;
@@ -952,25 +981,30 @@ namespace FuzRoBorkNamespace {
 		j["gameId"] = game;
 		j["pitch"] = obj.pitch;
 		j["rate"] = obj.rate;
-		j["vol"] = obj.vol;
+		j["vol"] = obj.vol / 100;
 		j["text"] = s;
 		j["done"] = false;
 
-		string path = GetSSEFolder();
+		string path = GetXVAFolder();
 
 		if (path == "") {
+			_MESSAGE("xVAFolder not set");
 			return;
 		}
 
 		path += "xVASynthText.json";
 
+		_MESSAGE("Writing to %s", path.c_str());
+
 		ofstream o(path);
 		o << setw(4) << j << endl;
 
+		_MESSAGE("Wrote speech to file for xVASynth");
+
 		sendingXVAS = false;
-		playingXVAS = false;
 		checkWavCount = 0;
 		if (s.size() > 0) {
+			playingXVAS = true;
 			_MESSAGE("Waiting for wav file creation");
 
 			wav_find_timer_start(CheckForWav, 100);
@@ -1078,9 +1112,10 @@ namespace FuzRoBorkNamespace {
 		t3.detach();
 	}
 
-	string randSpeech[] = { "I <emph>used</emph> to be an adventurer like you. Then I took an <emph>arrow</emph> in the knee.","What is better - to be <emph>born</emph> good, or to <emph>overcome</emph> your evil nature through <emph>great</emph> effort?","Let me <emph>guess</emph>, Someone stole your <emph>sweetroll</emph>!","My cousin is out <emph> fighting dragons.</emph> And what do <emph>I</emph> get? <emph>Guard</emph> duty.","Oh, there <emph>once</emph> was a hero named <emph>Ragnar</emph> the Red, who came <emph>riding</emph> to Whiterun from old <emph>Rorikstead</emph>. ","And the <emph>braggart</emph> did swagger and <emph>brandish</emph> his blade as he <emph>told</emph> of bold battles and <emph>gold</emph> he had made. ","But <emph>then</emph> he went quiet, did <emph>Ragnar</emph> the Red when he <emph>met</emph> the shield-maiden <emph>Matilda</emph>, who said; ","Oh, you <emph>talk</emph> and you <emph>lie</emph> and you <emph>drink</emph> all our mead; now I <emph>think</emph> it's high time that you <emph>lie</emph> down and <emph>bleed</emph>!. ","And so <emph>then</emph> came <emph>clashing</emph> and <emph>slashing</emph> of steel, as the <emph>brave</emph> lass Matilda <emph>charged</emph> in, full of zeal. ","And the <emph>braggart</emph> named <emph>Ragnar</emph> was boastful no more... when his <emph>ugly</emph> red <emph>head</emph> rolled <emph>around</emph> on the <emph>floor</emph>!","There are <emph>formalities</emph> that must be observed, at the first meeting of two of the <emph>dov</emph>. ","My <emph>favorite</emph> drinking buddy! Let's get some <emph>mead</emph>.","Perhaps we should find a random stranger to murder. Practice <emph>does</emph> make perfect.","You stink of <emph>death</emph> my friend. I <emph>salute</emph> you.","You <emph>never</emph> should have <emph>come</emph> here.","Babette, my girl - <emph>pack</emph> your things. We're <emph>moving</emph>!","<emph>Enough</emph>! I will <emph>not</emph> stand idly by while a <emph>dragon</emph> burns my hold and <emph>slaughters</emph> my <emph>people</emph>!","I'm told they call me <emph>Dirge</emph> because I'm the <emph>last</emph> thing you hear before they put you in the ground.","Been so long since I killed a Stormcloak, my sword arm's getting <emph>flabby</emph>.","If these ruins frighten you, take comfort from the knowledge that <emph>I</emph> am here.","Look at <emph>that</emph>. Am I <emph>drunk</emph>? I must be <emph>drunk</emph>.","I used to be the <emph>top</emph> soldier for the Stormcloaks, then i took a <emph>sword</emph> to the chest","And who are <emph>you</emph> to challenge <emph>me</emph>? I've conquered <emph>mortality</emph> itself. ","I've <emph>spat</emph> in the eyes of the <emph>Daedric Lords</emph>! ","This is <emph>my</emph> realm now, I've <emph>sacrificed</emph> too much to let you <emph>take</emph> it from me!","I'll see you <emph>burn</emph>!","You do not even know our <emph>tongue</emph>, do you? ","Such <emph>arrogance</emph>, to <emph>dare</emph> take for yourself the name of <emph>Dovah</emph>!","Well well... Another <emph>maggot</emph> to <emph>squash</emph> beneath my boot!","Either <emph>I'm</emph> drunk, or <emph>you're</emph> naked. Possibly both.","I'll see you in pieces!","I've been hunting and fishing in these parts for <emph>years</emph>.","I've got my <emph>eyes</emph> on you.","We’re one of the <emph>same</emph> kind, you and I. I’m <emph>happy</emph> to have met you.","Looking to <emph>protect</emph> yourself? Or <emph>deal</emph> some damage?","I got to <emph>thinking</emph>, maybe <emph>I’m</emph> the Dragonborn and I <emph>just</emph> don’t <emph>know</emph> it yet.","It's a <emph>fine</emph> day with <emph>you</emph> around!","My father said I should go to <emph>college</emph>, but he didnt say <emph>which</emph> one.","I'd be a lot <emph>happier</emph> and a lot <emph>warmer</emph> with a <emph>belly</emph> full of <emph>mead</emph>.","I heard about <emph>you</emph> and your <emph>honeyed</emph> words.","I guess you don't have potatoes in your ears <emph>after</emph> all." };
-
 	void testSpeech(StaticFunctionTag* base, BSFixedString _which) {
+
+		if (isSpeaking() || isXVASpeaking())
+			return;
 
 		string which(_which.data);
 
@@ -1094,9 +1129,9 @@ namespace FuzRoBorkNamespace {
 		}
 
 		//Console_Print("testing speech");
-
-		int r = static_cast<double>(rand()) / RAND_MAX * size(randSpeech);
-		string speech = randSpeech[r];
+		srand(time(0));
+		int r = static_cast<double>(rand() % size(randomTexts));
+		string speech = randomTexts[r];
 
 		_MESSAGE("Speaking random %s text: %s", which.c_str(), speech.c_str());
 
@@ -1148,6 +1183,7 @@ namespace FuzRoBorkNamespace {
 	}
 
 	void stopSpeaking() {
+		_MESSAGE("Stopping speech");
 		PlaySound(NULL, NULL, SND_SYNC);
 		playingXVAS = false;
 		if (pVoice == NULL)
@@ -1212,7 +1248,12 @@ namespace FuzRoBorkNamespace {
 		kMaleLanguage.SetDataAsString(stringV[2].c_str());
 		kNarratorLanguage.SetDataAsString(stringV[3].c_str());
 		kxVASynthGame.SetDataAsString(stringV[4].c_str());
-		kxVASynthVoice.SetUInt(stoi(stringV[5].c_str()));
+		try {
+			kxVASynthVoice.SetUInt(stringV[5].size() > 0 ? stoi(stringV[5].c_str()) : 0);
+		}
+		catch (invalid_argument ex) {
+			_MESSAGE("Error converting voice index to int");
+		}
 
 		if (boolV.size() == 9) {
 			OutputDebugString("Bools correct size\n");
@@ -1228,8 +1269,6 @@ namespace FuzRoBorkNamespace {
 		}
 
 		if (floatV.size() == 13) {
-			OutputDebugString("Floats correct size\n");
-
 			kMsPerWordSilence.SetFloat(stof(floatV[0]));
 
 			kPlayerVoiceVolume.SetFloat(stof(floatV[1]));
@@ -1246,6 +1285,7 @@ namespace FuzRoBorkNamespace {
 			kFemaleVoicePitch.SetInt(stoi(floatV[10]));
 			kMaleVoicePitch.SetInt(stoi(floatV[11]));
 			kNarratorVoicePitch.SetInt(stoi(floatV[12]));
+
 		}
 		_MESSAGE("Config settings completed");
 
@@ -1411,14 +1451,13 @@ namespace FuzRoBorkNamespace {
 
 		_MESSAGE("Sending games for xVASynth");
 
-		// xVASynth
-
 		CHAR my_documents[MAX_PATH];
 		HRESULT result = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, my_documents);
 
-		string path = GetSSEFolder();
+		string path = GetXVAFolder();
 
 		if (path == "") {
+			_MESSAGE("xVAFolder not set");
 			return;
 		}
 		path += "xVASynthVoices.json";
@@ -1454,6 +1493,9 @@ namespace FuzRoBorkNamespace {
 
 				}
 			}
+		}
+		else {
+			_MESSAGE("xVAFolder not found %s", XVAFolder.c_str());
 		}
 	}
 

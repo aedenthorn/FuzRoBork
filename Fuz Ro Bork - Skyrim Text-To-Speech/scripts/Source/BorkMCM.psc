@@ -125,6 +125,17 @@ EndEvent
 
 Event OnConfigClose()
     doSendVals()
+	GameList = new string[100]
+	VoiceList = new string[100]
+	FuzRoBork_getXGames(GameList)
+	if GameList[xGameVal]
+		xGameName = GameList[xGameVal]
+		FuzRoBork_getXVoices(xGameName, VoiceList)
+		if VoiceList[xVoiceVal]
+			doSendVals()
+			FuzRoBork_testSpeech("xx")
+		endIf
+	endIf
 EndEvent
 
 event OnPageReset(string page)
@@ -176,9 +187,9 @@ event OnPageReset(string page)
         EndIf
         
         AddHeaderOption("Keys")
-        AddKeyMapOptionST("bookReadKeyST", "Book Read Key", bookReadKeyVal,flag)
-        AddKeyMapOptionST("entrySpeakKeyST", "Dialog Speak Key", entrySpeakKeyVal,flag)
-        AddKeyMapOptionST("stopSpeakKeyST", "Stop Speaking Key", stopSpeakKeyVal,flag)
+        AddKeyMapOptionST("bookReadKeyST", "Book Read Key", bookReadKeyVal, flag)
+        AddKeyMapOptionST("entrySpeakKeyST", "Dialog Speak Key", entrySpeakKeyVal, flag)
+        AddKeyMapOptionST("stopSpeakKeyST", "Stop Speaking Key", stopSpeakKeyVal, flag)
     
         AddKeyMapOptionST("HotKey1ST", "HotKey 1", HotKey1Val,flag)
         AddKeyMapOptionST("HotKey2ST", "HotKey 2", HotKey2Val,flag)
@@ -204,6 +215,7 @@ event OnPageReset(string page)
 			endIf
 			xGameName = GameList[xGameVal]
 			AddMenuOptionST("xGameST","", xGameName)
+			VoiceList = new string[100]
 			FuzRoBork_getXVoices(xGameName, VoiceList)
 			if(xVoiceVal >	VoiceList.length - 1)
 				xVoiceVal = 0
@@ -382,6 +394,7 @@ state enableKeysST; TOGGLE
         enableKeysVal= !enableKeysVal
         SetToggleOptionValueST(enableKeysVal)
         If(enableKeysVal)
+            SetOptionFlagsST(OPTION_FLAG_NONE, false, "bookReadKeyST")
             SetOptionFlagsST(OPTION_FLAG_NONE, false, "entrySpeakKeyST")
             SetOptionFlagsST(OPTION_FLAG_NONE, false, "stopSpeakKeyST")
             SetOptionFlagsST(OPTION_FLAG_NONE, false, "HotKey1ST")
@@ -394,6 +407,9 @@ state enableKeysST; TOGGLE
             SetOptionFlagsST(OPTION_FLAG_NONE, false, "HotKey8ST")
             SetOptionFlagsST(OPTION_FLAG_NONE, false, "HotKey9ST")
 
+			RegisterForKey(entrySpeakKeyVal)
+			RegisterForKey(bookReadKeyVal)
+			RegisterForKey(stopSpeakKeyVal)
             RegisterForKey(HotKey1Val)
             RegisterForKey(HotKey2Val)
             RegisterForKey(HotKey3Val)
@@ -404,6 +420,7 @@ state enableKeysST; TOGGLE
             RegisterForKey(HotKey8Val)
             RegisterForKey(HotKey9Val)
         Else
+            SetOptionFlagsST(OPTION_FLAG_DISABLED, false, "bookReadKeyST")
             SetOptionFlagsST(OPTION_FLAG_DISABLED, false, "entrySpeakKeyST")
             SetOptionFlagsST(OPTION_FLAG_DISABLED, false, "stopSpeakKeyST")
             SetOptionFlagsST(OPTION_FLAG_DISABLED, false, "HotKey1ST")
@@ -416,6 +433,9 @@ state enableKeysST; TOGGLE
             SetOptionFlagsST(OPTION_FLAG_DISABLED, false, "HotKey8ST")
             SetOptionFlagsST(OPTION_FLAG_DISABLED, false, "HotKey9ST")
 
+			UnregisterForKey(entrySpeakKeyVal)
+			UnregisterForKey(bookReadKeyVal)
+			UnregisterForKey(stopSpeakKeyVal)
             UnregisterForKey(HotKey1Val)
             UnregisterForKey(HotKey2Val)
             UnregisterForKey(HotKey3Val)
@@ -465,14 +485,22 @@ state xGameST; Menu
             a_index = 0
         EndIf
         xGameVal = a_index
+		xVoiceVal = 0
 		xGameName = GameList[xGameVal]
         SetMenuOptionValueST(xGameName)
+		VoiceList = new string[100]
+		FuzRoBork_getXVoices(xGameName, VoiceList)
+		SetMenuOptionValueST(VoiceList[xVoiceVal], false, "xVoiceST")
     endEvent
 
     event OnDefaultST()
         xGameVal = 0
+		xVoiceVal = 0
 		xGameName = GameList[xGameVal]
         SetMenuOptionValueST(xGameName)
+		VoiceList = new string[100]
+		FuzRoBork_getXVoices(xGameName, VoiceList)
+		SetMenuOptionValueST(VoiceList[xVoiceVal], false, "xVoiceST")
     endEvent
 
     event OnHighlightST()
@@ -485,6 +513,11 @@ state xVoiceST; Menu
         If(xVoiceVal < 0)
             xVoiceVal = 0
         EndIf
+		if GameList[xGameVal]
+			xGameName = GameList[xGameVal]
+			VoiceList = new string[100]
+			FuzRoBork_getXVoices(xGameName, VoiceList)
+		endIf
         SetMenuDialogStartIndex(xVoiceVal)
         SetMenuDialogDefaultIndex(0)
         SetMenuDialogOptions(VoiceList)
@@ -1008,12 +1041,16 @@ state bookReadKeyST; KEYMAP
             continue = ShowMessage(msg, true, "$Yes", "$No")
         endIf
         if (continue)
-            bookReadKeyVal= newKeyCode    
+		    UnregisterForKey(bookReadKeyVal)
+            bookReadKeyVal = newKeyCode    
+            RegisterForKey(bookReadKeyVal)
             SetKeyMapOptionValueST(bookReadKeyVal)
         endIf
     endEvent
     event OnDefaultST()
+	    UnregisterForKey(bookReadKeyVal)
         bookReadKeyVal = 157
+        RegisterForKey(bookReadKeyVal)
         SetKeyMapOptionValueST(bookReadKeyVal)
     endEvent
     event OnHighlightST()
@@ -1035,12 +1072,16 @@ state entrySpeakKeyST; KEYMAP
             continue = ShowMessage(msg, true, "$Yes", "$No")
         endIf
         if (continue)
+            UnregisterForKey(entrySpeakKeyVal)
             entrySpeakKeyVal= newKeyCode    
+            RegisterForKey(entrySpeakKeyVal)
             SetKeyMapOptionValueST(entrySpeakKeyVal)
         endIf
     endEvent
     event OnDefaultST()
+		UnregisterForKey(entrySpeakKeyVal)
         entrySpeakKeyVal = 42
+		RegisterForKey(entrySpeakKeyVal)
         SetKeyMapOptionValueST(entrySpeakKeyVal)
     endEvent
     event OnHighlightST()

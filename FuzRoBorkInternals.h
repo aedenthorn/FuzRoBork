@@ -19,6 +19,10 @@
 #include <shlobj.h>
 #include <filesystem>
 #include <cstdio>
+#include <sstream>
+#include <locale>
+#include <codecvt>
+
 
 #include "skse64/PluginAPI.h"
 #include "skse64/skse64_common/skse_version.h"

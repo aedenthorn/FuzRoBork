@@ -89,6 +89,12 @@ extern "C"
 		}
 		else if (type == "CHECK_DONE") { // check whether speech is finished
 			bool isDone = !FuzRoBorkNamespace::isSpeaking() && !FuzRoBorkNamespace::isXVASpeaking();
+			if (isDone) {
+				_MESSAGE("Done speaking");
+			}
+			else {
+				_MESSAGE("Still speaking");
+			}
 			args->result->type = GFxValue::kType_String;
 			args->result->data.string = isDone ? "YES" : "NO";
 		}

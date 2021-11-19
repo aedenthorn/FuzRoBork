@@ -172,4 +172,47 @@
 		<hotkey key="9">[pitch absmiddle="10"]Ulfric who?[/pitch]</hotkey><!-- 8 -->
 		<hotkey key="10">[pitch absmiddle="-10"]Ulfrickin bust this door down if you don't open up![/pitch]</hotkey><!-- 9 -->
 	</hotkeys>
+	<random>
+		<text>I <emph>used</emph> to be an adventurer like you. Then I took an <emph>arrow</emph> in the knee.</text>
+		<text>What is better - to be <emph>born</emph> good, or to <emph>overcome</emph> your evil nature through <emph>great</emph> effort?</text>
+		<text>Let me <emph>guess</emph>, Someone stole your <emph>sweetroll</emph>!</text>
+		<text>My cousin is out <emph> fighting dragons.</emph> And what do <emph>I</emph> get? <emph>Guard</emph> duty.</text>
+		<text>Oh, there <emph>once</emph> was a hero named <emph>Ragnar</emph> the Red, who came <emph>riding</emph> to Whiterun from old <emph>Rorikstead</emph>. </text>
+		<text>And the <emph>braggart</emph> did swagger and <emph>brandish</emph> his blade as he <emph>told</emph> of bold battles and <emph>gold</emph> he had made. </text>
+		<text>But <emph>then</emph> he went quiet, did <emph>Ragnar</emph> the Red when he <emph>met</emph> the shield-maiden <emph>Matilda</emph>, who said; </text>
+		<text>Oh, you <emph>talk</emph> and you <emph>lie</emph> and you <emph>drink</emph> all our mead; now I <emph>think</emph> it's high time that you <emph>lie</emph> down and <emph>bleed</emph>!. </text>
+		<text>And so <emph>then</emph> came <emph>clashing</emph> and <emph>slashing</emph> of steel, as the <emph>brave</emph> lass Matilda <emph>charged</emph> in, full of zeal. </text>
+		<text>And the <emph>braggart</emph> named <emph>Ragnar</emph> was boastful no more... when his <emph>ugly</emph> red <emph>head</emph> rolled <emph>around</emph> on the <emph>floor</emph>!</text>
+		<text>There are <emph>formalities</emph> that must be observed, at the first meeting of two of the <emph>dov</emph>. </text>
+		<text>My <emph>favorite</emph> drinking buddy! Let's get some <emph>mead</emph>.</text>
+		<text>Perhaps we should find a random stranger to murder. Practice <emph>does</emph> make perfect.</text>
+		<text>You stink of <emph>death</emph> my friend. I <emph>salute</emph> you.</text>
+		<text>You <emph>never</emph> should have <emph>come</emph> here.</text>
+		<text>Babette, my girl - <emph>pack</emph> your things. We're <emph>moving</emph>!</text>
+		<text><emph>Enough</emph>! I will <emph>not</emph> stand idly by while a <emph>dragon</emph> burns my hold and <emph>slaughters</emph> my <emph>people</emph>!</text>
+		<text>I'm told they call me <emph>Dirge</emph> because I'm the <emph>last</emph> thing you hear before they put you in the ground.</text>
+		<text>Been so long since I killed a Stormcloak, my sword arm's getting <emph>flabby</emph>.</text>
+		<text>If these ruins frighten you, take comfort from the knowledge that <emph>I</emph> am here.</text>
+		<text>Look at <emph>that</emph>. Am I <emph>drunk</emph>? I must be <emph>drunk</emph>.</text>
+		<text>I used to be the <emph>top</emph> soldier for the Stormcloaks, then i took a <emph>sword</emph> to the chest</text>
+		<text>And who are <emph>you</emph> to challenge <emph>me</emph>? I've conquered <emph>mortality</emph> itself. </text>
+		<text>I've <emph>spat</emph> in the eyes of the <emph>Daedric Lords</emph>! </text>
+		<text>This is <emph>my</emph> realm now, I've <emph>sacrificed</emph> too much to let you <emph>take</emph> it from me!</text>
+		<text>I'll see you <emph>burn</emph>!</text>
+		<text>You do not even know our <emph>tongue</emph>, do you? </text>
+		<text>Such <emph>arrogance</emph>, to <emph>dare</emph> take for yourself the name of <emph>Dovah</emph>!</text>
+		<text>Well well... Another <emph>maggot</emph> to <emph>squash</emph> beneath my boot!</text>
+		<text>Either <emph>I'm</emph> drunk, or <emph>you're</emph> naked. Possibly both.</text>
+		<text>I'll see you in pieces!</text>
+		<text>I've been hunting and fishing in these parts for <emph>years</emph>.</text>
+		<text>I've got my <emph>eyes</emph> on you.</text>
+		<text>We're one of the <emph>same</emph> kind, you and I. I'm <emph>happy</emph> to have met you.</text>
+		<text>Looking to <emph>protect</emph> yourself? Or <emph>deal</emph> some damage?</text>
+		<text>I got to <emph>thinking</emph>, maybe <emph>I'm</emph> the Dragonborn and I <emph>just</emph> don't <emph>know</emph> it yet.</text>
+		<text>It's a <emph>fine</emph> day with <emph>you</emph> around!</text>
+		<text>My father said I should go to <emph>college</emph>, but he didnt say <emph>which</emph> one.</text>
+		<text>I'd be a lot <emph>happier</emph> and a lot <emph>warmer</emph> with a <emph>belly</emph> full of <emph>mead</emph>.</text>
+		<text>I heard about <emph>you</emph> and your <emph>honeyed</emph> words.</text>
+		<text>I guess you don't have potatoes in your ears <emph>after</emph> all.</text>
+	</random>
 </config>
