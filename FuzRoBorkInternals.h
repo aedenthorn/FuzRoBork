@@ -314,6 +314,7 @@ namespace FuzRoBorkNamespace {
 	{
 		public:
 			NPCObj(string _name, string _race, string _lang, float _rate, float _vol, int _pitch);
+			NPCObj();
 			string name;
 			string race;
 			string lang;
@@ -322,6 +323,7 @@ namespace FuzRoBorkNamespace {
 			int pitch;
 	};
 
+	bool GetNPC(string nName, string nRace, NPCObj &npc);
 	string findReplace(string str, const string oldStr, const string newStr);
 	void ImportTranslationFiles();
 	void ParseTranslation(string name);

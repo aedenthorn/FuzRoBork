@@ -166,15 +166,35 @@ bool ShouldForceSubs2(NPCChatterData* ChatterData, UInt32 ForceRegardless, const
 bool ShouldForceSubs3(NPCChatterData* ChatterData, UInt32 ForceRegardless, const char* Subtitle)
 {
 	_MESSAGE("ShouldForceSubs3");
-	if (Subtitle && SubtitleHasher::Instance.HasMatch(Subtitle))		// force if the subtitle is for a voiceless response
-	{
-		if (ChatterData->speaker != (*g_invalidRefHandle) && ChatterData->speaker != 0) {
-			NiPointer<TESObjectREFR> refr;
-			LookupREFRByHandle(ChatterData->speaker, refr);
+	if (ChatterData->speaker != (*g_invalidRefHandle) && ChatterData->speaker != 0) {
+		NiPointer<TESObjectREFR> refr;
+		LookupREFRByHandle(ChatterData->speaker, refr);
+
+		/*
+		if (!refr || !refr->baseForm)
+			return ShouldForceSubs(ChatterData, ForceRegardless, Subtitle);
+		TESNPC* npc = DYNAMIC_CAST(refr->baseForm, TESForm, TESNPC);
+		if (npc) {
+			const char* nName(npc->fullName.GetName());
+			const char* nRace(npc->race.race->fullName.GetName());
+
+			_MESSAGE("Checking for custom XML NPC voice %s, %s", nName, nRace);
+
+			FuzRoBorkNamespace::NPCObj npc;
+			if (FuzRoBorkNamespace::GetNPC(string(nName), string(nRace), &npc)) {
+				_MESSAGE("Overriding subs because custom XML NPC voice %s, %s", nName, nRace);
+				FuzRoBorkNamespace::startNPCSpeech(Subtitle, refr);
+				return true;
+
+			}
+		}
+		*/
+		if (Subtitle && SubtitleHasher::Instance.HasMatch(Subtitle))		// force if the subtitle is for a voiceless response
+		{
 			_MESSAGE("Found a match for %s - playing TTS", Subtitle);
 			FuzRoBorkNamespace::startNPCSpeech(Subtitle, refr);
+			return true;
 		}
-
 	}
 	return ShouldForceSubs(ChatterData, ForceRegardless, Subtitle);
 }

@@ -19,7 +19,6 @@ int mLangVal = 0
 int nLangVal = 0
 
 int xGameVal = 0
-string xGameName = ""
 int xVoiceVal = 0
 
 int nSexVal = 0
@@ -61,7 +60,7 @@ string[] LCIDList
 string[] SexList
 
 int function GetVersion()
-    return 19
+    return 20
 endFunction
 
 event OnVersionUpdate(int a_version)
@@ -88,8 +87,7 @@ event OnGameReload()
 	VoiceList = new string[100]
 	FuzRoBork_getXGames(GameList)
 	if GameList[xGameVal]
-		xGameName = GameList[xGameVal]
-		FuzRoBork_getXVoices(xGameName, VoiceList)
+		FuzRoBork_getXVoices(GameList[xGameVal], VoiceList)
 		if VoiceList[xVoiceVal]
 			doSendVals()
 			FuzRoBork_testSpeech("xx")
@@ -116,7 +114,7 @@ Event OnConfigInit()
     Pages = new string[3]
     Pages[0] = "Settings"
     Pages[1] = "Voice Selection"
-    Pages[2] = "xVASynth Options"
+    Pages[2] = "xVASynth"
 
     SexList  = new string[2]
     SexList[0] = "Male"
@@ -129,8 +127,7 @@ Event OnConfigClose()
 	VoiceList = new string[100]
 	FuzRoBork_getXGames(GameList)
 	if GameList[xGameVal]
-		xGameName = GameList[xGameVal]
-		FuzRoBork_getXVoices(xGameName, VoiceList)
+		FuzRoBork_getXVoices(GameList[xGameVal], VoiceList)
 		if VoiceList[xVoiceVal]
 			doSendVals()
 			FuzRoBork_testSpeech("xx")
@@ -148,8 +145,7 @@ event OnPageReset(string page)
         FuzRoBork_getLanguages(LangList)
         FuzRoBork_getXGames(GameList)
 		if GameList[xGameVal]
-			xGameName = GameList[xGameVal]
-			FuzRoBork_getXVoices(xGameName, VoiceList)
+			FuzRoBork_getXVoices(GameList[xGameVal], VoiceList)
 			if VoiceList[xVoiceVal]
 				doSendVals()
 				FuzRoBork_testSpeech("xx")
@@ -201,7 +197,7 @@ event OnPageReset(string page)
         AddKeyMapOptionST("HotKey8ST", "HotKey 8", HotKey8Val,flag)
         AddKeyMapOptionST("HotKey9ST", "HotKey 9", HotKey9Val,flag)
 
-    elseIf(page == "xVASynth Options")    
+    elseIf(page == "xVASynth")    
 
         SetCursorFillMode(TOP_TO_BOTTOM)
 
@@ -213,10 +209,9 @@ event OnPageReset(string page)
 			if(xGameVal > GameList.length - 1)
 				xGameVal = 0
 			endIf
-			xGameName = GameList[xGameVal]
-			AddMenuOptionST("xGameST","", xGameName)
+			AddMenuOptionST("xGameST","", GameList[xGameVal])
 			VoiceList = new string[100]
-			FuzRoBork_getXVoices(xGameName, VoiceList)
+			FuzRoBork_getXVoices(GameList[xGameVal], VoiceList)
 			if(xVoiceVal >	VoiceList.length - 1)
 				xVoiceVal = 0
 			endIf
@@ -486,25 +481,23 @@ state xGameST; Menu
         EndIf
         xGameVal = a_index
 		xVoiceVal = 0
-		xGameName = GameList[xGameVal]
-        SetMenuOptionValueST(xGameName)
+        SetMenuOptionValueST(GameList[xGameVal])
 		VoiceList = new string[100]
-		FuzRoBork_getXVoices(xGameName, VoiceList)
+		FuzRoBork_getXVoices(GameList[xGameVal], VoiceList)
 		SetMenuOptionValueST(VoiceList[xVoiceVal], false, "xVoiceST")
     endEvent
 
     event OnDefaultST()
         xGameVal = 0
 		xVoiceVal = 0
-		xGameName = GameList[xGameVal]
-        SetMenuOptionValueST(xGameName)
+        SetMenuOptionValueST(GameList[xGameVal])
 		VoiceList = new string[100]
-		FuzRoBork_getXVoices(xGameName, VoiceList)
+		FuzRoBork_getXVoices(GameList[xGameVal], VoiceList)
 		SetMenuOptionValueST(VoiceList[xVoiceVal], false, "xVoiceST")
     endEvent
 
     event OnHighlightST()
-        SetInfoText("Game for xVASynth: " + xGameName)
+        SetInfoText("Game for xVASynth: " + GameList[xGameVal])
     endEvent
 endState
 
@@ -514,9 +507,8 @@ state xVoiceST; Menu
             xVoiceVal = 0
         EndIf
 		if GameList[xGameVal]
-			xGameName = GameList[xGameVal]
 			VoiceList = new string[100]
-			FuzRoBork_getXVoices(xGameName, VoiceList)
+			FuzRoBork_getXVoices(GameList[xGameVal], VoiceList)
 		endIf
         SetMenuDialogStartIndex(xVoiceVal)
         SetMenuDialogDefaultIndex(0)
@@ -1434,7 +1426,7 @@ Function doSendVals()
     strings += "^"+LangList[fLangVal]
     strings += "^"+LangList[mLangVal]
     strings += "^"+LangList[nLangVal]
-    strings += "^"+xGameName
+    strings += "^"+GameList[xGameVal]
     strings += "^"+xVoiceVal
     
     string booleans = ""
