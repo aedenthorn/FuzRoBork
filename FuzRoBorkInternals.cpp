@@ -339,7 +339,7 @@ namespace FuzRoBorkNamespace {
 	map< string, string > transMap;
 	map<string, json > gameVoices;
 
-	string XVAFolder = "";
+	wstring XVAFolder = L"";
 
 	int checkWavCount = 0;
 	const char* lastTopic = "";
@@ -390,8 +390,8 @@ namespace FuzRoBorkNamespace {
 		}).detach();
 	}
 
-	string GetXVAFolder() {
-		if (XVAFolder == "") {
+	wstring GetXVAFolder() {
+		if (XVAFolder == L"") {
 			wchar_t* folder = NULL;
 			::SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_CREATE, NULL, &folder);
 
@@ -399,23 +399,26 @@ namespace FuzRoBorkNamespace {
 			wcstombs(str, folder, 128);
 			::CoTaskMemFree(folder);
 			
-			XVAFolder = string(str) + "/xVASynth/realTimeTTS/";
+			XVAFolder = wstring(folder) + L"\\xVASynth\\realTimeTTS\\";
+
 			_MESSAGE("Folder set to %s", XVAFolder.c_str());
 		}
 		return XVAFolder;
 	}
 
 	bool CheckForWav() {
-		string path = GetXVAFolder();
+		wstring path = GetXVAFolder();
 
-		if (path == "") {
+		if (path == L"") {
 			return false;
 		}
 
-		path += "output.wav";
-		if(PlaySound(path.c_str(), NULL, SND_FILENAME | SND_NODEFAULT)) {
+		path += L"output.wav";
+		wstring_convert<codecvt_utf8_utf16<wchar_t>> conv;
+		string str = conv.to_bytes(path);
+		if(PlaySound(str.c_str(), NULL, SND_FILENAME | SND_NODEFAULT)) {
 			playingXVAS = false;
-			remove(path.c_str());
+			remove(str.c_str());
 			return true;
 		}
 		checkWavCount++;
@@ -1079,20 +1082,22 @@ namespace FuzRoBorkNamespace {
 		j["text"] = s;
 		j["done"] = false;
 
-		string fpath = GetXVAFolder();
+		wstring fpath = GetXVAFolder();
 
-		if (fpath == "") {
+		if (fpath == L"") {
 			_MESSAGE("xVAFolder not set");
 			return;
 		}
 
-		string wpath = fpath + "output.wav";
+		wstring wpath = fpath + L"output.wav";
+		wstring_convert<codecvt_utf8_utf16<wchar_t>> conv;
+		string str = conv.to_bytes(wpath);
+		remove(str.c_str());
 
-		remove(wpath.c_str());
-
-		string path = fpath + "xVASynthText.json";
+		wpath = fpath + L"xVASynthText.json";
+		string path = conv.to_bytes(wpath);
 		_MESSAGE("Writing to %s", path.c_str());
-		ofstream o(path);
+		ofstream o(wpath);
 		o << setw(4) << j << endl;
 
 		_MESSAGE("Wrote speech to file for xVASynth");
@@ -1552,14 +1557,14 @@ namespace FuzRoBorkNamespace {
 
 		CHAR my_documents[MAX_PATH];
 		HRESULT result = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, my_documents);
+		
+		wstring path = GetXVAFolder();
 
-		string path = GetXVAFolder();
-
-		if (path == "") {
+		if (path == L"") {
 			_MESSAGE("xVAFolder not set");
 			return;
 		}
-		path += "xVASynthVoices.json";
+		path += L"xVASynthVoices.json";
 
 		std::ifstream i(path);
 
