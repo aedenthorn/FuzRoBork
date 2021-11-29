@@ -302,8 +302,8 @@ namespace FuzRoBorkNamespace {
 	class SpeakObj
 	{
 		public:
-			SpeakObj(std::string _speech, std::string _lang, float _rate, float _vol, int _pitch);
-			std::string speech;
+			SpeakObj(wstring _speech, std::string _lang, float _rate, float _vol, int _pitch);
+			wstring speech;
 			std::string lang;
 			float rate;
 			float vol;
@@ -324,7 +324,7 @@ namespace FuzRoBorkNamespace {
 	};
 
 	bool GetNPC(string nName, string nRace, NPCObj &npc);
-	string findReplace(string str, const string oldStr, const string newStr);
+	wstring findReplace(wstring str, const wstring oldStr, const wstring newStr);
 	void ImportTranslationFiles();
 	void ParseTranslation(string name);
 	void ReloadXML();
@@ -333,16 +333,16 @@ namespace FuzRoBorkNamespace {
 
 	void sendToxVASynth(SpeakObj obj);
 	void sendLanguages(StaticFunctionTag* t, VMArray<BSFixedString> names);
-	void storeBookSpeech(string text);
-	void storeFirstPagesSpeech(string text);
-	void storePagesSpeech(string text);
+	void storeBookSpeech(wstring text);
+	void storeFirstPagesSpeech(wstring text);
+	void storePagesSpeech(wstring text);
 	void startStoredPagesSpeech(StaticFunctionTag* base);
 	void startStoredBookSpeech(StaticFunctionTag* base);
-	void startBookSpeech(string text);
-	void startNPCSpeech(const char * text, TESObjectREFR * refr);
-	void startPlayerSpeech(const char* _title);
-	void startNarratorSpeech(string text);
-	void speakLoadingScreen(string text);
+	void startBookSpeech(wstring text);
+	void startNPCSpeech(wstring text, TESObjectREFR * refr);
+	void startPlayerSpeech(wstring _title);
+	void startNarratorSpeech(wstring text);
+	void speakLoadingScreen(wstring text);
 
 	boolean isSpeaking();
 	boolean isXVASpeaking();

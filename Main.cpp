@@ -52,12 +52,16 @@ extern "C"
 
 		GFxValue* a = args->args;
 
-		const char* speech = "";
+		string sspeech = "";
 
 		if (a[1].GetType() == GFxValue::kType_String) // text to speak
-			speech = a[0].GetString();
+			sspeech = a[0].GetString();
 
-		std::string type = "";
+		wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
+		wstring wspeech = converter.from_bytes(sspeech).c_str();
+		const wchar_t * speech = wspeech.c_str();
+
+		string type = "";
 
 		if (a[1].GetType() == GFxValue::kType_String) // call type
 			type = a[1].GetString();

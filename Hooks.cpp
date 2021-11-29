@@ -192,7 +192,9 @@ bool ShouldForceSubs3(NPCChatterData* ChatterData, UInt32 ForceRegardless, const
 		if (Subtitle && SubtitleHasher::Instance.HasMatch(Subtitle))		// force if the subtitle is for a voiceless response
 		{
 			_MESSAGE("Found a match for %s - playing TTS", Subtitle);
-			FuzRoBorkNamespace::startNPCSpeech(Subtitle, refr);
+			wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
+			wstring str(converter.from_bytes(Subtitle));
+			FuzRoBorkNamespace::startNPCSpeech(str, refr);
 			return true;
 		}
 	}
