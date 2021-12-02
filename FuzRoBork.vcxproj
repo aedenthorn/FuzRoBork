@@ -47,7 +47,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\skse64;..\common;$(SMESundriesIncludePath);$(IncludePath)</IncludePath>
+    <IncludePath>..\skse64;..\skse64\skse64;..\skse64\skse64_common;..\common;$(SMESundriesIncludePath);$(IncludePath)</IncludePath>
     <TargetName>FuzRoBork</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -83,6 +83,7 @@
     <PostBuildEvent>
       <Message>Installing DLL...</Message>
     </PostBuildEvent>
+    <ProjectReference />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>

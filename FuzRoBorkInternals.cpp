@@ -1,5 +1,6 @@
 #include "FuzRoBorkInternals.h"
 
+
 IDebugLog				gLog;
 
 namespace interfaces
@@ -414,7 +415,7 @@ namespace FuzRoBorkNamespace {
 		string str = conv.to_bytes(path);
 		if(PlaySound(str.c_str(), NULL, SND_FILENAME | SND_NODEFAULT)) {
 			playingXVAS = false;
-			remove(str.c_str());
+			std::remove(str.c_str());
 			return true;
 		}
 		checkWavCount++;
@@ -543,7 +544,8 @@ namespace FuzRoBorkNamespace {
 	}
 
 
-	void ReloadXML(StaticFunctionTag* base) {
+	void ReloadXML(StaticFunctionTag* base) 
+	{
 		LoadXML();
 	}
 
@@ -1068,14 +1070,24 @@ namespace FuzRoBorkNamespace {
 
 		wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
 		string speech = converter.to_bytes(obj.speech);
+
+		float rate = 0;
+		if (obj.rate < 0) {
+			rate = (obj.rate + 10) / 10;
+		}
+		else {
+			rate = (obj.rate / 10) + 1;
+		}
+
 		json j;
 		j["voiceId"] = gameVoices[game][idx]["id"];
 		j["gameId"] = game;
-		j["pitch"] = obj.pitch;
-		j["rate"] = obj.rate;
-		j["vol"] = obj.vol / 100;
+		j["pitch"] = obj.pitch / 10 * 3;
+		j["rate"] = rate;
+		j["vol"] = obj.vol / 100 * 3;
 		j["text"] = speech;
 		j["done"] = false;
+		j["use_ffmpeg"] = true;
 
 		wstring fpath = GetXVAFolder();
 

@@ -1,6 +1,29 @@
 #pragma once
 #pragma comment( lib, "Winmm.lib" )
 
+#include <skse64/PluginAPI.h>
+#include <skse64/GameSettings.h>
+#include <skse64/GameTypes.h>
+#include <skse64/GameEvents.h>
+#include <skse64/GameData.h>
+#include <skse64/GameStreams.h>
+#include <skse64/ScaleformState.h>
+#include <skse64/PapyrusArgs.h>
+#include <skse64_common/skse_version.h>
+#include <skse64/GameData.h>
+#include <skse64/GameForms.h>
+#include <skse64/GameInput.h>
+#include <skse64/GameObjects.h>
+#include <skse64/GameRTTI.h>
+#include <skse64/GameSettings.h>
+#include <skse64/GameStreams.h>
+#include <skse64/GameUtilities.h>
+#include <skse64/PapyrusArgs.h>
+#include <skse64/PapyrusNativeFunctions.h>
+#include <skse64/PluginAPI.h>
+#include <skse64/ScaleformMovie.h>
+#include <skse64/ScaleformState.h>
+
 #include "tinyxml2.h"
 #include "json/single_include/nlohmann/json.hpp"
 
@@ -23,24 +46,7 @@
 #include <locale>
 #include <codecvt>
 
-
-#include "skse64/PluginAPI.h"
-#include "skse64/skse64_common/skse_version.h"
-#include "skse64/GameData.h"
-#include <skse64/GameForms.h>
-#include "skse64/GameInput.h"
-#include "skse64/GameObjects.h"
-#include <skse64/GameRTTI.h>
-#include <skse64/GameSettings.h>
-#include <skse64/GameStreams.h>
-#include <skse64/GameUtilities.h>
-#include "skse64/PapyrusArgs.h"
-#include "skse64/PapyrusNativeFunctions.h"
-#include <skse64/PluginAPI.h>
-#include <skse64/ScaleformMovie.h>
-#include <skse64/ScaleformState.h>
-
-#include "skse64_common/Utilities.h"
+#include <skse64_common/Utilities.h>
 
 #include <common/ICriticalSection.h>
 
@@ -48,6 +54,7 @@
 #include <INIManager.h>
 #include <StringHelpers.h>
 #include <MiscGunk.h>
+
 
 using json = nlohmann::json;
 using namespace std;
@@ -159,7 +166,6 @@ public:
 
 	static BSIStream*				CreateInstance(const char* FilePath, void* ParentLocation = nullptr);		// BSResource::Location* ParentLocation
 };
-STATIC_ASSERT(sizeof(BSIStream) == 0x20);
 
 // 10
 template <typename NodeT>
@@ -177,7 +183,6 @@ public:
 	// members
 	/*00*/ ListNode<NodeT>				Head;
 };
-STATIC_ASSERT(sizeof(BSSimpleList<void>) == 0x10);
 
 // arbitrary name, final cache that gets passed to the dialog playback subsystem
 // 40
@@ -196,7 +201,6 @@ public:
 	/*39*/ UInt8					hasLipFile;
 	/*3A*/ UInt8					pad22[6];
 };
-STATIC_ASSERT(sizeof(CachedResponseData) == 0x40);
 
 // arbitrary name, used to queue subtitles for gamemode conversations (outside the standard dialog menu; NPC-NPC or NPC-PC)
 // 20
@@ -210,7 +214,6 @@ public:
 	/*1C*/ UInt8					forceSubtitles;
 	/*1D*/ UInt8					pad11[3];
 };
-STATIC_ASSERT(sizeof(NPCChatterData) == 0x20);
 
 class PlayerDialogData;
 
@@ -241,9 +244,7 @@ public:
 	/*4B*/ UInt8					pad27[5];
 	/*50*/ TESTopic*				unk28;				// seen caching parentTopic
 };
-STATIC_ASSERT(offsetof(PlayerDialogData, responses) == 0x18);
-STATIC_ASSERT(offsetof(PlayerDialogData, unk26) == 0x4A);
-STATIC_ASSERT(sizeof(PlayerDialogData) == 0x58);
+
 
 namespace override
 {
@@ -287,7 +288,6 @@ namespace override
 
 		static MenuTopicManager*		GetSingleton(void);
 	};
-	STATIC_ASSERT(sizeof(MenuTopicManager) == 0xE0);
 }
 
 std::string			MakeSillyName();
