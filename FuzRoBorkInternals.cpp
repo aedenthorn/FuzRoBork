@@ -1063,7 +1063,7 @@ namespace FuzRoBorkNamespace {
 			return;
 		}
 
-		_MESSAGE("Voice name is %s", string(gameVoices[game][idx]["id"]).c_str());
+		_MESSAGE("Voice name is %s", string(gameVoices[game][idx]["name"]).c_str());
 
 		wregex tags(L"<[^>]*>");
 		obj.speech = regex_replace(obj.speech, tags, L"");
@@ -1080,14 +1080,17 @@ namespace FuzRoBorkNamespace {
 		}
 
 		json j;
-		j["voiceId"] = gameVoices[game][idx]["id"];
+		j["voiceId"] = gameVoices[game][idx]["name"];
 		j["gameId"] = game;
-		j["pitch"] = obj.pitch / 10 * 3;
-		j["rate"] = rate;
+		j["xVA_pitch"] = obj.pitch / 10 * 3;
+		j["xVA_pace"] = rate;
 		j["vol"] = obj.vol / 100 * 3;
 		j["text"] = speech;
 		j["done"] = false;
 		j["use_ffmpeg"] = true;
+		j["pad_start"] = 0;
+		j["pad_end"] = 200;
+		j["ffmpeg_tempo"] = 1;
 
 		wstring fpath = GetXVAFolder();
 
