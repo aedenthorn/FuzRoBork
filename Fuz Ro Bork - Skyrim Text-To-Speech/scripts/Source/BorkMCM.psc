@@ -138,6 +138,27 @@ EndEvent
 event OnPageReset(string page)
     {Called when a new page is selected, including the initial empty page}
     if(page == "")
+		If(pLangVal < 0)
+            pLangVal = 0
+        EndIf
+		If(fLangVal < 0)
+            fLangVal = 0
+        EndIf
+		If(mLangVal < 0)
+            mLangVal = 0
+        EndIf
+		If(nLangVal < 0)
+            nLangVal = 0
+        EndIf
+		If(nLangVal < 0)
+            nLangVal = 0
+        EndIf
+		If(xGameVal < 0)
+            xGameVal = 0
+        EndIf
+		If(xVoiceVal < 0)
+            xVoiceVal = 0
+        EndIf
         LoadCustomContent("FuzRoBork/bork_logo.dds", 0,0)
         LangList = new string[100]
         GameList = new string[100]

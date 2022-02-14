@@ -6,38 +6,36 @@
 namespace hookedAddresses
 {
 	// E8 ? ? ? ? 48 8B F8 EB 02 33 FF 48 85 FF
-	RelocAddr<uintptr_t>	kCachedResponseData_Ctor(MAKE_RVA(0x00000001405899C0));
+	RelocAddr<uintptr_t>	kCachedResponseData_Ctor(ADDR_PAIR(0x000000014056D570, 0x0000000140573B70));
 	uintptr_t				kCachedResponseData_Ctor_Hook = kCachedResponseData_Ctor + 0xEC;
 	uintptr_t				kCachedResponseData_Ctor_Ret = kCachedResponseData_Ctor + 0xF1;
 
-	// E8 ? ? ? ? 8B 06 EB 09
-	RelocAddr<uintptr_t>	kUIUtils_QueueDialogSubtitles(MAKE_RVA(0x0000000140906D60));
-	uintptr_t				kUIUtils_QueueDialogSubtitles_Hook = kUIUtils_QueueDialogSubtitles + 0x4D;
-	uintptr_t				kUIUtils_QueueDialogSubtitles_Show = kUIUtils_QueueDialogSubtitles + 0x5A;
-	uintptr_t				kUIUtils_QueueDialogSubtitles_Exit = kUIUtils_QueueDialogSubtitles + 0x103;
+	// E8 ? ? ? ? EB 42 45 84 ED (VR Build - E8 ? ? ? ? EB 42 45 84 FF)
+	RelocAddr<uintptr_t>	kUIUtils_QueueDialogSubtitles(ADDR_PAIR(0x00000001408D5B90, 0x00000001409037F0));
+	uintptr_t				kUIUtils_QueueDialogSubtitles_Hook = kUIUtils_QueueDialogSubtitles + 0x4B;
+	uintptr_t				kUIUtils_QueueDialogSubtitles_Show = kUIUtils_QueueDialogSubtitles + 0x58;
+	uintptr_t				kUIUtils_QueueDialogSubtitles_Exit = kUIUtils_QueueDialogSubtitles + 0x11C;
 
-	// E8 ? ? ? ? 84 C0 75 42 48 8B 35 ? ? ? ?
-	RelocAddr<uintptr_t>	kASCM_DisplayQueuedNPCChatterData(MAKE_RVA(0x00000001408FD0B0));
-	uintptr_t				kASCM_DisplayQueuedNPCChatterData_DialogSubs_Hook = kASCM_DisplayQueuedNPCChatterData + 0x1CA;
-	uintptr_t				kASCM_DisplayQueuedNPCChatterData_DialogSubs_Show = kASCM_DisplayQueuedNPCChatterData + 0x1D3;
-	uintptr_t				kASCM_DisplayQueuedNPCChatterData_DialogSubs_Exit = kASCM_DisplayQueuedNPCChatterData + 0x1FD;
+	// E8 ? ? ? ? 84 C0 75 42 48 8B 2D ? ? ? ?
+	RelocAddr<uintptr_t>	kASCM_DisplayQueuedNPCChatterData(ADDR_PAIR(0x00000001408CD260, 0x00000001408FA330));
+	uintptr_t				kASCM_DisplayQueuedNPCChatterData_DialogSubs_Hook = kASCM_DisplayQueuedNPCChatterData + 0x1DE;
+	uintptr_t				kASCM_DisplayQueuedNPCChatterData_DialogSubs_Show = kASCM_DisplayQueuedNPCChatterData + 0x1E7;
+	uintptr_t				kASCM_DisplayQueuedNPCChatterData_DialogSubs_Exit = kASCM_DisplayQueuedNPCChatterData + 0x212;
 
-	uintptr_t				kASCM_DisplayQueuedNPCChatterData_GeneralSubs_Hook = kASCM_DisplayQueuedNPCChatterData + 0x99;
-	uintptr_t				kASCM_DisplayQueuedNPCChatterData_GeneralSubs_Show = kASCM_DisplayQueuedNPCChatterData + 0xA6;
-	uintptr_t				kASCM_DisplayQueuedNPCChatterData_GeneralSubs_Exit = kASCM_DisplayQueuedNPCChatterData + 0x1CA;
+	uintptr_t				kASCM_DisplayQueuedNPCChatterData_GeneralSubs_Hook = kASCM_DisplayQueuedNPCChatterData + 0xA0;
+	uintptr_t				kASCM_DisplayQueuedNPCChatterData_GeneralSubs_Show = kASCM_DisplayQueuedNPCChatterData + 0xAD;
+	uintptr_t				kASCM_DisplayQueuedNPCChatterData_GeneralSubs_Exit = kASCM_DisplayQueuedNPCChatterData + 0x1DE;
 
 	// E8 ? ? ? ? F3 0F 10 35 ? ? ? ? 48 8D 4E 28
-	RelocAddr<uintptr_t>	kASCM_QueueNPCChatterData(MAKE_RVA(0x00000001408FCA00));
-	uintptr_t				kASCM_QueueNPCChatterData_Hook = kASCM_QueueNPCChatterData + 0x85;
-	uintptr_t				kASCM_QueueNPCChatterData_Show = kASCM_QueueNPCChatterData + 0x92;
-	uintptr_t				kASCM_QueueNPCChatterData_Exit = kASCM_QueueNPCChatterData + 0xCA;
+	RelocAddr<uintptr_t>	kASCM_QueueNPCChatterData(ADDR_PAIR(0x00000001408CCBB0, 0x00000001408F9C60));
+	uintptr_t				kASCM_QueueNPCChatterData_Hook = kASCM_QueueNPCChatterData + 0x88;
+	uintptr_t				kASCM_QueueNPCChatterData_Show = kASCM_QueueNPCChatterData + 0x95;
+	uintptr_t				kASCM_QueueNPCChatterData_Exit = kASCM_QueueNPCChatterData + 0xD4;
 }
 
 
 void SneakAtackVoicePath(CachedResponseData* Data, char* VoicePathBuffer)
 {
-	_MESSAGE("Sneak attack voice path %s", VoicePathBuffer);
-
 	// overwritten code
 	CALL_MEMBER_FN(&Data->voiceFilePath, Set)(VoicePathBuffer);
 
@@ -54,8 +52,6 @@ void SneakAtackVoicePath(CachedResponseData* Data, char* VoicePathBuffer)
 	XWMPath.erase(0, 5);
 	XWMPath.erase(XWMPath.length() - 3, 3);
 	XWMPath.append("xwm");
-
-	//_MESSAGE("w %s, f %s, x %s", WAVPath.c_str(), FUZPath.c_str(), XWMPath.c_str());
 
 	BSIStream* WAVStream = BSIStream::CreateInstance(WAVPath.c_str());
 	BSIStream* FUZStream = BSIStream::CreateInstance(FUZPath.c_str());
@@ -119,7 +115,9 @@ bool ShouldForceSubs(NPCChatterData* ChatterData, UInt32 ForceRegardless, const 
 
 	if (Subtitle && SubtitleHasher::Instance.HasMatch(Subtitle))		// force if the subtitle is for a voiceless response
 	{
+#ifndef NDEBUG
 		_MESSAGE("Found a match for %s - Forcing subs", Subtitle);
+#endif
 
 		Result = true;
 	}
@@ -206,19 +204,18 @@ bool ShouldForceSubs4(NPCChatterData* ChatterData, UInt32 ForceRegardless, const
 }
 
 
-
 #define PUSH_VOLATILE		push(rcx); push(rdx); push(r8);
 #define POP_VOLATILE		pop(r8); pop(rdx); pop(rcx);
 
 bool InstallHooks()
 {
-	if (!g_branchTrampoline.Create(1024 * 1))
+	if (!g_branchTrampoline.Create(1024 * 64))
 	{
 		_ERROR("Couldn't create branch trampoline. this is fatal. skipping remainder of init process.");
 		return false;
 	}
 
-	if (!g_localTrampoline.Create(1024 * 1, nullptr))
+	if (!g_localTrampoline.Create(1024 * 64, nullptr))
 	{
 		_ERROR("Couldn't create codegen buffer. this is fatal. skipping remainder of init process.");
 		return false;
@@ -269,7 +266,11 @@ bool InstallHooks()
 				PUSH_VOLATILE;
 				xor(rcx, rcx);
 				xor(rdx, rdx);
+#ifdef VR_BUILD
+				mov(r8, rbp);	// subtitle
+#else
 				mov(r8, r14);	// subtitle
+#endif
 				mov(rax, (uintptr_t)ShouldForceSubs1);
 				call(rax);
 				POP_VOLATILE;
@@ -307,9 +308,9 @@ bool InstallHooks()
 				jnz(ShowLabel);
 
 				PUSH_VOLATILE;
-				mov(rcx, rsi);
+				mov(rcx, r14);
 				xor(rdx, rdx);
-				mov(r8, ptr[rsi + 0x8]);	// subtitle
+				mov(r8, ptr[r14 + 0x8]);	// subtitle
 				mov(rax, (uintptr_t)ShouldForceSubs2);
 				call(rax);
 				POP_VOLATILE;
@@ -347,9 +348,9 @@ bool InstallHooks()
 				jnz(ShowLabel);
 
 				PUSH_VOLATILE;
-				mov(rcx, rsi);
+				mov(rcx, r14);
 				xor (rdx, rdx);
-				mov(r8, ptr[rsi + 0x8]);	// subtitle
+				mov(r8, ptr[r14 + 0x8]);	// subtitle
 				mov(rax, (uintptr_t)ShouldForceSubs3);
 				call(rax);
 				POP_VOLATILE;
@@ -388,7 +389,7 @@ bool InstallHooks()
 
 				PUSH_VOLATILE;
 				xor(rcx, rcx);
-				mov(rdx, r15d);
+				mov(rdx, r12d);
 				mov(r8, rbp);	// subtitle
 				mov(rax, (uintptr_t)ShouldForceSubs4);
 				call(rax);

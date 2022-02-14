@@ -37,12 +37,14 @@
     <ClInclude Include="include\Hooks.h" />
     <ClInclude Include="include\version.h" />
     <ClInclude Include="include\VersionInfo.h" />
+    <ClInclude Include="include\detour.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FuzRoBorkInternals.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
+    <ClCompile Include="Hooks.cpp" />
+    <ClCompile Include="include\detour.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="VersionInfo.rc">

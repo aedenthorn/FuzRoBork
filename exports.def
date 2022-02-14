@@ -1,4 +1,3 @@
 LIBRARY	"Fuz Ro D'oh"
 EXPORTS
-SKSEPlugin_Query
 SKSEPlugin_Load

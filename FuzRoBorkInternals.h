@@ -24,7 +24,7 @@
 #include <skse64/ScaleformMovie.h>
 #include <skse64/ScaleformState.h>
 
-#include "tinyxml2.h"
+#include "include/tinyxml2.h"
 #include "json/single_include/nlohmann/json.hpp"
 
 #include <sapi.h>
@@ -38,7 +38,7 @@
 #include <iostream>
 #include <string>
 #include <filesystem>
-#include <IFileStream.h>
+#include <common/common/IFileStream.h>
 #include <shlobj.h>
 #include <filesystem>
 #include <cstdio>
@@ -50,10 +50,10 @@
 
 #include <common/ICriticalSection.h>
 
-#include <SME_Prefix.h>
-#include <INIManager.h>
-#include <StringHelpers.h>
-#include <MiscGunk.h>
+#include "include/SME_Prefix.h"
+#include "include/INIManager.h"
+#include "include/StringHelpers.h"
+#include "include/MiscGunk.h"
 
 
 using json = nlohmann::json;
@@ -106,12 +106,6 @@ extern SME::INI::INISetting				kxVASynthVoice;
 
 #define MAKE_RVA(addr)		addr - 0x140000000i64
 
-#ifdef VR_BUILD
-#define ADDR_PAIR(NON_VR, VR)	MAKE_RVA(VR)
-#else
-#define ADDR_PAIR(NON_VR, VR)	MAKE_RVA(NON_VR)
-#endif
-
 class FuzRoBorkINIManager : public SME::INI::INIManager
 {
 public:
@@ -152,7 +146,7 @@ public:
 	MEMBER_FN_PREFIX(BSIStream);
 
 	// E8 ? ? ? ? 90 33 DB 38 5C 24 38
-	DEFINE_MEMBER_FN(Ctor, BSIStream*, ADDR_PAIR(0x0000000140D47BA0, 0x0000000140D90AD0), const char* FilePath, void* ParentLocation);
+	DEFINE_MEMBER_FN(Ctor, BSIStream*, MAKE_RVA(0x0000000140D814B0), const char* FilePath, void* ParentLocation);
 
 	// members
 	///*00*/ void**					vtbl;
@@ -162,10 +156,11 @@ public:
 	/*18*/ StringCache::Ref			filePath;	// relative to the Data directory when no BSResource::Location's passed to the ctor (the game uses a static instance)
 												// otherwise, use its location
 
-	virtual void*					Dtor(bool FreeMemory = true);
+	virtual void* Dtor(bool FreeMemory = true);
 
-	static BSIStream*				CreateInstance(const char* FilePath, void* ParentLocation = nullptr);		// BSResource::Location* ParentLocation
+	static BSIStream* CreateInstance(const char* FilePath, void* ParentLocation = nullptr);		// BSResource::Location* ParentLocation
 };
+STATIC_ASSERT(sizeof(BSIStream) == 0x20);
 
 // 10
 template <typename NodeT>
@@ -176,13 +171,14 @@ public:
 	struct ListNode
 	{
 		// members
-		/*00*/ NodeT*					Data;
-		/*08*/ ListNode<NodeT>*			Next;
+		/*00*/ NodeT* Data;
+		/*08*/ ListNode<NodeT>* Next;
 	};
 
 	// members
 	/*00*/ ListNode<NodeT>				Head;
 };
+STATIC_ASSERT(sizeof(BSSimpleList<void>) == 0x10);
 
 // arbitrary name, final cache that gets passed to the dialog playback subsystem
 // 40
@@ -201,6 +197,7 @@ public:
 	/*39*/ UInt8					hasLipFile;
 	/*3A*/ UInt8					pad22[6];
 };
+STATIC_ASSERT(sizeof(CachedResponseData) == 0x40);
 
 // arbitrary name, used to queue subtitles for gamemode conversations (outside the standard dialog menu; NPC-NPC or NPC-PC)
 // 20
@@ -214,6 +211,7 @@ public:
 	/*1C*/ UInt8					forceSubtitles;
 	/*1D*/ UInt8					pad11[3];
 };
+STATIC_ASSERT(sizeof(NPCChatterData) == 0x20);
 
 class PlayerDialogData;
 
@@ -234,17 +232,19 @@ public:
 	/*12*/ UInt8					unk0A;
 	/*13*/ UInt8					pad0B[5];
 	/*18*/ CachedResponseListT		responses;
-	/*28*/ TESQuest*				parentQuest;
-	/*30*/ TESTopicInfo*			parentTopicInfo;
-	/*38*/ TESTopic*				parentTopic;
-	/*40*/ CachedResponseListT*		unk20;				// seen pointing to this::unk0C
+	/*28*/ TESQuest* parentQuest;
+	/*30*/ TESTopicInfo* parentTopicInfo;
+	/*38*/ TESTopic* parentTopic;
+	/*40*/ CachedResponseListT* unk20;				// seen pointing to this::unk0C
 	/*48*/ UInt8					unk24;
 	/*49*/ UInt8					pad25;
 	/*4A*/ UInt8					unk26;
 	/*4B*/ UInt8					pad27[5];
-	/*50*/ TESTopic*				unk28;				// seen caching parentTopic
+	/*50*/ TESTopic* unk28;				// seen caching parentTopic
 };
-
+STATIC_ASSERT(offsetof(PlayerDialogData, responses) == 0x18);
+STATIC_ASSERT(offsetof(PlayerDialogData, unk26) == 0x4A);
+STATIC_ASSERT(sizeof(PlayerDialogData) == 0x58);
 
 namespace override
 {
@@ -256,11 +256,11 @@ namespace override
 		///*00*/ void**					vtbl;
 		/*08*/ BSTEventSink<void*>		unk04;					// BSTEventSink<PositionPlayerEvent>
 		/*10*/ UInt64					unk08;
-		/*18*/ PlayerTopicListT*		selectedResponseNode;	// points to the ListNode that refers to the PlayerDialogData instance of the selected topicinfo
-		/*20*/ PlayerTopicListT*		availableResponses;
-		/*28*/ TESTopicInfo*			unk14;
-		/*30*/ TESTopicInfo*			rootTopicInfo;
-		/*38*/ PlayerDialogData*		lastSelectedResponse;
+		/*18*/ PlayerTopicListT* selectedResponseNode;	// points to the ListNode that refers to the PlayerDialogData instance of the selected topicinfo
+		/*20*/ PlayerTopicListT* availableResponses;
+		/*28*/ TESTopicInfo* unk14;
+		/*30*/ TESTopicInfo* rootTopicInfo;
+		/*38*/ PlayerDialogData* lastSelectedResponse;
 		/*40*/ CRITICAL_SECTION			topicManagerCS;
 		/*68*/ UInt32					speaker;				// a BSHandleRefObject handle to the speaker
 		/*6C*/ UInt32					refHandle3C;			// same as above
@@ -284,16 +284,16 @@ namespace override
 		/*D8*/ UInt64					unkD8;
 
 		// methods
-		virtual void*					Dtor(bool FreeMemory = true);
+		virtual void* Dtor(bool FreeMemory = true);
 
-		static MenuTopicManager*		GetSingleton(void);
+		static MenuTopicManager* GetSingleton(void);
 	};
+	STATIC_ASSERT(sizeof(MenuTopicManager) == 0xE0);
 }
 
 std::string			MakeSillyName();
 bool				CanShowDialogSubtitles();
 bool				CanShowGeneralSubtitles();
-
 
 //TTS Additions
 
@@ -324,6 +324,7 @@ namespace FuzRoBorkNamespace {
 	};
 
 	bool GetNPC(string nName, string nRace, NPCObj &npc);
+	bool IsRegexMatch(string str, string rx);
 	wstring findReplace(wstring str, const wstring oldStr, const wstring newStr);
 	void ImportTranslationFiles();
 	void ParseTranslation(string name);
@@ -347,6 +348,5 @@ namespace FuzRoBorkNamespace {
 	boolean isSpeaking();
 	boolean isXVASpeaking();
 	void stopSpeaking(void);
-
-
+	
 }

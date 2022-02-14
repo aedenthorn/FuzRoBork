@@ -5,8 +5,6 @@
 #include "skse64/ScaleformValue.h"
 #include "skse64/ScaleformCallbacks.h"
 
-#define RUNTIME_VERSION RUNTIME_VERSION_1_5_97
-
 PluginHandle g_pluginHandle;
 
 SKSEScaleformInterface* g_scaleform = NULL;
@@ -15,11 +13,99 @@ SKSEPapyrusInterface* g_papyrus = NULL;
 
 extern "C"
 {
-	void MessageHandler(SKSEMessagingInterface::Message * msg)
+
+	__declspec(dllexport) SKSEPluginVersionData SKSEPlugin_Version =
+	{
+		SKSEPluginVersionData::kVersion,
+
+		PACKED_SME_VERSION,
+		"Fuz Ro Bork",
+		"aedenthorn",
+		"",
+		0,	// Version-dependent
+		{ RUNTIME_VERSION_1_6_353, 0 },
+		0,
+	};
+
+	class SKSEScaleform_BorkFunction : public GFxFunctionHandler
+	{
+	public:
+		virtual void	Invoke(Args* args);
+	};
+
+	void SKSEScaleform_BorkFunction::Invoke(Args* args)
+	{
+		GFxValue* a = args->args;
+
+		string sspeech = "";
+		wstring wspeech = L"";
+
+		if (a[1].GetType() == GFxValue::kType_String) {// text to speak
+			sspeech = string(a[0].GetString());
+
+			//_MESSAGE("Raw speech: %s", sspeech.c_str());
+
+			wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
+			wspeech = converter.from_bytes(sspeech);
+		} 
+
+		string type = "";
+
+		if (a[1].GetType() == GFxValue::kType_String) // call type
+			type = a[1].GetString();
+
+		if (type != "CHECK_DONE")
+			_MESSAGE(("SKSEScaleform_BorkFunction received " + type).c_str());
+
+		if (type == "DIALOGUE_CLICK") {
+			FuzRoBorkNamespace::stopSpeaking();
+			FuzRoBorkNamespace::startPlayerSpeech(wspeech);
+		}
+		else if (type == "DIALOGUE" && kPlayPlayerDialogue.GetData().i == 1)
+			FuzRoBorkNamespace::startPlayerSpeech(wspeech);
+		else if (type == "BOOK_READ" && kPlayBookPages.GetData().i == 1) {
+			FuzRoBorkNamespace::stopSpeaking();
+			FuzRoBorkNamespace::startBookSpeech(wspeech);
+		}
+		else if (type == "BOOK_BOOK") {
+			FuzRoBorkNamespace::storeBookSpeech(wspeech);
+		}
+		else if (type == "BOOK_PAGES_FIRST") {
+			FuzRoBorkNamespace::storeFirstPagesSpeech(wspeech);
+		}
+		else if (type == "BOOK_PAGES") {
+			FuzRoBorkNamespace::storePagesSpeech(wspeech);
+		}
+		else if (type == "LOADING_SCREEN" && kPlayLoadingScreenText.GetData().i == 1) {
+			FuzRoBorkNamespace::speakLoadingScreen(wspeech);
+		}
+		else if (type == "CHECK_DONE") { // check whether speech is finished
+			bool isDone = !FuzRoBorkNamespace::isSpeaking() && !FuzRoBorkNamespace::isXVASpeaking();
+			args->result->type = GFxValue::kType_String;
+			args->result->data.string = isDone ? "YES" : "NO";
+			if (isDone) {
+				_MESSAGE("Done speaking");
+			}
+			else {
+				_MESSAGE("Still speaking");
+			}
+		}
+		else if (type == "STOP") {
+			FuzRoBorkNamespace::stopSpeaking();
+		}
+	}
+
+	__declspec(dllexport) bool RegisterScaleform(GFxMovieView* view, GFxValue* root)
+	{
+		RegisterFunction <SKSEScaleform_BorkFunction>(root, view, "BorkFunction");
+		return true;
+	}
+
+	__declspec(dllexport) void MessageHandler(SKSEMessagingInterface::Message* msg)
 	{
 		switch (msg->type)
 		{
-		case SKSEMessagingInterface::kMessage_InputLoaded:
+			case SKSEMessagingInterface::kMessage_InputLoaded:
 			{
 				// schedule a cleanup thread for the subtitle hasher
 				std::thread CleanupThread([]() {
@@ -35,106 +121,21 @@ extern "C"
 				_MESSAGE("%s Initialized!", MakeSillyName().c_str());
 				FuzRoBorkNamespace::LoadXML();
 				FuzRoBorkNamespace::ImportTranslationFiles();
-		}
+			}
 			break;
 		}
 	}
 
-	class SKSEScaleform_BorkFunction : public GFxFunctionHandler
-	{
-	public:
-		virtual void	Invoke(Args* args);
-	};
-
-	void SKSEScaleform_BorkFunction::Invoke(Args* args)
-	{
-
-
-		GFxValue* a = args->args;
-
-		string sspeech = "";
-
-		if (a[1].GetType() == GFxValue::kType_String) // text to speak
-			sspeech = a[0].GetString();
-
-		wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
-		wstring wspeech = converter.from_bytes(sspeech).c_str();
-		const wchar_t * speech = wspeech.c_str();
-
-		string type = "";
-
-		if (a[1].GetType() == GFxValue::kType_String) // call type
-			type = a[1].GetString();
-
-		if (type != "CHECK_DONE")
-			_MESSAGE(("SKSEScaleform_BorkFunction received " + type).c_str());
-
-		if (type == "DIALOGUE_CLICK") {
-			FuzRoBorkNamespace::stopSpeaking();
-			FuzRoBorkNamespace::startPlayerSpeech(speech);
-		}
-		else if (type == "DIALOGUE" && kPlayPlayerDialogue.GetData().i == 1)
-			FuzRoBorkNamespace::startPlayerSpeech(speech);
-		else if (type == "BOOK_READ" && kPlayBookPages.GetData().i == 1) {
-			FuzRoBorkNamespace::stopSpeaking();
-			FuzRoBorkNamespace::startBookSpeech(speech);
-		}
-		else if (type == "BOOK_BOOK") {
-			FuzRoBorkNamespace::storeBookSpeech(speech);
-		}
-		else if (type == "BOOK_PAGES_FIRST") {
-			FuzRoBorkNamespace::storeFirstPagesSpeech(speech);
-		}
-		else if (type == "BOOK_PAGES") {
-			FuzRoBorkNamespace::storePagesSpeech(speech);
-		}
-		else if (type == "LOADING_SCREEN" && kPlayLoadingScreenText.GetData().i == 1) {
-			FuzRoBorkNamespace::speakLoadingScreen(speech);
-		}
-		else if (type == "CHECK_DONE") { // check whether speech is finished
-			bool isDone = !FuzRoBorkNamespace::isSpeaking() && !FuzRoBorkNamespace::isXVASpeaking();
-			if (isDone) {
-				_MESSAGE("Done speaking");
-			}
-			else {
-				_MESSAGE("Still speaking");
-			}
-			args->result->type = GFxValue::kType_String;
-			args->result->data.string = isDone ? "YES" : "NO";
-		}
-		else if (type == "STOP") {
-			FuzRoBorkNamespace::stopSpeaking();
-		}
-	}
-
-	bool RegisterScaleform(GFxMovieView* view, GFxValue* root)
-	{
-		RegisterFunction <SKSEScaleform_BorkFunction>(root, view, "BorkFunction");
-		return true;
-	}
-
-	bool SKSEPlugin_Query(const SKSEInterface * skse, PluginInfo * info)
+	__declspec(dllexport) bool SKSEPlugin_Load(const SKSEInterface* skse)
 	{
 		gLog.OpenRelative(CSIDL_MYDOCUMENTS, "\\My Games\\Skyrim Special Edition\\SKSE\\FuzRoBork.log");
 
 		_MESSAGE("%s Initializing...", MakeSillyName().c_str());
 
-		// populate info structure
-		info->infoVersion = PluginInfo::kInfoVersion;
-		info->name = "Fuz Ro D'oh";
-		info->version = PACKED_SME_VERSION;
-
 		interfaces::kPluginHandle = skse->GetPluginHandle();
 		interfaces::kMsgInterface = (SKSEMessagingInterface*)skse->QueryInterface(kInterface_Messaging);
 
-		if (skse->isEditor)
-			return false;
-		else if (skse->runtimeVersion != RUNTIME_VERSION)
-		{
-			_MESSAGE("Unsupported runtime version %08X", skse->runtimeVersion);
-			return false;
-		}
-		else if (!interfaces::kMsgInterface)
+		if (!interfaces::kMsgInterface)
 		{
 			_MESSAGE("Couldn't initialize messaging interface");
 			return false;
@@ -145,6 +146,16 @@ extern "C"
 			return false;
 		}
 
+		_MESSAGE("Initializing INI Manager");
+		FuzRoBorkINIManager::Instance.Initialize("Data\\SKSE\\Plugins\\FuzRoBork.ini", nullptr);
+
+		if (interfaces::kMsgInterface->RegisterListener(interfaces::kPluginHandle, "SKSE", MessageHandler) == false)
+		{
+			_MESSAGE("Couldn't register message listener");
+			return false;
+		}
+		else if (InstallHooks() == false)
+			return false;
 
 		g_scaleform = static_cast<SKSEScaleformInterface*>(skse->QueryInterface(kInterface_Scaleform));
 		if (!g_scaleform)
@@ -159,35 +170,24 @@ extern "C"
 			_FATALERROR("couldn't get papyrus interface");
 			return false;
 		}
-		return true;
-	}
 
-	bool SKSEPlugin_Load(const SKSEInterface * skse)
-	{
 		bool btest = g_papyrus->Register(FuzRoBorkNamespace::RegisterFuncs);
 		if (btest)
 			_MESSAGE("Register papyrus methods Succeeded");
-
+		else {
+			_MESSAGE("Register papyrus methods failed");
+			return false;
+		}
 		btest = g_scaleform->Register("FuzRoBork", RegisterScaleform);
 		if (btest)
 			_MESSAGE("Register scaleform method Succeeded");
-
-
-
-		_MESSAGE("Initializing INI Manager");
-		FuzRoBorkINIManager::Instance.Initialize("Data\\SKSE\\Plugins\\FuzRoBork.ini", nullptr);
-
-		if (interfaces::kMsgInterface->RegisterListener(interfaces::kPluginHandle, "SKSE", MessageHandler) == false)
-		{
-			_MESSAGE("Couldn't register message listener");
+		else {
+			_MESSAGE("Register scaleform methods failed");
 			return false;
 		}
-		else if (InstallHooks() == false)
-			return false;
 
 		return true;
 	}
-
 };
 
 

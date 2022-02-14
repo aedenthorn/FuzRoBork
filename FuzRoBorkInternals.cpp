@@ -285,8 +285,6 @@ override::MenuTopicManager* override::MenuTopicManager::GetSingleton(void)
 }
 
 
-
-
 // TTS Additions
 
 namespace FuzRoBorkNamespace {
@@ -360,14 +358,31 @@ namespace FuzRoBorkNamespace {
 
 	bool GetNPC(string nName, string nRace, NPCObj &npc) {
 		for (vector<NPCObj>::size_type i = 0; i < NPCList.size(); i++) {
+			_MESSAGE("checking list entry %s %d %s", nName.c_str(), i, NPCList[i].name.c_str());
+
 			if (
-				(size(nName) > 0 && (NPCList[i].name.compare(nName) == 0 || (NPCList[i].name.length() > 0 && regex_match(nName, regex(NPCList[i].name.c_str())))))
-				|| ((NPCList[i].race.compare(nRace) == 0 || (NPCList[i].race.length() > 0 && regex_match(nRace, regex(NPCList[i].race.c_str())))))
+				(nName != "null" && size(nName) > 0 && (NPCList[i].name.compare(nName) == 0 || IsRegexMatch(nName, NPCList[i].name)))
+				|| (nRace != "null" && size(nRace) > 0 && (NPCList[i].race.compare(nRace) == 0 || IsRegexMatch(nRace, NPCList[i].race)))
 				) {
 				_MESSAGE("Found match for %s %s",NPCList[i].name.c_str(), NPCList[i].lang.c_str());
 				npc = NPCList[i];
 				return true;
 			}
+		}
+		_MESSAGE("checked list, no match");
+		return false;
+	}
+
+	bool IsRegexMatch(string str, string rx) {
+		return false;
+		_MESSAGE("checking regex %s %s", str.c_str(), rx.c_str());
+		try {
+			return (size(rx) > 0 && regex_match(str, regex(rx.c_str())));
+		}
+		catch(...)
+		{
+			_MESSAGE("regex error");
+			return false;
 		}
 		return false;
 	}
@@ -396,7 +411,8 @@ namespace FuzRoBorkNamespace {
 			wchar_t* folder = NULL;
 			::SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_CREATE, NULL, &folder);
 
-			XVAFolder = wstring(folder) + L"\\xVASynth\\realTimeTTS\\";
+			XVAFolder = folder;
+			XVAFolder += L"\\xVASynth\\realTimeTTS\\";
 
 			//_MESSAGE("Folder set to %s", XVAFolder.c_str());
 		}
@@ -827,12 +843,25 @@ namespace FuzRoBorkNamespace {
 			str = findReplace(str, it->first, it->second);
 		}
 
+		// remove \t \r, etc
+
+		int idx = 0;
+		boolean par = false;
+
+		wstring newStr = L"";
+		while (idx < str.length()) {
+			if (str[idx] != '\r' && str[idx] != '\n' && str[idx] != '\t')
+				newStr += str[idx];
+			idx++;
+		}
+		str = newStr;
+
 		// remove parenthesis and brackets if option ticked
 
 		if (kSpeakParentheses.GetData().i == 0) {
-			int idx = 0;
-			boolean par = false;
-			wstring newStr = L"";
+			idx = 0;
+			par = false;
+			newStr = L"";
 			while (idx < str.length()) {
 				if (!par && str[idx] == '(')
 					par = true;
@@ -842,7 +871,6 @@ namespace FuzRoBorkNamespace {
 					newStr += str[idx];
 				idx++;
 			}
-			str = newStr;
 			idx = 0;
 			par = false;
 			newStr = L"";
@@ -863,7 +891,7 @@ namespace FuzRoBorkNamespace {
 	void speakTask(SpeakObj nSpeech)
 	{
 
-		//_MESSAGE("speakTask: '%s'", nSpeech.speech.c_str());
+		_MESSAGE("speakTask: '%s'", nSpeech.speech.c_str());
 		replaceUnspeakables(nSpeech.speech);
 
 		if (nSpeech.lang == "xVASynth") {
@@ -894,7 +922,7 @@ namespace FuzRoBorkNamespace {
 
 		if (SUCCEEDED(hr))
 		{
-			//_MESSAGE("searching for voices in registry");
+			_MESSAGE("searching for voices in registry");
 			
 			for (int i = 0; i < size(speechPaths); i++) {
 				found = findSpeechToken(&cpToken, wideLang, speechPaths[i]);
@@ -913,26 +941,26 @@ namespace FuzRoBorkNamespace {
 		{
 
 			hr = pVoice->SetVoice(cpToken);
-			//_MESSAGE("set voice");
+			_MESSAGE("set voice");
 
 		}
 		if (SUCCEEDED(hr))
 		{
 			hr = pVoice->SetRate(nSpeech.rate);
-			//_MESSAGE("set rate");
+			_MESSAGE("set rate");
 
 		}
 		if (SUCCEEDED(hr))
 		{
 
 			hr = pVoice->SetVolume(nSpeech.vol);
-			//_MESSAGE("set volume");
+			_MESSAGE("set volume");
 		}
 		if (SUCCEEDED(hr))
 		{
 			wstring str(nSpeech.speech);
 			if (str.length() < 1) {
-				//_MESSAGE("No speech string");
+				_MESSAGE("No speech string");
 				return;
 			}
 
@@ -940,9 +968,7 @@ namespace FuzRoBorkNamespace {
 
 			wstring speech = L"<pitch absmiddle=\"" + to_wstring(nSpeech.pitch) + L"\">" + nSpeech.speech + L"</pitch>";
 
-			const wchar_t* lSpeech = speech.c_str();
-
-			//_MESSAGE("Speaking '%s'", nChar);
+			//_MESSAGE("Speaking '%s'", lSpeech);
 
 			if (pVoice == NULL) {
 				_MESSAGE("No pVoice");
@@ -957,9 +983,9 @@ namespace FuzRoBorkNamespace {
 				}
 
 			}
-			hr = pVoice->Speak(lSpeech, SPF_PURGEBEFORESPEAK | SPF_ASYNC, NULL);
+			hr = pVoice->Speak(speech.c_str(), SPF_PURGEBEFORESPEAK | SPF_ASYNC, NULL);
 			actionSpeaking = false;
-			//_MESSAGE("Spoke");
+			_MESSAGE("Spoke");
 		}
 
 
@@ -1038,32 +1064,48 @@ namespace FuzRoBorkNamespace {
 		sendingXVAS = true;
 		_MESSAGE("Writing speech to file for xVASynth");
 
-		string game = StringToLower(string(kxVASynthGame.GetData().s));
+		string game = "";
+		string voice = "";
 
-		if (gameVoices.count(game) == 0) {
-			_MESSAGE("Game %s not found", game.c_str());
-			sendingXVAS = false;
-			return;
+		if (obj.speech.size() > 0) {
+			game = StringToLower(string(kxVASynthGame.GetData().s));
+
+			if (game.size() == 0 && obj.lang != "xVASynth") {
+				_MESSAGE("Empty game string sent");
+				sendingXVAS = false;
+				return;
+			}
+
+			if (gameVoices.count(game) == 0) {
+				_MESSAGE("Game %s not found", game.c_str());
+				sendingXVAS = false;
+				return;
+			}
+			if (gameVoices[game].size() == 0) {
+				_MESSAGE("Game %s has no voices", game.c_str());
+				sendingXVAS = false;
+				return;
+			}
+
+			UInt32 idx = kxVASynthVoice.GetData().u;
+
+			if (idx >= gameVoices[game].size())
+				idx = 0;
+
+			_MESSAGE("Voice id is %d", idx);
+
+			if (idx >= gameVoices[game].size()) {
+				_MESSAGE("Index %d out of bounds for game %s", idx, game.c_str());
+				return;
+			}
+
+			voice = gameVoices[game][idx]["id"];
+
+			_MESSAGE("Voice name is %s", string(gameVoices[game][idx]["name"]).c_str());
 		}
-		if (gameVoices[game].size() == 0) {
-			_MESSAGE("Game %s has no voices", game.c_str());
-			sendingXVAS = false;
-			return;
+		else {
+			_MESSAGE("Sending initialization data only");
 		}
-
-		UInt32 idx = kxVASynthVoice.GetData().u;
-
-		if (idx >= gameVoices[game].size())
-			idx = 0;
-
-		_MESSAGE("Voice id is %d", idx);
-
-		if (idx >= gameVoices[game].size()) {
-			_MESSAGE("Index %d out of bounds for game %s", idx, game.c_str());
-			return;
-		}
-
-		_MESSAGE("Voice name is %s", string(gameVoices[game][idx]["name"]).c_str());
 
 		wregex tags(L"<[^>]*>");
 		obj.speech = regex_replace(obj.speech, tags, L"");
@@ -1071,26 +1113,19 @@ namespace FuzRoBorkNamespace {
 		wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
 		string speech = converter.to_bytes(obj.speech);
 
-		float rate = 0;
-		if (obj.rate < 0) {
-			rate = (obj.rate + 10) / 10;
-		}
-		else {
-			rate = (obj.rate / 10) + 1;
-		}
-
 		json j;
-		j["voiceId"] = gameVoices[game][idx]["name"];
+		j["voiceId"] = voice;
 		j["gameId"] = game;
-		j["xVA_pitch"] = obj.pitch / 10 * 3;
-		j["xVA_pace"] = rate;
-		j["vol"] = obj.vol / 100 * 3;
+		//j["xVA_pitch"] = 1 + obj.pitch / 10 * 3.33;
+		j["ffmpeg_pitchMult"] = 1 + obj.pitch / 10;
+		//j["xVA_pace"] = rate;
+		j["vol"] = obj.vol / 100 * 3.33;
 		j["text"] = speech;
 		j["done"] = false;
 		j["use_ffmpeg"] = true;
 		j["pad_start"] = 0;
 		j["pad_end"] = 200;
-		j["ffmpeg_tempo"] = 1;
+		j["ffmpeg_tempo"] = 1 + obj.rate / 10;
 
 		wstring fpath = GetXVAFolder();
 
@@ -1134,7 +1169,7 @@ namespace FuzRoBorkNamespace {
 			return;
 		}
 
-		//_MESSAGE("NPC Speaking '%s'", text.c_str());
+		_MESSAGE("NPC Speaking '%s'", text.c_str());
 
 
 		// standard values
@@ -1165,17 +1200,18 @@ namespace FuzRoBorkNamespace {
 
 			// specific NPC override
 
-			const char* nName(npc->fullName.GetName());
-			const char* nRace(npc->race.race->fullName.GetName());
+			string nName = npc->fullName.GetName();
+			string nRace = npc->race.race->fullName.GetName();
 
-			_MESSAGE("Looking for custom npc: %s %s", nRace, nName);
+			_MESSAGE("Looking for custom npc: %s %s", nRace.c_str(), nName.c_str());
 
 			//Console_Print(nName.c_str());
 			//Console_Print(nRace.c_str());
 
 			NPCObj npc;
 
-			if (GetNPC(string(nName), string(nRace), npc)) {
+
+			if (GetNPC(nName, nRace, npc)) {
 
 				if (size(npc.lang) > 0)
 					lang = npc.lang;
@@ -1555,6 +1591,7 @@ namespace FuzRoBorkNamespace {
 		BSFixedString vs;
 		vs.data = "xVASynth";
 		names.Set(&vs, nameA.size());
+		_MESSAGE("Sent %d languages to MCM", names.Length());
 	}
 	void sendXGames(StaticFunctionTag* t, VMArray<BSFixedString> xGames) {
 
@@ -1617,7 +1654,7 @@ namespace FuzRoBorkNamespace {
 			_MESSAGE("No voices for %s", game.data);
 			return;
 		}
-		_MESSAGE("Sending x voices for game %s", game.data);
+		_MESSAGE("Sending %d voices for game %s", gameVoices.count(gameData), game.data);
 
 		json vlist = gameVoices[gameData];
 
@@ -1657,4 +1694,5 @@ namespace FuzRoBorkNamespace {
 
 		return true;
 	}
+
 }
