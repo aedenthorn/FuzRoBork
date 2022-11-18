@@ -62,6 +62,10 @@ SME::INI::INISetting	kMsPerWordSilence("MsPerWordSilence",
 	"General",
 	"BLEH",
 	(float)-1);
+SME::INI::INISetting	kCustomTempPath("PlayerLanguage",
+	"General",
+	"BLEH",
+	(char*)"");
 
 SME::INI::INISetting	kPlayerLanguage("PlayerLanguage",
 	"General",
@@ -170,6 +174,7 @@ void FuzRoBorkINIManager::Initialize(const char* INIPath, void* Paramenter)
 
 	RegisterSetting(&kSpeakParentheses);
 	RegisterSetting(&kEnableHotKeys);
+	RegisterSetting(&kCustomTempPath);
 
 	RegisterSetting(&kPlayerLanguage);
 	RegisterSetting(&kFemaleLanguage);
@@ -409,11 +414,17 @@ namespace FuzRoBorkNamespace {
 	wstring GetXVAFolder() {
 		if (XVAFolder == L"") {
 			wchar_t* folder = NULL;
-			::SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_CREATE, NULL, &folder);
 
-			XVAFolder = folder;
-			XVAFolder += L"\\xVASynth\\realTimeTTS\\";
+			if (strlen(kCustomTempPath.GetData().s) == 0) {
+				::SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_CREATE, NULL, &folder);
 
+				XVAFolder = folder;
+				XVAFolder += L"\\xVASynth\\realTimeTTS\\";
+			}
+			else {
+				wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
+				XVAFolder = converter.from_bytes(kCustomTempPath.GetData().s) + L"\\";
+			}
 			//_MESSAGE("Folder set to %s", XVAFolder.c_str());
 		}
 		return XVAFolder;

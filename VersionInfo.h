@@ -13,15 +13,11 @@
 #define STRINGIZE2(s) #s
 #define STRINGIZE(s) STRINGIZE2(s)
 
-#define VERSION_MAJOR               0
-#define VERSION_MINOR               1
+#define VERSION_MAJOR               2
+#define VERSION_MINOR               3
 
 #define VER_COMPANYNAME_STR         "aedenthorn"
-#ifdef VR_BUILD
-	#define VER_FILE_DESCRIPTION_STR    "A plugin for the Skyrim Script Extender VR"
-#else
-	#define VER_FILE_DESCRIPTION_STR    "A plugin for the Skyrim Script Extender 64"
-#endif
+#define VER_FILE_DESCRIPTION_STR    "A plugin for the Skyrim Script Extender 64"
 #define VER_FILE_VERSION            VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD
 #define VER_FILE_VERSION_STR        STRINGIZE(VERSION_MAJOR)        \
 									"." STRINGIZE(VERSION_MINOR)    \
@@ -38,9 +34,9 @@
 #define VER_COPYRIGHT_STR           "Copyright aedenthorn (C) 2021"
 
 #ifdef _DEBUG
-  #define VER_VER_DEBUG             VS_FF_DEBUG
+#define VER_VER_DEBUG             VS_FF_DEBUG
 #else
-  #define VER_VER_DEBUG             0
+#define VER_VER_DEBUG             0
 #endif
 
 #define VER_FILEOS                  VOS_NT_WINDOWS32

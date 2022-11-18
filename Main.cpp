@@ -13,7 +13,6 @@ SKSEPapyrusInterface* g_papyrus = NULL;
 
 extern "C"
 {
-
 	__declspec(dllexport) SKSEPluginVersionData SKSEPlugin_Version =
 	{
 		SKSEPluginVersionData::kVersion,
@@ -23,7 +22,8 @@ extern "C"
 		"aedenthorn",
 		"",
 		0,	// Version-dependent
-		{ RUNTIME_VERSION_1_6_353, 0 },
+		0,
+		{ RUNTIME_VERSION_1_6_640, 0 },
 		0,
 	};
 
