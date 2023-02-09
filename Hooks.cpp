@@ -45,6 +45,8 @@ void SneakAtackVoicePath(CachedResponseData* Data, char* VoicePathBuffer)
 	if (strlen(VoicePathBuffer) < 17)
 		return;
 
+	//_MESSAGE("1");
+
 	std::string FUZPath(VoicePathBuffer), WAVPath(VoicePathBuffer), XWMPath(VoicePathBuffer);
 	WAVPath.erase(0, 5);
 
@@ -55,8 +57,6 @@ void SneakAtackVoicePath(CachedResponseData* Data, char* VoicePathBuffer)
 	XWMPath.erase(0, 5);
 	XWMPath.erase(XWMPath.length() - 3, 3);
 	XWMPath.append("xwm");
-
-	//_MESSAGE("w %s, f %s, x %s", WAVPath.c_str(), FUZPath.c_str(), XWMPath.c_str());
 
 	BSIStream* WAVStream = BSIStream::CreateInstance(WAVPath.c_str());
 	BSIStream* FUZStream = BSIStream::CreateInstance(FUZPath.c_str());
@@ -73,6 +73,7 @@ void SneakAtackVoicePath(CachedResponseData* Data, char* VoicePathBuffer)
 
 	if (WAVStream->valid == 0 && FUZStream->valid == 0 && XWMStream->valid == 0)
 	{
+		//_MESSAGE("2");
 		static const int kWordsPerSecond = kWordsPerSecondSilence.GetData().i;
 		static const int kMaxSeconds = 10;
 
@@ -82,6 +83,7 @@ void SneakAtackVoicePath(CachedResponseData* Data, char* VoicePathBuffer)
 
 		if (ResponseText.length() > 4 && strncmp(ResponseText.c_str(), "<ID=", 4))
 		{
+			//_MESSAGE("3");
 			SME::StringHelpers::Tokenizer TextParser(ResponseText.c_str(), " ");
 			int WordCount = 0;
 
@@ -99,8 +101,11 @@ void SneakAtackVoicePath(CachedResponseData* Data, char* VoicePathBuffer)
 			SubtitleHasher::Instance.Add(Data->responseText.Get());
 		}
 
+		//_MESSAGE("4");
+
 		if (ResponseText.length() > 1 || (ResponseText.length() == 1 && ResponseText[0] == ' ' && kSkipEmptyResponses.GetData().i == 0))
 		{
+			//_MESSAGE("5");
 			FORMAT_STR(ShimAssetFilePath, "Data\\Sound\\Voice\\Fuz Ro Doh\\Stock_%d.xwm", SecondsOfSilence);
 			CALL_MEMBER_FN(&Data->voiceFilePath, Set)(ShimAssetFilePath);
 #ifndef NDEBUG
@@ -108,6 +113,7 @@ void SneakAtackVoicePath(CachedResponseData* Data, char* VoicePathBuffer)
 #endif
 		}
 	}
+	//_MESSAGE("6");
 
 	WAVStream->Dtor();
 	FUZStream->Dtor();
@@ -208,8 +214,8 @@ bool ShouldForceSubs4(NPCChatterData* ChatterData, UInt32 ForceRegardless, const
 
 
 
-#define PUSH_VOLATILE		push(rcx); push(rdx); push(r8);
-#define POP_VOLATILE		pop(r8); pop(rdx); pop(rcx);
+#define PUSH_VOLATILE		push(rcx); push(rdx); push(r8); sub(rsp, 0x20);
+#define POP_VOLATILE		add(rsp, 0x20); pop(r8); pop(rdx); pop(rcx); 
 
 bool InstallHooks()
 {

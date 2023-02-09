@@ -3,9 +3,12 @@
 
 #include <skse64/PluginAPI.h>
 #include <skse64/GameSettings.h>
+#include "skse64/GameAPI.h"
 #include <skse64/GameTypes.h>
+#include "skse64/GameForms.h"
 #include <skse64/GameEvents.h>
 #include <skse64/GameData.h>
+#include "skse64/GameSettings.h"
 #include <skse64/GameStreams.h>
 #include <skse64/ScaleformState.h>
 #include <skse64/PapyrusArgs.h>
@@ -146,7 +149,7 @@ public:
 	MEMBER_FN_PREFIX(BSIStream);
 
 	// E8 ? ? ? ? 90 33 DB 38 5C 24 38
-	DEFINE_MEMBER_FN(Ctor, BSIStream*, MAKE_RVA(0x0000000140D814B0), const char* FilePath, void* ParentLocation);
+	DEFINE_MEMBER_FN(Ctor, BSIStream*, MAKE_RVA(0x0000000140D93090), const char* FilePath, void* ParentLocation);
 
 	// members
 	///*00*/ void**					vtbl;
@@ -154,7 +157,7 @@ public:
 	/*10*/ UInt8					valid;		// set to 1 if the stream's valid
 	/*11*/ UInt8					pad09[7];
 	/*18*/ StringCache::Ref			filePath;	// relative to the Data directory when no BSResource::Location's passed to the ctor (the game uses a static instance)
-												// otherwise, use its location
+	// otherwise, use its location
 
 	virtual void* Dtor(bool FreeMemory = true);
 
