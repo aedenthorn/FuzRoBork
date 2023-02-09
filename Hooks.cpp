@@ -228,7 +228,7 @@ bool InstallHooks()
 	{
 		struct HotswapReponseAssetPath_Code : Xbyak::CodeGenerator
 		{
-			HotswapReponseAssetPath_Code(void * buf) : Xbyak::CodeGenerator(4096, buf)
+			HotswapReponseAssetPath_Code(void* buf) : Xbyak::CodeGenerator(4096, buf)
 			{
 				Xbyak::Label RetnLabel;
 
@@ -241,7 +241,7 @@ bool InstallHooks()
 				pop(rcx);
 				jmp(ptr[rip + RetnLabel]);
 
-			L(RetnLabel);
+				L(RetnLabel);
 				dq(hookedAddresses::kCachedResponseData_Ctor_Ret);
 			}
 		};
@@ -256,7 +256,7 @@ bool InstallHooks()
 	{
 		struct UIUtilsQueueDialogSubs_Code : Xbyak::CodeGenerator
 		{
-			UIUtilsQueueDialogSubs_Code(void * buf) : Xbyak::CodeGenerator(4096, buf)
+			UIUtilsQueueDialogSubs_Code(void* buf) : Xbyak::CodeGenerator(4096, buf)
 			{
 				Xbyak::Label ShowLabel;
 
@@ -268,8 +268,8 @@ bool InstallHooks()
 				jnz(ShowLabel);
 
 				PUSH_VOLATILE;
-				xor(rcx, rcx);
-				xor(rdx, rdx);
+				xor (rcx, rcx);
+				xor (rdx, rdx);
 				mov(r8, r14);	// subtitle
 				mov(rax, (uintptr_t)ShouldForceSubs1);
 				call(rax);
@@ -280,7 +280,7 @@ bool InstallHooks()
 				jmp(ptr[rip]);
 				dq(hookedAddresses::kUIUtils_QueueDialogSubtitles_Exit);
 
-			L(ShowLabel);
+				L(ShowLabel);
 				jmp(ptr[rip]);
 				dq(hookedAddresses::kUIUtils_QueueDialogSubtitles_Show);
 			}
@@ -296,7 +296,7 @@ bool InstallHooks()
 	{
 		struct ASCMDisplayQueuedNPCChatterData_DialogSubs_Code : Xbyak::CodeGenerator
 		{
-			ASCMDisplayQueuedNPCChatterData_DialogSubs_Code(void * buf) : Xbyak::CodeGenerator(4096, buf)
+			ASCMDisplayQueuedNPCChatterData_DialogSubs_Code(void* buf) : Xbyak::CodeGenerator(4096, buf)
 			{
 				Xbyak::Label ShowLabel;
 
@@ -309,7 +309,7 @@ bool InstallHooks()
 
 				PUSH_VOLATILE;
 				mov(rcx, rsi);
-				xor(rdx, rdx);
+				xor (rdx, rdx);
 				mov(r8, ptr[rsi + 0x8]);	// subtitle
 				mov(rax, (uintptr_t)ShouldForceSubs2);
 				call(rax);
@@ -320,7 +320,7 @@ bool InstallHooks()
 				jmp(ptr[rip]);
 				dq(hookedAddresses::kASCM_DisplayQueuedNPCChatterData_DialogSubs_Exit);
 
-			L(ShowLabel);
+				L(ShowLabel);
 				jmp(ptr[rip]);
 				dq(hookedAddresses::kASCM_DisplayQueuedNPCChatterData_DialogSubs_Show);
 			}
@@ -336,7 +336,7 @@ bool InstallHooks()
 	{
 		struct ASCMDisplayQueuedNPCChatterData_GeneralSubs_Code : Xbyak::CodeGenerator
 		{
-			ASCMDisplayQueuedNPCChatterData_GeneralSubs_Code(void * buf) : Xbyak::CodeGenerator(4096, buf)
+			ASCMDisplayQueuedNPCChatterData_GeneralSubs_Code(void* buf) : Xbyak::CodeGenerator(4096, buf)
 			{
 				Xbyak::Label ShowLabel;
 
@@ -360,7 +360,7 @@ bool InstallHooks()
 				jmp(ptr[rip]);
 				dq(hookedAddresses::kASCM_DisplayQueuedNPCChatterData_GeneralSubs_Exit);
 
-			L(ShowLabel);
+				L(ShowLabel);
 				jmp(ptr[rip]);
 				dq(hookedAddresses::kASCM_DisplayQueuedNPCChatterData_GeneralSubs_Show);
 			}
@@ -376,7 +376,7 @@ bool InstallHooks()
 	{
 		struct ASCMQueueNPCChatterData_Code : Xbyak::CodeGenerator
 		{
-			ASCMQueueNPCChatterData_Code(void * buf) : Xbyak::CodeGenerator(4096, buf)
+			ASCMQueueNPCChatterData_Code(void* buf) : Xbyak::CodeGenerator(4096, buf)
 			{
 				Xbyak::Label ShowLabel;
 
@@ -388,7 +388,7 @@ bool InstallHooks()
 				jnz(ShowLabel);
 
 				PUSH_VOLATILE;
-				xor(rcx, rcx);
+				xor (rcx, rcx);
 				mov(rdx, r15d);
 				mov(r8, rbp);	// subtitle
 				mov(rax, (uintptr_t)ShouldForceSubs4);
@@ -400,7 +400,7 @@ bool InstallHooks()
 				jmp(ptr[rip]);
 				dq(hookedAddresses::kASCM_QueueNPCChatterData_Exit);
 
-			L(ShowLabel);
+				L(ShowLabel);
 				jmp(ptr[rip]);
 				dq(hookedAddresses::kASCM_QueueNPCChatterData_Show);
 			}
