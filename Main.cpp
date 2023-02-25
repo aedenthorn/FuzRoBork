@@ -38,17 +38,13 @@ extern "C"
 		GFxValue* a = args->args;
 
 		string sspeech = "";
-		wstring wspeech = L"";
 
 		if (a[1].GetType() == GFxValue::kType_String) {// text to speak
 			sspeech = string(a[0].GetString());
 
 			//_MESSAGE("Raw speech: %s", sspeech.c_str());
-
-			wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
-			wspeech = converter.from_bytes(sspeech);
 		} 
-
+		const char* speech = sspeech.c_str();
 		string type = "";
 
 		if (a[1].GetType() == GFxValue::kType_String) // call type
@@ -59,25 +55,25 @@ extern "C"
 
 		if (type == "DIALOGUE_CLICK") {
 			FuzRoBorkNamespace::stopSpeaking();
-			FuzRoBorkNamespace::startPlayerSpeech(wspeech);
+			FuzRoBorkNamespace::startPlayerSpeech(speech);
 		}
 		else if (type == "DIALOGUE" && kPlayPlayerDialogue.GetData().i == 1)
-			FuzRoBorkNamespace::startPlayerSpeech(wspeech);
+			FuzRoBorkNamespace::startPlayerSpeech(speech);
 		else if (type == "BOOK_READ" && kPlayBookPages.GetData().i == 1) {
 			FuzRoBorkNamespace::stopSpeaking();
-			FuzRoBorkNamespace::startBookSpeech(wspeech);
+			FuzRoBorkNamespace::startBookSpeech(speech);
 		}
 		else if (type == "BOOK_BOOK") {
-			FuzRoBorkNamespace::storeBookSpeech(wspeech);
+			FuzRoBorkNamespace::storeBookSpeech(speech);
 		}
 		else if (type == "BOOK_PAGES_FIRST") {
-			FuzRoBorkNamespace::storeFirstPagesSpeech(wspeech);
+			FuzRoBorkNamespace::storeFirstPagesSpeech(speech);
 		}
 		else if (type == "BOOK_PAGES") {
-			FuzRoBorkNamespace::storePagesSpeech(wspeech);
+			FuzRoBorkNamespace::storePagesSpeech(speech);
 		}
 		else if (type == "LOADING_SCREEN" && kPlayLoadingScreenText.GetData().i == 1) {
-			FuzRoBorkNamespace::speakLoadingScreen(wspeech);
+			FuzRoBorkNamespace::speakLoadingScreen(speech);
 		}
 		else if (type == "CHECK_DONE") { // check whether speech is finished
 			bool isDone = !FuzRoBorkNamespace::isSpeaking() && !FuzRoBorkNamespace::isXVASpeaking();
@@ -118,6 +114,24 @@ extern "C"
 				CleanupThread.detach();
 
 				_MESSAGE("Scheduled cleanup thread");
+				
+				std::thread CheckSpeechThread([]() {
+					SpeakObj obj;
+					while (true)
+					{
+						//_MESSAGE("checking for speech; speaking: %s, queue: %s", (!FuzRoBorkNamespace::isSpeaking() && !FuzRoBorkNamespace::isXVASpeaking()) ? "false" : "true", FuzRoBorkNamespace::GetSpeechFromQueue(obj) ? "yes" : "no");
+						if (!FuzRoBorkNamespace::isSpeaking() && !FuzRoBorkNamespace::isXVASpeaking() && FuzRoBorkNamespace::GetSpeechFromQueue(obj)) {
+
+							_MESSAGE("Speaking queued speech %s", obj.speech);
+							actionSpeaking = true;
+							thread(FuzRoBorkNamespace::speakTask, obj).detach();
+							FuzRoBorkNamespace::EraseFromQueue();
+						}
+						std::this_thread::sleep_for(100ms);
+					}
+				});
+				CheckSpeechThread.detach();
+
 				_MESSAGE("%s Initialized!", MakeSillyName().c_str());
 				FuzRoBorkNamespace::LoadXML();
 				FuzRoBorkNamespace::ImportTranslationFiles();

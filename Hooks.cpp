@@ -3,7 +3,6 @@
 #include "skse64_common/BranchTrampoline.h"
 #include "skse64_common/Relocation.h"
 
-
 namespace hookedAddresses
 {
 	// E8 ? ? ? ? 48 8B F8 EB 02 33 FF 48 85 FF
@@ -33,7 +32,6 @@ namespace hookedAddresses
 	uintptr_t				kASCM_QueueNPCChatterData_Show = kASCM_QueueNPCChatterData + 0x92;
 	uintptr_t				kASCM_QueueNPCChatterData_Exit = kASCM_QueueNPCChatterData + 0xCA;
 }
-
 
 void SneakAtackVoicePath(CachedResponseData* Data, char* VoicePathBuffer)
 {
@@ -197,10 +195,18 @@ bool ShouldForceSubs3(NPCChatterData* ChatterData, UInt32 ForceRegardless, const
 		*/
 		if (Subtitle && SubtitleHasher::Instance.HasMatch(Subtitle))		// force if the subtitle is for a voiceless response
 		{
-			_MESSAGE("Found a match for %s - playing TTS", Subtitle);
-			wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
-			wstring str(converter.from_bytes(Subtitle));
-			FuzRoBorkNamespace::startNPCSpeech(str, refr);
+			_MESSAGE("Voiceless NPC speech %s", Subtitle);
+			
+			if (!refr || !refr->baseForm) {
+				_MESSAGE("Couldn't get speaker, aborting");
+			}
+
+			TESNPC* npc = DYNAMIC_CAST(refr->baseForm, TESForm, TESNPC);
+			
+			_MESSAGE("Speaker: %s (%s)", npc->fullName.GetName(), CALL_MEMBER_FN(npc, GetSex)() == 0 ? "male" : "female");
+
+			FuzRoBorkNamespace::AddSpeechToQueue(npc, Subtitle);
+
 			return true;
 		}
 	}
@@ -211,8 +217,6 @@ bool ShouldForceSubs4(NPCChatterData* ChatterData, UInt32 ForceRegardless, const
 	_MESSAGE("ShouldForceSubs4");
 	return ShouldForceSubs(ChatterData, ForceRegardless, Subtitle);
 }
-
-
 
 #define PUSH_VOLATILE		push(rcx); push(rdx); push(r8); sub(rsp, 0x20);
 #define POP_VOLATILE		add(rsp, 0x20); pop(r8); pop(rdx); pop(rcx); 

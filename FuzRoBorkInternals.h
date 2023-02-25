@@ -300,54 +300,71 @@ bool				CanShowGeneralSubtitles();
 
 //TTS Additions
 
+
+class NPCObj
+{
+public:
+	NPCObj(const char* _name, const char* _race, const char* _lang, int _sex, float _rate, float _vol, int _pitch);
+	NPCObj();
+	const char* name;
+	const char* race;
+	const char* lang;
+	int sex = -1;
+	float rate = 0;
+	float vol = 0;
+	int pitch = 0;
+};
+
+class SpeakObj
+{
+public:
+	SpeakObj(const char* _speech, const char* _lang, float _rate, float _vol, int _pitch);
+	SpeakObj();
+	const char* speech;
+	const char* lang;
+	float rate;
+	float vol;
+	int pitch;
+};
+class QueueObj
+{
+public:
+	QueueObj(TESNPC* _npc, const char* _speech);
+	TESNPC* npc;
+	const char* speech;
+};
+
+static boolean actionSpeaking = false;
+
 namespace FuzRoBorkNamespace {
 
-	class SpeakObj
-	{
-		public:
-			SpeakObj(wstring _speech, std::string _lang, float _rate, float _vol, int _pitch);
-			wstring speech;
-			std::string lang;
-			float rate;
-			float vol;
-			int pitch;
-	};
+	void AddSpeechToQueue(TESNPC* npc, const char* speech);
+	bool GetSpeechFromQueue(SpeakObj& obj);
+	void EraseFromQueue();
 
-	class NPCObj
-	{
-		public:
-			NPCObj(string _name, string _race, string _lang, float _rate, float _vol, int _pitch);
-			NPCObj();
-			string name;
-			string race;
-			string lang;
-			float rate;
-			float vol;
-			int pitch;
-	};
-
-	bool GetNPC(string nName, string nRace, NPCObj &npc);
-	bool IsRegexMatch(string str, string rx);
-	wstring findReplace(wstring str, const wstring oldStr, const wstring newStr);
+	bool GetNPC(const char* nName, const char* nRace, NPCObj &npc);
+	bool IsRegexMatch(const char* str, const char* rx);
+	void findReplace(string& str, string oldStr, string newStr);
 	void ImportTranslationFiles();
 	void ParseTranslation(string name);
-	void ReloadXML();
+	void ReloadXML(StaticFunctionTag* base);
 	void LoadXML();
 	bool RegisterFuncs(VMClassRegistry* registry);
 
+	void replaceUnspeakables(string& str);
+	void speakTask(SpeakObj obj);
 	void sendToxVASynth(SpeakObj obj);
 	void sendLanguages(StaticFunctionTag* t, VMArray<BSFixedString> names);
-	void storeBookSpeech(wstring text);
-	void storeFirstPagesSpeech(wstring text);
-	void storePagesSpeech(wstring text);
+	void storeBookSpeech(const char* text);
+	void storeFirstPagesSpeech(const char* text);
+	void storePagesSpeech(const char* text);
 	void startStoredPagesSpeech(StaticFunctionTag* base);
 	void startStoredBookSpeech(StaticFunctionTag* base);
-	void startBookSpeech(wstring text);
-	void startNPCSpeech(wstring text, TESObjectREFR * refr);
-	void startPlayerSpeech(wstring _title);
-	void startNarratorSpeech(wstring text);
-	void speakLoadingScreen(wstring text);
-
+	void startBookSpeech(const char* text);
+	SpeakObj GetNPCSpeech(TESNPC* refr, const char* text);
+	void startPlayerSpeech(const char* _title);
+	void startNarratorSpeech(const char* text);
+	void speakLoadingScreen(const char* text);
 	boolean isSpeaking();
 	boolean isXVASpeaking();
 	void stopSpeaking(void);

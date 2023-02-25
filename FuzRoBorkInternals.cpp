@@ -292,12 +292,42 @@ override::MenuTopicManager* override::MenuTopicManager::GetSingleton(void)
 
 // TTS Additions
 
+NPCObj::NPCObj(const char* _name, const char* _race, const char* _lang, int _sex, float _rate, float _vol, int _pitch) {
+	name = _name;
+	race = _race;
+	sex = _sex;
+	lang = _lang;
+	rate = _rate;
+	vol = _vol;
+	pitch = _pitch;
+}
+NPCObj::NPCObj() {
+}
+
+SpeakObj::SpeakObj(const char* _speech, const char*  _lang, float _rate, float _vol, int _pitch) {
+	speech = _speech;
+	lang = _lang;
+	rate = _rate;
+	vol = _vol;
+	pitch = _pitch;
+}
+SpeakObj::SpeakObj() {
+}
+
+
+QueueObj::QueueObj(TESNPC* _npc, const char* _speech) {
+	speech = _speech;
+	npc = _npc;
+}
+
 namespace FuzRoBorkNamespace {
 
 	PluginHandle g_pluginHandle;
 	
-	wstring storedBookSpeech = L"";
-	wstring storedPagesSpeech = L"";
+	vector<QueueObj> speakingQueue;
+
+	const char* storedBookSpeech = "";
+	const char* storedPagesSpeech = "";
 
 	//SubtitleHasher			SubtitleHasher::Instance;
 	//const double			SubtitleHasher::kPurgeInterval = 1000.0 * 60.0f;
@@ -312,35 +342,15 @@ namespace FuzRoBorkNamespace {
 
 	vector<NPCObj> NPCList;
 
-	NPCObj::NPCObj(string _name, string _race, string _lang, float _rate, float _vol, int _pitch) {
-		name = _name;
-		race = _race;
-		lang = _lang;
-		rate = _rate;
-		vol = _vol;
-		pitch = _pitch;
-	}
-	NPCObj::NPCObj() {
-
-	}
-
-	boolean actionSpeaking = false;
 
 	ISpVoice* pVoice = NULL;
 
-	SpeakObj::SpeakObj(wstring _speech, std::string _lang, float _rate, float _vol, int _pitch) {
-		speech = _speech;
-		lang = _lang;
-		rate = _rate;
-		vol = _vol;
-		pitch = _pitch;
-	}
 
-	map< int, wstring > hotkeyTexts;
-	vector< wstring > randomTexts;
-	map<string, vector<wstring>> actionList;
-	map< wstring, wstring > fixes;
-	map< wstring, wstring > transMap;
+	map< int, string> hotkeyTexts;
+	vector< string > randomTexts;
+	map<string, vector<string>> actionList;
+	map< string, string> fixes;
+	map< string, string> transMap;
 	map<string, json > gameVoices;
 
 	wstring XVAFolder = L"";
@@ -353,23 +363,50 @@ namespace FuzRoBorkNamespace {
 	bool playingXVAS = false;
 	bool stopTimer = false;
 
-	string StringToLower(string str) {
-		for (int i = 0; i < str.length(); i++)
-		{
-			str[i] = tolower(str[i]);
+	void AddSpeechToQueue(TESNPC* npc, const char* speech) {
+		//_MESSAGE("Adding speech to queue position %i: %s ", speakingQueue.size(), speech);
+
+		QueueObj obj(npc, speech);
+		speakingQueue.push_back(obj);
+	}
+	bool GetSpeechFromQueue(SpeakObj& obj) {
+		if (speakingQueue.size() == 0) {
+			return false;
 		}
+		//_MESSAGE("got queued speech (queue size: %i): %s", speakingQueue.size(), speakingQueue[0].speech);
+		obj = GetNPCSpeech(speakingQueue[0].npc, speakingQueue[0].speech);
+		return true;
+	}
+	void EraseFromQueue() {
+		if (speakingQueue.size() == 0)
+			return;
+		//_MESSAGE("Erasing first queued speech (queue size: %i): %s", speakingQueue.size(), speakingQueue[0].speech);
+		speakingQueue.erase(speakingQueue.begin());
+		//_MESSAGE("Remaning queue size: %i", speakingQueue.size());
+	}
+	
+	const char* StringToLower(const char* str) {
+		string s(str);
+		for (int i = 0; i < s.size(); i++)
+		{
+			s[i] = tolower(s[i]);
+		}
+		str = s.c_str();
 		return str;
 	}
 
-	bool GetNPC(string nName, string nRace, NPCObj &npc) {
+	bool GetNPC(const char* nName, const char* nRace, NPCObj& npc) {
 		for (vector<NPCObj>::size_type i = 0; i < NPCList.size(); i++) {
-			_MESSAGE("checking list entry %s %d %s", nName.c_str(), i, NPCList[i].name.c_str());
+			_MESSAGE("checking list entry %s %d %s", nName, i, NPCList[i].name);
 
 			if (
-				(nName != "null" && size(nName) > 0 && (NPCList[i].name.compare(nName) == 0 || IsRegexMatch(nName, NPCList[i].name)))
-				|| (nRace != "null" && size(nRace) > 0 && (NPCList[i].race.compare(nRace) == 0 || IsRegexMatch(nRace, NPCList[i].race)))
-				) {
-				_MESSAGE("Found match for %s %s",NPCList[i].name.c_str(), NPCList[i].lang.c_str());
+				(
+					(nName != "null" && strlen(nName) > 0 && (strcmp(NPCList[i].name, nName) == 0 || IsRegexMatch(nName, NPCList[i].name)))
+					|| (nRace != "null" && strlen(nRace) > 0 && (strcmp(NPCList[i].race, nRace) == 0 || IsRegexMatch(nRace, NPCList[i].race) && (npc.sex == -1 || npc.sex == NPCList[i].sex)))
+				)
+			)
+			{
+				_MESSAGE("Found match for %s %s", NPCList[i].name, NPCList[i].lang);
 				npc = NPCList[i];
 				return true;
 			}
@@ -378,11 +415,11 @@ namespace FuzRoBorkNamespace {
 		return false;
 	}
 
-	bool IsRegexMatch(string str, string rx) {
+	bool IsRegexMatch(const char* str, const char* rx) {
 		return false;
-		_MESSAGE("checking regex %s %s", str.c_str(), rx.c_str());
+		_MESSAGE("checking regex %s %s", str, rx);
 		try {
-			return (size(rx) > 0 && regex_match(str, regex(rx.c_str())));
+			return (strlen(rx) > 0 && regex_match(str, regex(rx)));
 		}
 		catch(...)
 		{
@@ -422,8 +459,9 @@ namespace FuzRoBorkNamespace {
 				XVAFolder += L"\\xVASynth\\realTimeTTS\\";
 			}
 			else {
-				wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
-				XVAFolder = converter.from_bytes(kCustomTempPath.GetData().s) + L"\\";
+				const char* c = kCustomTempPath.GetData().s;
+				wstring str(c, c + strlen(c));
+				XVAFolder = str + L"\\";
 			}
 			//_MESSAGE("Folder set to %s", XVAFolder.c_str());
 		}
@@ -527,6 +565,7 @@ namespace FuzRoBorkNamespace {
 			_MESSAGE("BOM Error, file must be encoded in UCS-2 LE.");
 			return;
 		}
+		wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
 
 		while (true)
 		{
@@ -565,8 +604,9 @@ namespace FuzRoBorkNamespace {
 			BSScaleformTranslator::GetCachedString(&translation, &buf[delimIdx + 1], 0);
 			wstring  wkey(key);
 			wstring  wt(translation);
+			
 			//_MESSAGE("Adding translation %s %s", skey.c_str(), st.c_str());
-			transMap[wkey] = wt;
+			transMap[converter.to_bytes(wkey)] = converter.to_bytes(wt);
 		}
 	}
 
@@ -580,7 +620,7 @@ namespace FuzRoBorkNamespace {
 	{
 		wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
 
-		randomTexts = { L"I <emph>used</emph> to be an adventurer like you. Then I took an <emph>arrow</emph> in the knee.", L"What is better - to be <emph>born</emph> good, or to <emph>overcome</emph> your evil nature through <emph>great</emph> effort?", L"Let me <emph>guess</emph>, Someone stole your <emph>sweetroll</emph>!", L"My cousin is out <emph> fighting dragons.</emph> And what do <emph>I</emph> get? <emph>Guard</emph> duty.", L"Oh, there <emph>once</emph> was a hero named <emph>Ragnar</emph> the Red, who came <emph>riding</emph> to Whiterun from old <emph>Rorikstead</emph>. ", L"And the <emph>braggart</emph> did swagger and <emph>brandish</emph> his blade as he <emph>told</emph> of bold battles and <emph>gold</emph> he had made. ", L"But <emph>then</emph> he went quiet, did <emph>Ragnar</emph> the Red when he <emph>met</emph> the shield-maiden <emph>Matilda</emph>, who said; ", L"Oh, you <emph>talk</emph> and you <emph>lie</emph> and you <emph>drink</emph> all our mead; now I <emph>think</emph> it's high time that you <emph>lie</emph> down and <emph>bleed</emph>!. ", L"And so <emph>then</emph> came <emph>clashing</emph> and <emph>slashing</emph> of steel, as the <emph>brave</emph> lass Matilda <emph>charged</emph> in, full of zeal. ", L"And the <emph>braggart</emph> named <emph>Ragnar</emph> was boastful no more... when his <emph>ugly</emph> red <emph>head</emph> rolled <emph>around</emph> on the <emph>floor</emph>!", L"There are <emph>formalities</emph> that must be observed, at the first meeting of two of the <emph>dov</emph>. ", L"My <emph>favorite</emph> drinking buddy! Let's get some <emph>mead</emph>.", L"Perhaps we should find a random stranger to murder. Practice <emph>does</emph> make perfect.", L"You stink of <emph>death</emph> my friend. I <emph>salute</emph> you.", L"You <emph>never</emph> should have <emph>come</emph> here.", L"Babette, my girl - <emph>pack</emph> your things. We're <emph>moving</emph>!", L"<emph>Enough</emph>! I will <emph>not</emph> stand idly by while a <emph>dragon</emph> burns my hold and <emph>slaughters</emph> my <emph>people</emph>!", L"I'm told they call me <emph>Dirge</emph> because I'm the <emph>last</emph> thing you hear before they put you in the ground.", L"Been so long since I killed a Stormcloak, my sword arm's getting <emph>flabby</emph>.", L"If these ruins frighten you, take comfort from the knowledge that <emph>I</emph> am here.", L"Look at <emph>that</emph>. Am I <emph>drunk</emph>? I must be <emph>drunk</emph>.", L"I used to be the <emph>top</emph> soldier for the Stormcloaks, then i took a <emph>sword</emph> to the chest", L"And who are <emph>you</emph> to challenge <emph>me</emph>? I've conquered <emph>mortality</emph> itself. ", L"I've <emph>spat</emph> in the eyes of the <emph>Daedric Lords</emph>! ", L"This is <emph>my</emph> realm now, I've <emph>sacrificed</emph> too much to let you <emph>take</emph> it from me!", L"I'll see you <emph>burn</emph>!", L"You do not even know our <emph>tongue</emph>, do you? ", L"Such <emph>arrogance</emph>, to <emph>dare</emph> take for yourself the name of <emph>Dovah</emph>!", L"Well well... Another <emph>maggot</emph> to <emph>squash</emph> beneath my boot!", L"Either <emph>I'm</emph> drunk, or <emph>you're</emph> naked. Possibly both.", L"I'll see you in pieces!", L"I've been hunting and fishing in these parts for <emph>years</emph>.", L"I've got my <emph>eyes</emph> on you.", L"We're one of the <emph>same</emph> kind, you and I. I'm <emph>happy</emph> to have met you.", L"Looking to <emph>protect</emph> yourself? Or <emph>deal</emph> some damage?", L"I got to <emph>thinking</emph>, maybe <emph>I'm</emph> the Dragonborn and I <emph>just</emph> don't <emph>know</emph> it yet.", L"It's a <emph>fine</emph> day with <emph>you</emph> around!", L"My father said I should go to <emph>college</emph>, but he didnt say <emph>which</emph> one.", L"I'd be a lot <emph>happier</emph> and a lot <emph>warmer</emph> with a <emph>belly</emph> full of <emph>mead</emph>.", L"I heard about <emph>you</emph> and your <emph>honeyed</emph> words.", L"I guess you don't have potatoes in your ears <emph>after</emph> all." };
+		randomTexts = { "I <emph>used</emph> to be an adventurer like you. Then I took an <emph>arrow</emph> in the knee.", "What is better - to be <emph>born</emph> good, or to <emph>overcome</emph> your evil nature through <emph>great</emph> effort?", "Let me <emph>guess</emph>, Someone stole your <emph>sweetroll</emph>!", "My cousin is out <emph> fighting dragons.</emph> And what do <emph>I</emph> get? <emph>Guard</emph> duty.", "Oh, there <emph>once</emph> was a hero named <emph>Ragnar</emph> the Red, who came <emph>riding</emph> to Whiterun from old <emph>Rorikstead</emph>. ", "And the <emph>braggart</emph> did swagger and <emph>brandish</emph> his blade as he <emph>told</emph> of bold battles and <emph>gold</emph> he had made. ", "But <emph>then</emph> he went quiet, did <emph>Ragnar</emph> the Red when he <emph>met</emph> the shield-maiden <emph>Matilda</emph>, who said; ", "Oh, you <emph>talk</emph> and you <emph>lie</emph> and you <emph>drink</emph> all our mead; now I <emph>think</emph> it's high time that you <emph>lie</emph> down and <emph>bleed</emph>!. ", "And so <emph>then</emph> came <emph>clashing</emph> and <emph>slashing</emph> of steel, as the <emph>brave</emph> lass Matilda <emph>charged</emph> in, full of zeal. ", "And the <emph>braggart</emph> named <emph>Ragnar</emph> was boastful no more... when his <emph>ugly</emph> red <emph>head</emph> rolled <emph>around</emph> on the <emph>floor</emph>!", "There are <emph>formalities</emph> that must be observed, at the first meeting of two of the <emph>dov</emph>. ", "My <emph>favorite</emph> drinking buddy! Let's get some <emph>mead</emph>.", "Perhaps we should find a random stranger to murder. Practice <emph>does</emph> make perfect.", "You stink of <emph>death</emph> my friend. I <emph>salute</emph> you.", "You <emph>never</emph> should have <emph>come</emph> here.", "Babette, my girl - <emph>pack</emph> your things. We're <emph>moving</emph>!", "<emph>Enough</emph>! I will <emph>not</emph> stand idly by while a <emph>dragon</emph> burns my hold and <emph>slaughters</emph> my <emph>people</emph>!", "I'm told they call me <emph>Dirge</emph> because I'm the <emph>last</emph> thing you hear before they put you in the ground.", "Been so long since I killed a Stormcloak, my sword arm's getting <emph>flabby</emph>.", "If these ruins frighten you, take comfort from the knowledge that <emph>I</emph> am here.", "Look at <emph>that</emph>. Am I <emph>drunk</emph>? I must be <emph>drunk</emph>.", "I used to be the <emph>top</emph> soldier for the Stormcloaks, then i took a <emph>sword</emph> to the chest", "And who are <emph>you</emph> to challenge <emph>me</emph>? I've conquered <emph>mortality</emph> itself. ", "I've <emph>spat</emph> in the eyes of the <emph>Daedric Lords</emph>! ", "This is <emph>my</emph> realm now, I've <emph>sacrificed</emph> too much to let you <emph>take</emph> it from me!", "I'll see you <emph>burn</emph>!", "You do not even know our <emph>tongue</emph>, do you? ", "Such <emph>arrogance</emph>, to <emph>dare</emph> take for yourself the name of <emph>Dovah</emph>!", "Well well... Another <emph>maggot</emph> to <emph>squash</emph> beneath my boot!", "Either <emph>I'm</emph> drunk, or <emph>you're</emph> naked. Possibly both.", "I'll see you in pieces!", "I've been hunting and fishing in these parts for <emph>years</emph>.", "I've got my <emph>eyes</emph> on you.", "We're one of the <emph>same</emph> kind, you and I. I'm <emph>happy</emph> to have met you.", "Looking to <emph>protect</emph> yourself? Or <emph>deal</emph> some damage?", "I got to <emph>thinking</emph>, maybe <emph>I'm</emph> the Dragonborn and I <emph>just</emph> don't <emph>know</emph> it yet.", "It's a <emph>fine</emph> day with <emph>you</emph> around!", "My father said I should go to <emph>college</emph>, but he didnt say <emph>which</emph> one.", "I'd be a lot <emph>happier</emph> and a lot <emph>warmer</emph> with a <emph>belly</emph> full of <emph>mead</emph>.", "I heard about <emph>you</emph> and your <emph>honeyed</emph> words.", "I guess you don't have potatoes in your ears <emph>after</emph> all." };
 
 		tinyxml2::XMLDocument doc;
 
@@ -607,9 +647,9 @@ namespace FuzRoBorkNamespace {
 			XMLElement* xKey = xKeys->FirstChildElement("hotkey");
 			UInt32 idx = 1;
 			while (xKey) {
-				wstring text = converter.from_bytes(xKey->GetText());
-				text = findReplace(text, L"[", L"<");
-				text = findReplace(text, L"]", L">");
+				string text(xKey->GetText());
+				findReplace(text, "[", "<");
+				findReplace(text, "]", ">");
 				hotkeyTexts[idx] = text;
 				xKey = xKey->NextSiblingElement("hotkey");
 				idx++;
@@ -626,10 +666,11 @@ namespace FuzRoBorkNamespace {
 			randomTexts.clear();
 			XMLElement* xRand = xRandoms->FirstChildElement("text");
 			while (xRand) {
-				wstring text = converter.from_bytes(xRand->GetText());
-				text = findReplace(text, L"[", L"<");
-				text = findReplace(text, L"]", L">");
-				randomTexts.push_back(text);
+				string chars = xRand->GetText();
+				findReplace(chars, "[", "<");
+				findReplace(chars, "]", ">");
+				string str(chars);
+				randomTexts.push_back(str.c_str());
 				xRand = xRand->NextSiblingElement("text");
 			}
 			_MESSAGE("Loaded %d random texts", randomTexts.size());
@@ -643,8 +684,8 @@ namespace FuzRoBorkNamespace {
 			NPCList.clear();
 			XMLElement* xNPC = xNPCs->FirstChildElement("npc");
 			while (xNPC) {
-				string name = "";
-				string race = "";
+				const char* name = "";
+				const char* race = "";
 				if (xNPC->FindAttribute("name") != 0)
 					name = xNPC->FindAttribute("name")->Value();
 				if (xNPC->FindAttribute("race") != 0)
@@ -659,6 +700,18 @@ namespace FuzRoBorkNamespace {
 				if(xLang)
 					lang = string(xLang->GetText());
 
+				XMLElement* xSex = xNPC->FirstChildElement("sex");
+				int sex = -1;
+				if (xSex) {
+					string ssex = xSex->GetText();
+					try {
+						sex = stoi(ssex);
+					}
+					catch (invalid_argument ex) {
+
+					}
+				}
+
 				XMLElement* xVol = xNPC->FirstChildElement("volume");
 				float vol = 30;
 				if (xVol) {
@@ -672,11 +725,11 @@ namespace FuzRoBorkNamespace {
 				}
 
 				XMLElement* xPitch = xNPC->FirstChildElement("pitch");
-				float pitch = 0;
+				int pitch = 0;
 				if (xPitch) {
 					string spitch = xPitch->GetText();
 					try {
-						pitch = stof(spitch);
+						pitch = stoi(spitch);
 					}
 					catch (invalid_argument ex) {
 
@@ -695,7 +748,7 @@ namespace FuzRoBorkNamespace {
 					}
 				}
 
-				NPCObj obj(name, race, lang, rate, vol, pitch);
+				NPCObj obj(name, race, lang.c_str(), sex, rate, vol, pitch);
 				NPCList.push_back(obj);
 				xNPC = xNPC->NextSiblingElement("npc");
 			}
@@ -718,11 +771,11 @@ namespace FuzRoBorkNamespace {
 
 				if (!xFind || !xFix)
 					continue;
-				wstring find = converter.from_bytes(xFind->GetText());
-				wstring replace = converter.from_bytes(xReplace->GetText());
-				replace = findReplace(replace, L"[", L"<");
-				replace = findReplace(replace, L"]", L">");
-				fixes[find] = replace;
+				string find(xFind->GetText());
+				string replace(xReplace->GetText());
+				findReplace(replace, "[", "<");
+				findReplace(replace, "]", ">");
+				fixes[find.c_str()] = replace.c_str();
 				xFix = xFix->NextSiblingElement("fix");
 			}
 			_MESSAGE("Loaded fixes");
@@ -744,29 +797,29 @@ namespace FuzRoBorkNamespace {
 
 				while (xTopic) {
 
-					vector<wstring> optionList;
+					vector<string> optionList;
 
 					XMLElement* xOption = xTopic->FirstChildElement("option");
 
-					string aName = (const char*)xTopic->Attribute("name");
+					const char* aName = (const char*)xTopic->Attribute("name");
 
-					OutputDebugString(aName.c_str());
+					OutputDebugString(aName);
 					OutputDebugString("\n");
 
 					while (xOption) {
 						if (xOption->GetText()) {
-							OutputDebugString(string(xOption->GetText()).c_str());
+							OutputDebugString(xOption->GetText());
 							OutputDebugString("\n");
-							optionList.push_back(converter.from_bytes(xOption->GetText()));
+							optionList.push_back(string(xOption->GetText()));
 						}
 						else
-							optionList.push_back(L" "); // add empties to make less common
+							optionList.push_back(" "); // add empties to make less common
 
 						xOption = xOption->NextSiblingElement("option");
 					}
 
 					if (optionList.size() != 0) {
-						actionList[aName] = optionList;
+						actionList[string(aName)] = optionList;
 					}
 					xTopic = xTopic->NextSiblingElement("topic");
 				}
@@ -822,13 +875,12 @@ namespace FuzRoBorkNamespace {
 		return false;
 	}
 
-	wstring findReplace(wstring str, const wstring oldStr, const wstring newStr) {
+	void findReplace(string& str, string oldStr, string newStr) {
 		std::size_t pos = 0;
-		while ((pos = str.find(oldStr, pos)) != wstring::npos) {
-			str.replace(pos, oldStr.length(), newStr);
-			pos += newStr.length();
+		while ((pos = str.find(oldStr, pos)) != string::npos) {
+			str.replace(pos, oldStr.size(), newStr);
+			pos += newStr.size();
 		}
-		return str;
 	}
 
 	const wchar_t* GetWC(const char* c)
@@ -840,18 +892,16 @@ namespace FuzRoBorkNamespace {
 		return wc;
 	}
 
-	void replaceUnspeakables(wstring& str) {
+	void replaceUnspeakables(string& str) {
 		
-		map<wstring, wstring>::iterator it;
-
-		for (it = fixes.begin(); it != fixes.end(); it++)
+		for (auto const& [key, val] : fixes)
 		{
-			str = findReplace(str, it->first, it->second);
+			findReplace(str, key, val);
 		}
 
-		for (it = transMap.begin(); it != transMap.end(); it++)
+		for (auto const& [key, val] : transMap)
 		{
-			str = findReplace(str, it->first, it->second);
+			findReplace(str, key.c_str(), val.c_str());
 		}
 
 		// remove \t \r, etc
@@ -859,21 +909,21 @@ namespace FuzRoBorkNamespace {
 		int idx = 0;
 		boolean par = false;
 
-		wstring newStr = L"";
-		while (idx < str.length()) {
+		string newStr = "";
+		while (idx < str.size()) {
 			if (str[idx] != '\r' && str[idx] != '\n' && str[idx] != '\t')
 				newStr += str[idx];
 			idx++;
 		}
-		str = newStr;
+		str = newStr.c_str();
 
 		// remove parenthesis and brackets if option ticked
 
 		if (kSpeakParentheses.GetData().i == 0) {
 			idx = 0;
 			par = false;
-			newStr = L"";
-			while (idx < str.length()) {
+			newStr = "";
+			while (idx < str.size()) {
 				if (!par && str[idx] == '(')
 					par = true;
 				else if (par && str[idx] == ')')
@@ -884,8 +934,8 @@ namespace FuzRoBorkNamespace {
 			}
 			idx = 0;
 			par = false;
-			newStr = L"";
-			while (idx < str.length()) {
+			newStr = "";
+			while (idx < str.size()) {
 				if (!par && str[idx] == '[')
 					par = true;
 				else if (par && str[idx] == ']')
@@ -902,8 +952,9 @@ namespace FuzRoBorkNamespace {
 	void speakTask(SpeakObj nSpeech)
 	{
 
-		_MESSAGE("speakTask: '%s'", nSpeech.speech.c_str());
-		replaceUnspeakables(nSpeech.speech);
+		_MESSAGE("speakTask: '%s'", nSpeech.speech);
+		string speech = nSpeech.speech;
+		replaceUnspeakables(speech);
 
 		if (nSpeech.lang == "xVASynth") {
 			_MESSAGE("Sending text to xVASynth");
@@ -922,11 +973,16 @@ namespace FuzRoBorkNamespace {
 		ISpObjectToken* cpToken;
 
 		bool found = false;
+		wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
 
-		std::wstring wideLang(nSpeech.lang.size() + 1, L' ');
-		std::size_t newLength = std::mbstowcs(&wideLang[0], nSpeech.lang.c_str(), wideLang.size());
+		wstring wlang = converter.from_bytes(nSpeech.lang);
+		wstring wspeech = converter.from_bytes(speech);
+
+		std::wstring wideLang(wlang.size() + 1, L' ');
+		std::size_t newLength = std::mbstowcs(&wideLang[0], nSpeech.lang, wideLang.size());
 		wideLang.resize(newLength);
 
+		_MESSAGE("Creating SAPI voice");
 
 		// Create the SAPI voice.
 		hr = CoCreateInstance(CLSID_SpVoice, NULL, CLSCTX_ALL, IID_ISpVoice, (void**)&pVoice);
@@ -969,15 +1025,14 @@ namespace FuzRoBorkNamespace {
 		}
 		if (SUCCEEDED(hr))
 		{
-			wstring str(nSpeech.speech);
-			if (str.length() < 1) {
+			if (speech.size() < 1) {
 				_MESSAGE("No speech string");
 				return;
 			}
 
 			// pitch
 
-			wstring speech = L"<pitch absmiddle=\"" + to_wstring(nSpeech.pitch) + L"\">" + nSpeech.speech + L"</pitch>";
+			wspeech = L"<pitch absmiddle=\"" + to_wstring(nSpeech.pitch) + L"\">" + wspeech + L"</pitch>";
 
 			//_MESSAGE("Speaking '%s'", lSpeech);
 
@@ -994,7 +1049,7 @@ namespace FuzRoBorkNamespace {
 				}
 
 			}
-			hr = pVoice->Speak(speech.c_str(), SPF_PURGEBEFORESPEAK | SPF_ASYNC, NULL);
+			hr = pVoice->Speak(wspeech.c_str(), SPF_PURGEBEFORESPEAK | SPF_ASYNC, NULL);
 			actionSpeaking = false;
 			_MESSAGE("Spoke");
 		}
@@ -1004,11 +1059,11 @@ namespace FuzRoBorkNamespace {
 	}
 
 
-	void startNarratorSpeech(wstring text) { // unchecked
+	void startNarratorSpeech(const char* text) { // unchecked
 
 		//_MESSAGE("Starting narrator speech %s", text.c_str());
 
-		string lang = kNarratorLanguage.GetData().s;
+		const char* lang = kNarratorLanguage.GetData().s;
 
 		float rate = kNarratorVoiceRate.GetData().f;
 
@@ -1023,27 +1078,27 @@ namespace FuzRoBorkNamespace {
 	}
 
 	void startStoredBookSpeech(StaticFunctionTag* base) {
-		if (storedBookSpeech.size() == 0)
+		if (strlen(storedBookSpeech) == 0)
 			return;
 		stopSpeaking();
 		OutputDebugString("Starting stored book speech\n");
 		startNarratorSpeech(storedBookSpeech);
 	}
 	void startStoredPagesSpeech(StaticFunctionTag* base) {
-		if (storedPagesSpeech.size() == 0)
+		if (strlen(storedPagesSpeech) == 0)
 			return;
 		stopSpeaking();
 		OutputDebugString("Starting stored book speech\n");
 		startNarratorSpeech(storedPagesSpeech);
 	}
-	void startBookSpeech(wstring text) {
+	void startBookSpeech(const char* text) {
 		stopSpeaking();
 		storeBookSpeech(text);
 		OutputDebugString("Starting book speech\n");
 		startNarratorSpeech(text);
 	}
 	
-	void storeBookSpeech(wstring text) {
+	void storeBookSpeech(const char* text) {
 		OutputDebugString("Storing book speech\n");
 		storedBookSpeech = text;
 		if (kPlayBooks.GetData().i == 1) {
@@ -1052,7 +1107,7 @@ namespace FuzRoBorkNamespace {
 		}
 	}
 
-	void storeFirstPagesSpeech(wstring text) {
+	void storeFirstPagesSpeech(const char* text) {
 		OutputDebugString("Storing first pages speech\n");
 		storedPagesSpeech = text;
 		if (kPlayBookPages.GetData().i == 1 && kPlayBooks.GetData().i == 0) {
@@ -1061,7 +1116,7 @@ namespace FuzRoBorkNamespace {
 		}
 	}
 	
-	void storePagesSpeech(wstring text) {
+	void storePagesSpeech(const char* text) {
 		OutputDebugString("Storing pages speech\n");
 		storedPagesSpeech = text;
 		if (kPlayBookPages.GetData().i == 1) {
@@ -1075,25 +1130,25 @@ namespace FuzRoBorkNamespace {
 		sendingXVAS = true;
 		_MESSAGE("Writing speech to file for xVASynth");
 
-		string game = "";
-		string voice = "";
+		const char* game = "";
+		const char* voice = "";
 
-		if (obj.speech.size() > 0) {
-			game = StringToLower(string(kxVASynthGame.GetData().s));
+		if (strlen(obj.speech) > 0) {
+			game = StringToLower(kxVASynthGame.GetData().s);
 
-			if (game.size() == 0 && obj.lang != "xVASynth") {
+			if (strlen(game) == 0 && obj.lang != "xVASynth") {
 				_MESSAGE("Empty game string sent");
 				sendingXVAS = false;
 				return;
 			}
 
 			if (gameVoices.count(game) == 0) {
-				_MESSAGE("Game %s not found", game.c_str());
+				_MESSAGE("Game %s not found", game);
 				sendingXVAS = false;
 				return;
 			}
 			if (gameVoices[game].size() == 0) {
-				_MESSAGE("Game %s has no voices", game.c_str());
+				_MESSAGE("Game %s has no voices", game);
 				sendingXVAS = false;
 				return;
 			}
@@ -1106,11 +1161,11 @@ namespace FuzRoBorkNamespace {
 			_MESSAGE("Voice id is %d", idx);
 
 			if (idx >= gameVoices[game].size()) {
-				_MESSAGE("Index %d out of bounds for game %s", idx, game.c_str());
+				_MESSAGE("Index %d out of bounds for game %s", idx, game);
 				return;
 			}
-
-			voice = gameVoices[game][idx]["id"];
+			
+			string voice = gameVoices[game][idx]["id"];
 
 			_MESSAGE("Voice name is %s", string(gameVoices[game][idx]["name"]).c_str());
 		}
@@ -1118,11 +1173,10 @@ namespace FuzRoBorkNamespace {
 			_MESSAGE("Sending initialization data only");
 		}
 
-		wregex tags(L"<[^>]*>");
-		obj.speech = regex_replace(obj.speech, tags, L"");
+		regex tags("<[^>]*>");
+		obj.speech = regex_replace(obj.speech, tags, "").c_str();
 
-		wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
-		string speech = converter.to_bytes(obj.speech);
+		string speech(obj.speech);
 
 		json j;
 		j["voiceId"] = voice;
@@ -1160,7 +1214,7 @@ namespace FuzRoBorkNamespace {
 
 		sendingXVAS = false;
 		checkWavCount = 0;
-		if (obj.speech.size() > 0) {
+		if (strlen(obj.speech) > 0) {
 			stopTimer = false;
 			playingXVAS = true;
 			_MESSAGE("Waiting for wav file creation");
@@ -1169,35 +1223,23 @@ namespace FuzRoBorkNamespace {
 		}
 	}
 
-	void speakLoadingScreen(wstring text) {
+	void speakLoadingScreen(const char* text) {
 		startNarratorSpeech(text);
 	}
 
-	void startNPCSpeech(wstring text, TESObjectREFR * refr) {
-
-		if (kPlayNPCDialogue.GetData().i == 0) {
-			_MESSAGE("No dialogue");
-			return;
-		}
-
-		_MESSAGE("NPC Speaking '%s'", text.c_str());
+	SpeakObj GetNPCSpeech(TESNPC* npc, const char* text) {
+		
+		
+		_MESSAGE("NPC Speaking '%s'", text);
 
 
 		// standard values
 
 		UInt32 sex = 1; // female
 
-		if (!refr || !refr->baseForm) {
-			_MESSAGE("dialogue target not found!");
-			return;
-		}
-
-		TESNPC* npc = DYNAMIC_CAST(refr->baseForm, TESForm, TESNPC);
-
-
 		sex = npc ? CALL_MEMBER_FN(npc, GetSex)() : 1;
 
-		string lang = sex == 0 ? kMaleLanguage.GetData().s : kFemaleLanguage.GetData().s;
+		const char* lang = sex == 0 ? kMaleLanguage.GetData().s : kFemaleLanguage.GetData().s;
 
 		float rate = sex == 0 ? kMaleVoiceRate.GetData().f : kFemaleVoiceRate.GetData().f;
 
@@ -1205,26 +1247,20 @@ namespace FuzRoBorkNamespace {
 
 		float pitch = sex == 0 ? kMaleVoicePitch.GetData().i : kFemaleVoicePitch.GetData().i;
 
-
-
 		if (npc) {
 
 			// specific NPC override
 
-			string nName = npc->fullName.GetName();
-			string nRace = npc->race.race->fullName.GetName();
+			const char* nName = npc->fullName.GetName();
+			const char* nRace = npc->race.race->fullName.GetName();
 
-			_MESSAGE("Looking for custom npc: %s %s", nRace.c_str(), nName.c_str());
-
-			//Console_Print(nName.c_str());
-			//Console_Print(nRace.c_str());
+			_MESSAGE("Looking for custom npc: %s %s (%s)", nRace, nName, sex == 0 ? "male" : "female");
 
 			NPCObj npc;
 
-
 			if (GetNPC(nName, nRace, npc)) {
 
-				if (size(npc.lang) > 0)
+				if (strlen(npc.lang) > 0)
 					lang = npc.lang;
 				if (npc.rate > -11 && npc.rate < 11)
 					rate = npc.rate;
@@ -1233,23 +1269,23 @@ namespace FuzRoBorkNamespace {
 				if (npc.pitch > -11 && npc.pitch < 11)
 					pitch = npc.pitch;
 
-				_MESSAGE("Got language %s", lang.c_str());
+				_MESSAGE("Got language %s", lang);
 			}
 		}
 
 		SpeakObj pSpeech(text, lang, rate, volume, pitch);
 
-		thread t1(speakTask, pSpeech);
-		t1.detach();
+		return pSpeech;
+
 		//_MESSAGE("NPC Speaking initiated successfully");
 	}
 
-	void startPlayerSpeech(wstring _title) {
+	void startPlayerSpeech(const char* text) {
 		//_MESSAGE("Starting Player Speech: %s", _title.c_str());
 
 		TESNPC* pc = DYNAMIC_CAST((*g_thePlayer)->baseForm, TESForm, TESNPC);
 
-		string lang = kPlayerLanguage.GetData().s;
+		const char* lang = kPlayerLanguage.GetData().s;
 
 		float rate = kPlayerVoiceRate.GetData().f;
 
@@ -1266,7 +1302,7 @@ namespace FuzRoBorkNamespace {
 		OutputDebugString(" vol\n");
 		*/
 
-		SpeakObj pSpeech(_title, lang, rate, volume, pitch);
+		SpeakObj pSpeech(text, lang, rate, volume, pitch);
 
 		thread t3(speakTask, pSpeech);
 		t3.detach();
@@ -1282,7 +1318,7 @@ namespace FuzRoBorkNamespace {
 		if (which.compare("XX") == 0 || which.compare("xx") == 0) {
 			if (sendingXVAS || playingXVAS)
 				return;
-			SpeakObj pSpeech(L"", "xVASynth", kPlayerVoiceRate.GetData().f, kPlayerVoiceVolume.GetData().f, kPlayerVoicePitch.GetData().i);
+			SpeakObj pSpeech("", "xVASynth", kPlayerVoiceRate.GetData().f, kPlayerVoiceVolume.GetData().f, kPlayerVoicePitch.GetData().i);
 			thread t1(speakTask, pSpeech);
 			t1.detach();
 			return;
@@ -1291,9 +1327,9 @@ namespace FuzRoBorkNamespace {
 		srand(time(0));
 		int r = static_cast<double>(rand() % randomTexts.size());
 
-		wstring speech = randomTexts[r];
+		const char* speech = randomTexts[r].c_str();
 
-		_MESSAGE("Speaking random %s text");
+		_MESSAGE("Speaking random %s text", which.c_str());
 
 		if (which.compare("P") == 0 || which.compare("p") == 0) {
 			startPlayerSpeech(speech);
@@ -1314,7 +1350,7 @@ namespace FuzRoBorkNamespace {
 			t3.detach();
 		}
 		else if (which.compare("S") == 0 || which.compare("s") == 0) {
-			SpeakObj pSpeech(L"Bork bork bork!", "eSpeak-en", 0, 100.0, 0);
+			SpeakObj pSpeech("Bork bork bork!", "eSpeak-en", 0, 100.0, 0);
 			thread t3(speakTask, pSpeech);
 			t3.detach();
 		}
@@ -1520,11 +1556,11 @@ namespace FuzRoBorkNamespace {
 
 		stopSpeaking();
 
-		wstring text = hotkeyTexts.at(_which);
+		string text = hotkeyTexts.at(_which);
 
-		text = findReplace(text, L"[", L"<");
-		text = findReplace(text, L"]", L">");
-		startPlayerSpeech(text);
+		findReplace(text, "[", "<");
+		findReplace(text, "]", ">");
+		startPlayerSpeech(text.c_str());
 	}
 
 
@@ -1552,24 +1588,23 @@ namespace FuzRoBorkNamespace {
 
 		lastTime = nowTime;
 
-		string which = string(_which.data);
-
-		if (actionList.find(which) != actionList.end()) {
+		
+		if (actionList.find(_which.data) != actionList.end()) {
 
 			int r = 0;
-			if (actionList[which].size() > 1) {
-				r = static_cast<double>(rand()) / RAND_MAX * actionList[which].size();
+			if (actionList[_which.data].size() > 1) {
+				r = static_cast<double>(rand()) / RAND_MAX * actionList[_which.data].size();
 
 				while (strcmp(_lastTopic, _which.data) == 0 && r == rLast) // prevent duplicates
-					r = static_cast<double>(rand()) / RAND_MAX * actionList[which].size();
+					r = static_cast<double>(rand()) / RAND_MAX * actionList[_which.data].size();
 			}
 
 			actionSpeaking = true;
 			stopSpeaking();
-			wstring text = actionList[which][r];
-			text = findReplace(text, L"[", L"<");
-			text = findReplace(text, L"]", L">");
-			startPlayerSpeech(text);
+			string text = actionList[_which.data][r];
+			findReplace(text, "[", "<");
+			findReplace(text, "]", ">");
+			startPlayerSpeech(text.c_str());
 			return;
 
 		}
@@ -1635,11 +1670,11 @@ namespace FuzRoBorkNamespace {
 					_MESSAGE("got games");
 					UInt32 gameIndex = 0;
 					for (json::iterator it = jg.begin(); it != jg.end(); ++it) {
-						string key = it.key();
-						_MESSAGE("got %d voices for %s", it.value().size(), key.c_str());
+						const char* key = it.key().c_str();
+						_MESSAGE("got %d voices for %s", it.value().size(), key);
 
 						BSFixedString vs;
-						vs.data = key.c_str();
+						vs.data = key;
 						xGames.Set(&vs, gameIndex);
 
 						gameIndex++;
@@ -1660,7 +1695,7 @@ namespace FuzRoBorkNamespace {
 
 	void sendXGameVoices(StaticFunctionTag* t, BSFixedString game, VMArray<BSFixedString> xVoices) {
 
-		string gameData = StringToLower(string(game.data));
+		const char* gameData = StringToLower(game.data);
 		if (gameVoices.count(gameData) == 0) {
 			_MESSAGE("No voices for %s", game.data);
 			return;
