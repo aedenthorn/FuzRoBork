@@ -304,7 +304,7 @@ NPCObj::NPCObj(const char* _name, const char* _race, const char* _lang, int _sex
 NPCObj::NPCObj() {
 }
 
-SpeakObj::SpeakObj(const char* _speech, const char*  _lang, float _rate, float _vol, int _pitch) {
+SpeakObj::SpeakObj(string _speech, const char*  _lang, float _rate, float _vol, int _pitch) {
 	speech = _speech;
 	lang = _lang;
 	rate = _rate;
@@ -315,8 +315,8 @@ SpeakObj::SpeakObj() {
 }
 
 
-QueueObj::QueueObj(TESNPC* _npc, const char* _speech) {
-	speech = _speech;
+QueueObj::QueueObj(TESNPC* _npc, string _speech) {
+	speech = string(_speech);
 	npc = _npc;
 }
 
@@ -364,35 +364,32 @@ namespace FuzRoBorkNamespace {
 	bool stopTimer = false;
 
 	void AddSpeechToQueue(TESNPC* npc, const char* speech) {
-		//_MESSAGE("Adding speech to queue position %i: %s ", speakingQueue.size(), speech);
+		_MESSAGE("Adding speech to queue position %i: %s ", speakingQueue.size(), speech);
 
-		QueueObj obj(npc, speech);
+		QueueObj obj(npc, string(speech));
 		speakingQueue.push_back(obj);
 	}
 	bool GetSpeechFromQueue(SpeakObj& obj) {
 		if (speakingQueue.size() == 0) {
 			return false;
 		}
-		//_MESSAGE("got queued speech (queue size: %i): %s", speakingQueue.size(), speakingQueue[0].speech);
+		_MESSAGE("got queued speech (queue size: %i): %s", speakingQueue.size(), speakingQueue[0].speech.c_str());
 		obj = GetNPCSpeech(speakingQueue[0].npc, speakingQueue[0].speech);
 		return true;
 	}
 	void EraseFromQueue() {
 		if (speakingQueue.size() == 0)
 			return;
-		//_MESSAGE("Erasing first queued speech (queue size: %i): %s", speakingQueue.size(), speakingQueue[0].speech);
+		_MESSAGE("Erasing first queued speech (queue size: %i): %s", speakingQueue.size(), speakingQueue[0].speech.c_str());
 		speakingQueue.erase(speakingQueue.begin());
-		//_MESSAGE("Remaning queue size: %i", speakingQueue.size());
+		_MESSAGE("Remaning queue size: %i", speakingQueue.size());
 	}
 	
-	const char* StringToLower(const char* str) {
-		string s(str);
+	void StringToLower(string& s) {
 		for (int i = 0; i < s.size(); i++)
 		{
 			s[i] = tolower(s[i]);
 		}
-		str = s.c_str();
-		return str;
 	}
 
 	bool GetNPC(const char* nName, const char* nRace, NPCObj& npc) {
@@ -952,7 +949,7 @@ namespace FuzRoBorkNamespace {
 	void speakTask(SpeakObj nSpeech)
 	{
 
-		_MESSAGE("speakTask: '%s'", nSpeech.speech);
+		_MESSAGE("speakTask: '%s'", nSpeech.speech.c_str());
 		string speech = nSpeech.speech;
 		replaceUnspeakables(speech);
 
@@ -1130,13 +1127,13 @@ namespace FuzRoBorkNamespace {
 		sendingXVAS = true;
 		_MESSAGE("Writing speech to file for xVASynth");
 
-		const char* game = "";
-		const char* voice = "";
+		string game(kxVASynthGame.GetData().s);
+		string voice = "";
 
-		if (strlen(obj.speech) > 0) {
-			game = StringToLower(kxVASynthGame.GetData().s);
+		if (obj.speech.size() > 0) {
+			StringToLower(game);
 
-			if (strlen(game) == 0 && obj.lang != "xVASynth") {
+			if (game.size() == 0 && obj.lang != "xVASynth") {
 				_MESSAGE("Empty game string sent");
 				sendingXVAS = false;
 				return;
@@ -1165,7 +1162,7 @@ namespace FuzRoBorkNamespace {
 				return;
 			}
 			
-			string voice = gameVoices[game][idx]["id"];
+			voice = gameVoices[game][idx]["id"];
 
 			_MESSAGE("Voice name is %s", string(gameVoices[game][idx]["name"]).c_str());
 		}
@@ -1214,7 +1211,7 @@ namespace FuzRoBorkNamespace {
 
 		sendingXVAS = false;
 		checkWavCount = 0;
-		if (strlen(obj.speech) > 0) {
+		if (obj.speech.size() > 0) {
 			stopTimer = false;
 			playingXVAS = true;
 			_MESSAGE("Waiting for wav file creation");
@@ -1227,10 +1224,10 @@ namespace FuzRoBorkNamespace {
 		startNarratorSpeech(text);
 	}
 
-	SpeakObj GetNPCSpeech(TESNPC* npc, const char* text) {
+	SpeakObj GetNPCSpeech(TESNPC* npc, string text) {
 		
 		
-		_MESSAGE("NPC Speaking '%s'", text);
+		_MESSAGE("NPC Speaking '%s'", text.c_str());
 
 
 		// standard values
@@ -1670,16 +1667,16 @@ namespace FuzRoBorkNamespace {
 					_MESSAGE("got games");
 					UInt32 gameIndex = 0;
 					for (json::iterator it = jg.begin(); it != jg.end(); ++it) {
-						const char* key = it.key().c_str();
+						string key = it.key();
 						_MESSAGE("got %d voices for %s", it.value().size(), key);
 
 						BSFixedString vs;
-						vs.data = key;
+						vs.data = key.c_str();
 						xGames.Set(&vs, gameIndex);
 
 						gameIndex++;
 
-						key = StringToLower(key);
+						StringToLower(key);
 
 						gameVoices[key] = it.value();
 					}
@@ -1695,7 +1692,8 @@ namespace FuzRoBorkNamespace {
 
 	void sendXGameVoices(StaticFunctionTag* t, BSFixedString game, VMArray<BSFixedString> xVoices) {
 
-		const char* gameData = StringToLower(game.data);
+		string gameData(game.data);
+		StringToLower(gameData);
 		if (gameVoices.count(gameData) == 0) {
 			_MESSAGE("No voices for %s", game.data);
 			return;

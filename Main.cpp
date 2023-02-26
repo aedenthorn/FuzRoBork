@@ -122,7 +122,7 @@ extern "C"
 						//_MESSAGE("checking for speech; speaking: %s, queue: %s", (!FuzRoBorkNamespace::isSpeaking() && !FuzRoBorkNamespace::isXVASpeaking()) ? "false" : "true", FuzRoBorkNamespace::GetSpeechFromQueue(obj) ? "yes" : "no");
 						if (!FuzRoBorkNamespace::isSpeaking() && !FuzRoBorkNamespace::isXVASpeaking() && FuzRoBorkNamespace::GetSpeechFromQueue(obj)) {
 
-							_MESSAGE("Speaking queued speech %s", obj.speech);
+							_MESSAGE("Speaking queued speech %s", obj.speech.c_str());
 							actionSpeaking = true;
 							thread(FuzRoBorkNamespace::speakTask, obj).detach();
 							FuzRoBorkNamespace::EraseFromQueue();

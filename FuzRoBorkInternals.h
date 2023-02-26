@@ -318,9 +318,9 @@ public:
 class SpeakObj
 {
 public:
-	SpeakObj(const char* _speech, const char* _lang, float _rate, float _vol, int _pitch);
+	SpeakObj(string _speech, const char* _lang, float _rate, float _vol, int _pitch);
 	SpeakObj();
-	const char* speech;
+	string speech;
 	const char* lang;
 	float rate;
 	float vol;
@@ -329,9 +329,9 @@ public:
 class QueueObj
 {
 public:
-	QueueObj(TESNPC* _npc, const char* _speech);
+	QueueObj(TESNPC* _npc, string _speech);
 	TESNPC* npc;
-	const char* speech;
+	string speech;
 };
 
 static boolean actionSpeaking = false;
@@ -361,7 +361,7 @@ namespace FuzRoBorkNamespace {
 	void startStoredPagesSpeech(StaticFunctionTag* base);
 	void startStoredBookSpeech(StaticFunctionTag* base);
 	void startBookSpeech(const char* text);
-	SpeakObj GetNPCSpeech(TESNPC* refr, const char* text);
+	SpeakObj GetNPCSpeech(TESNPC* refr, string text);
 	void startPlayerSpeech(const char* _title);
 	void startNarratorSpeech(const char* text);
 	void speakLoadingScreen(const char* text);
