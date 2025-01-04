@@ -20,24 +20,27 @@
       <Filter>Resources</Filter>
     </ClInclude>
     <ClInclude Include="Hooks.h" />
-    <ClInclude Include="include\Functors.h" />
-    <ClInclude Include="include\INIEditGUI.h" />
-    <ClInclude Include="include\INIEditGUI_Res.h" />
-    <ClInclude Include="include\INIManager.h" />
-    <ClInclude Include="include\MemoryHandler.h" />
-    <ClInclude Include="include\MersenneTwister.h" />
-    <ClInclude Include="include\MiscGunk.h" />
-    <ClInclude Include="include\SME_Prefix.h" />
-    <ClInclude Include="include\StringHelpers.h" />
-    <ClInclude Include="include\tinyxml2.h" />
-    <ClInclude Include="include\UIHelpers.h" />
-    <ClInclude Include="BuildInfo.h" />
-    <ClInclude Include="include\BuildInfo.h" />
-    <ClInclude Include="include\FuzRoBorkInternals.h" />
-    <ClInclude Include="include\Hooks.h" />
-    <ClInclude Include="include\version.h" />
-    <ClInclude Include="include\VersionInfo.h" />
-    <ClInclude Include="include\detour.h" />
+    <ClInclude Include="..\skse64\skse64\GameAPI.h" />
+    <ClInclude Include="..\skse64\skse64\GameBSExtraData.h" />
+    <ClInclude Include="..\skse64\skse64\GameData.h" />
+    <ClInclude Include="..\skse64\skse64\GameExtraData.h" />
+    <ClInclude Include="..\skse64\skse64\GameFormComponents.h" />
+    <ClInclude Include="..\skse64\skse64\GameForms.h" />
+    <ClInclude Include="..\skse64\skse64\GameObjects.h" />
+    <ClInclude Include="..\skse64\skse64\GameReferences.h" />
+    <ClInclude Include="..\skse64\skse64\GameRTTI.h" />
+    <ClInclude Include="..\skse64\skse64\GameSettings.h" />
+    <ClInclude Include="..\skse64\skse64\GameStreams.h" />
+    <ClInclude Include="..\skse64\skse64\GameTypes.h" />
+    <ClInclude Include="..\skse64\skse64\GameUtilities.h" />
+    <ClInclude Include="..\skse64\skse64\HashUtil.h" />
+    <ClInclude Include="..\skse64\skse64\NiObjects.h" />
+    <ClInclude Include="..\skse64\skse64\NiTypes.h" />
+    <ClInclude Include="..\skse64\skse64\PluginAPI.h" />
+    <ClInclude Include="..\skse64\xbyak\xbyak.h" />
+    <ClInclude Include="..\skse64\xbyak\xbyak_bin2hex.h" />
+    <ClInclude Include="..\skse64\xbyak\xbyak_mnemonic.h" />
+    <ClInclude Include="..\skse64\xbyak\xbyak_util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FuzRoBorkInternals.cpp" />
@@ -45,6 +48,22 @@
     <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="include\detour.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameAPI.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameBSExtraData.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameData.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameExtraData.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameFormComponents.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameForms.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameObjects.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameReferences.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameRTTI.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameSettings.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameStreams.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameTypes.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameUtilities.cpp" />
+    <ClCompile Include="..\skse64\skse64\HashUtil.cpp" />
+    <ClCompile Include="..\skse64\skse64\NiObjects.cpp" />
+    <ClCompile Include="..\skse64\skse64\NiTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="VersionInfo.rc">

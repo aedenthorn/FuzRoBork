@@ -205,9 +205,6 @@ std::string MakeSillyName()
 	std::string Out("Fuz Ro ");
 	for (int i = 0; i < 16; i++)
 		Out += "Bork";
-#ifdef VR_BUILD
-	Out += " (for Skyrim VR)";
-#endif
 	return Out;
 }
 
@@ -249,7 +246,7 @@ bool SubtitleHasher::HasMatch(const char* Subtitle)
 {
 	IScopedCriticalSection Guard(&Lock);
 	HashT Current = CalculateHash(Subtitle);
-	return Store.find(Current) != Store.end();
+	return Store.find(Current) != Store.end(); 
 }
 
 void SubtitleHasher::Purge(void)
@@ -332,13 +329,30 @@ namespace FuzRoBorkNamespace {
 	//SubtitleHasher			SubtitleHasher::Instance;
 	//const double			SubtitleHasher::kPurgeInterval = 1000.0 * 60.0f;
 
-	LPCWSTR speechPaths[] = {
-		L"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech Server\\v11.0\\Voices",
-		L"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech Server\\v10.0\\Voices",
-		L"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices",
-		L"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech_OneCore\\Voices",
-		L"HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Speech\\Voices"
-	};
+	vector<wstring> GetSpeechPaths() {
+
+		wstring key0 = wstring(SPCAT_VOICES);
+		wstring root(SPREG_LOCAL_MACHINE_ROOT);
+		wstring key1(SPREG_LOCAL_MACHINE_ROOT);
+		key1 += wstring(L" Server\\v11.0\\Voices");
+		wstring key2(SPREG_LOCAL_MACHINE_ROOT);
+		key2 += wstring(L" Server\\v10.0\\Voices");
+		wstring key3(SPREG_LOCAL_MACHINE_ROOT);
+		key3 += wstring(L"_OneCore\\Voices");
+		wstring key4(SPCAT_VOICES); 
+		key4.replace(19, 9, L"SOFTWARE\\Wow6432Node\\");
+
+
+		_MESSAGE(string(key0.begin(), key0.end()).c_str());
+		_MESSAGE(string(key1.begin(), key1.end()).c_str());
+		_MESSAGE(string(key2.begin(), key2.end()).c_str());
+		_MESSAGE(string(key3.begin(), key3.end()).c_str());
+		_MESSAGE(string(key4.begin(), key4.end()).c_str());
+
+
+		vector<wstring> s = { key0, key1, key2, key3, key4};
+		return s;
+	}
 
 	vector<NPCObj> NPCList;
 
@@ -348,6 +362,7 @@ namespace FuzRoBorkNamespace {
 
 	map< int, string> hotkeyTexts;
 	vector< string > randomTexts;
+	vector< wstring > speechPaths = GetSpeechPaths();
 	map<string, vector<string>> actionList;
 	map< string, string> fixes;
 	map< string, string> transMap;
@@ -615,6 +630,19 @@ namespace FuzRoBorkNamespace {
 
 	void LoadXML()
 	{
+
+		wstring s1 = wstring(speechPaths[0]);
+		wstring s2 = wstring(speechPaths[1]);
+		wstring s3 = wstring(speechPaths[2]);
+		wstring s4 = wstring(speechPaths[3]);
+		wstring s5 = wstring(speechPaths[4]);
+
+		_MESSAGE(string(s1.begin(), s1.end()).c_str());
+		_MESSAGE(string(s2.begin(), s2.end()).c_str());
+		_MESSAGE(string(s3.begin(), s3.end()).c_str());
+		_MESSAGE(string(s4.begin(), s4.end()).c_str());
+		_MESSAGE(string(s5.begin(), s5.end()).c_str());
+
 		wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
 
 		randomTexts = { "I <emph>used</emph> to be an adventurer like you. Then I took an <emph>arrow</emph> in the knee.", "What is better - to be <emph>born</emph> good, or to <emph>overcome</emph> your evil nature through <emph>great</emph> effort?", "Let me <emph>guess</emph>, Someone stole your <emph>sweetroll</emph>!", "My cousin is out <emph> fighting dragons.</emph> And what do <emph>I</emph> get? <emph>Guard</emph> duty.", "Oh, there <emph>once</emph> was a hero named <emph>Ragnar</emph> the Red, who came <emph>riding</emph> to Whiterun from old <emph>Rorikstead</emph>. ", "And the <emph>braggart</emph> did swagger and <emph>brandish</emph> his blade as he <emph>told</emph> of bold battles and <emph>gold</emph> he had made. ", "But <emph>then</emph> he went quiet, did <emph>Ragnar</emph> the Red when he <emph>met</emph> the shield-maiden <emph>Matilda</emph>, who said; ", "Oh, you <emph>talk</emph> and you <emph>lie</emph> and you <emph>drink</emph> all our mead; now I <emph>think</emph> it's high time that you <emph>lie</emph> down and <emph>bleed</emph>!. ", "And so <emph>then</emph> came <emph>clashing</emph> and <emph>slashing</emph> of steel, as the <emph>brave</emph> lass Matilda <emph>charged</emph> in, full of zeal. ", "And the <emph>braggart</emph> named <emph>Ragnar</emph> was boastful no more... when his <emph>ugly</emph> red <emph>head</emph> rolled <emph>around</emph> on the <emph>floor</emph>!", "There are <emph>formalities</emph> that must be observed, at the first meeting of two of the <emph>dov</emph>. ", "My <emph>favorite</emph> drinking buddy! Let's get some <emph>mead</emph>.", "Perhaps we should find a random stranger to murder. Practice <emph>does</emph> make perfect.", "You stink of <emph>death</emph> my friend. I <emph>salute</emph> you.", "You <emph>never</emph> should have <emph>come</emph> here.", "Babette, my girl - <emph>pack</emph> your things. We're <emph>moving</emph>!", "<emph>Enough</emph>! I will <emph>not</emph> stand idly by while a <emph>dragon</emph> burns my hold and <emph>slaughters</emph> my <emph>people</emph>!", "I'm told they call me <emph>Dirge</emph> because I'm the <emph>last</emph> thing you hear before they put you in the ground.", "Been so long since I killed a Stormcloak, my sword arm's getting <emph>flabby</emph>.", "If these ruins frighten you, take comfort from the knowledge that <emph>I</emph> am here.", "Look at <emph>that</emph>. Am I <emph>drunk</emph>? I must be <emph>drunk</emph>.", "I used to be the <emph>top</emph> soldier for the Stormcloaks, then i took a <emph>sword</emph> to the chest", "And who are <emph>you</emph> to challenge <emph>me</emph>? I've conquered <emph>mortality</emph> itself. ", "I've <emph>spat</emph> in the eyes of the <emph>Daedric Lords</emph>! ", "This is <emph>my</emph> realm now, I've <emph>sacrificed</emph> too much to let you <emph>take</emph> it from me!", "I'll see you <emph>burn</emph>!", "You do not even know our <emph>tongue</emph>, do you? ", "Such <emph>arrogance</emph>, to <emph>dare</emph> take for yourself the name of <emph>Dovah</emph>!", "Well well... Another <emph>maggot</emph> to <emph>squash</emph> beneath my boot!", "Either <emph>I'm</emph> drunk, or <emph>you're</emph> naked. Possibly both.", "I'll see you in pieces!", "I've been hunting and fishing in these parts for <emph>years</emph>.", "I've got my <emph>eyes</emph> on you.", "We're one of the <emph>same</emph> kind, you and I. I'm <emph>happy</emph> to have met you.", "Looking to <emph>protect</emph> yourself? Or <emph>deal</emph> some damage?", "I got to <emph>thinking</emph>, maybe <emph>I'm</emph> the Dragonborn and I <emph>just</emph> don't <emph>know</emph> it yet.", "It's a <emph>fine</emph> day with <emph>you</emph> around!", "My father said I should go to <emph>college</emph>, but he didnt say <emph>which</emph> one.", "I'd be a lot <emph>happier</emph> and a lot <emph>warmer</emph> with a <emph>belly</emph> full of <emph>mead</emph>.", "I heard about <emph>you</emph> and your <emph>honeyed</emph> words.", "I guess you don't have potatoes in your ears <emph>after</emph> all." };
@@ -891,14 +919,14 @@ namespace FuzRoBorkNamespace {
 
 	void replaceUnspeakables(string& str) {
 		
-		for (auto const& [key, val] : fixes)
+		for (auto i : fixes)
 		{
-			findReplace(str, key, val);
+			findReplace(str, i.first, i.second);
 		}
 
-		for (auto const& [key, val] : transMap)
+		for (auto i : transMap)
 		{
-			findReplace(str, key.c_str(), val.c_str());
+			findReplace(str, i.first.c_str(), i.second.c_str());
 		}
 
 		// remove \t \r, etc
@@ -931,6 +959,7 @@ namespace FuzRoBorkNamespace {
 			}
 			idx = 0;
 			par = false;
+			str = newStr;
 			newStr = "";
 			while (idx < str.size()) {
 				if (!par && str[idx] == '[')
@@ -987,15 +1016,14 @@ namespace FuzRoBorkNamespace {
 		if (SUCCEEDED(hr))
 		{
 			_MESSAGE("searching for voices in registry");
-			
 			for (int i = 0; i < size(speechPaths); i++) {
-				found = findSpeechToken(&cpToken, wideLang, speechPaths[i]);
+				found = findSpeechToken(&cpToken, wideLang, speechPaths[i].c_str());
 				if (found)
 					break;
 			}
 			if (!found) {
 				for (int i = 0; i < size(speechPaths); i++) {
-					hr = SpFindBestToken(speechPaths[i], NULL, NULL, &cpToken);
+					hr = SpFindBestToken(speechPaths[i].c_str(), NULL, NULL, &cpToken);
 					if (SUCCEEDED(hr))
 						break;
 				}
@@ -1504,9 +1532,10 @@ namespace FuzRoBorkNamespace {
 
 		if (!SUCCEEDED(hr))
 			return;
+		wstring ks = wstring(key);
+		_MESSAGE("voices available in key %s:", string(ks.begin(), ks.end()).c_str());
 
-		OutputDebugString("voices available:\n");
-
+		gLog.Indent();
 		ISpObjectToken* pCurVoiceToken;
 		bool fFound = false;
 
@@ -1529,14 +1558,15 @@ namespace FuzRoBorkNamespace {
 
 				if (checkIfInArray(*nameA, nameValue))
 					continue;
-
-				OutputDebugStringW(nameValue);
-				OutputDebugString("\n");
+				wstring nameS = wstring(nameValue);
+				_MESSAGE(string(nameS.begin(), nameS.end()).c_str());
 
 				nameA->push_back(nameValue);
 
 			}
 		}
+		gLog.Outdent();
+
 	}
 
 
@@ -1608,19 +1638,20 @@ namespace FuzRoBorkNamespace {
 	}
 	void sendLanguages(StaticFunctionTag* t, VMArray<BSFixedString> names) {
 
+		_MESSAGE("Sending languages");
 		vector<LPWSTR> nameA;
 
-		addCatToVector(&nameA, SPCAT_VOICES);
-		addCatToVector(&nameA, L"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech Server\\v10.0\\Voices");
-		addCatToVector(&nameA, L"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech_OneCore\\Voices");
-		addCatToVector(&nameA, L"HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Speech\\Voices");
-		addCatToVector(&nameA, L"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices");
+		addCatToVector(&nameA, speechPaths[0].c_str());
+		addCatToVector(&nameA, speechPaths[1].c_str());
+		addCatToVector(&nameA, speechPaths[2].c_str());
+		addCatToVector(&nameA, speechPaths[3].c_str());
+		addCatToVector(&nameA, speechPaths[4].c_str());
 
-		_MESSAGE("Sending languages");
+		int langcount = 0;
 		for (UInt32 i = 0; i < nameA.size(); i++) {
 
 
-			char nameBuffer[500];
+			char nameBuffer[500]; 
 			// First arg is the pointer to destination char, second arg is
 			// the pointer to source wchar_t, last arg is the size of char buffer
 			wcstombs(nameBuffer, nameA[i], 500);
@@ -1630,15 +1661,19 @@ namespace FuzRoBorkNamespace {
 			_MESSAGE("adding language %s", nameBuffer);
 
 			names.Set(&bst, i);
+			langcount++;
 		}
 		BSFixedString vs;
 		vs.data = "xVASynth";
 		names.Set(&vs, nameA.size());
-		_MESSAGE("Sent %d languages to MCM", names.Length());
+		_MESSAGE("Sent %d languages to MCM", langcount);
 	}
 	void sendXGames(StaticFunctionTag* t, VMArray<BSFixedString> xGames) {
 
 		_MESSAGE("Sending games for xVASynth");
+
+
+
 
 		CHAR my_documents[MAX_PATH];
 		HRESULT result = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, my_documents);

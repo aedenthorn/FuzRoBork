@@ -6,18 +6,18 @@
 namespace hookedAddresses
 {
 	// E8 ? ? ? ? 48 8B F8 EB 02 33 FF 48 85 FF
-	RelocAddr<uintptr_t>	kCachedResponseData_Ctor(MAKE_RVA(0x0000000140591080));
+	RelocAddr<uintptr_t>	kCachedResponseData_Ctor(MAKE_RVA(0x00000001405DE460));
 	uintptr_t				kCachedResponseData_Ctor_Hook = kCachedResponseData_Ctor + 0xEC;
 	uintptr_t				kCachedResponseData_Ctor_Ret = kCachedResponseData_Ctor + 0xF1;
 
 	// E8 ? ? ? ? 8B 06 EB 09
-	RelocAddr<uintptr_t>	kUIUtils_QueueDialogSubtitles(MAKE_RVA(0x00000001409184B0));
+	RelocAddr<uintptr_t>	kUIUtils_QueueDialogSubtitles(MAKE_RVA(0x0000000140976E60));
 	uintptr_t				kUIUtils_QueueDialogSubtitles_Hook = kUIUtils_QueueDialogSubtitles + 0x4D;
 	uintptr_t				kUIUtils_QueueDialogSubtitles_Show = kUIUtils_QueueDialogSubtitles + 0x5A;
 	uintptr_t				kUIUtils_QueueDialogSubtitles_Exit = kUIUtils_QueueDialogSubtitles + 0x103;
 
 	// E8 ? ? ? ? 84 C0 75 42 48 8B 35 ? ? ? ?
-	RelocAddr<uintptr_t>	kASCM_DisplayQueuedNPCChatterData(MAKE_RVA(0x000000014090E800));
+	RelocAddr<uintptr_t>	kASCM_DisplayQueuedNPCChatterData(MAKE_RVA(0x000000014096D1B0));
 	uintptr_t				kASCM_DisplayQueuedNPCChatterData_DialogSubs_Hook = kASCM_DisplayQueuedNPCChatterData + 0x1CA;
 	uintptr_t				kASCM_DisplayQueuedNPCChatterData_DialogSubs_Show = kASCM_DisplayQueuedNPCChatterData + 0x1D3;
 	uintptr_t				kASCM_DisplayQueuedNPCChatterData_DialogSubs_Exit = kASCM_DisplayQueuedNPCChatterData + 0x1FD;
@@ -27,7 +27,7 @@ namespace hookedAddresses
 	uintptr_t				kASCM_DisplayQueuedNPCChatterData_GeneralSubs_Exit = kASCM_DisplayQueuedNPCChatterData + 0x1CA;
 
 	// E8 ? ? ? ? F3 0F 10 35 ? ? ? ? 48 8D 4E 28
-	RelocAddr<uintptr_t>	kASCM_QueueNPCChatterData(MAKE_RVA(0x000000014090E150));
+	RelocAddr<uintptr_t>	kASCM_QueueNPCChatterData(MAKE_RVA(0x000000014096CB00));
 	uintptr_t				kASCM_QueueNPCChatterData_Hook = kASCM_QueueNPCChatterData + 0x85;
 	uintptr_t				kASCM_QueueNPCChatterData_Show = kASCM_QueueNPCChatterData + 0x92;
 	uintptr_t				kASCM_QueueNPCChatterData_Exit = kASCM_QueueNPCChatterData + 0xCA;
@@ -43,7 +43,6 @@ void SneakAtackVoicePath(CachedResponseData* Data, char* VoicePathBuffer)
 	if (strlen(VoicePathBuffer) < 17)
 		return;
 
-	//_MESSAGE("1");
 
 	std::string FUZPath(VoicePathBuffer), WAVPath(VoicePathBuffer), XWMPath(VoicePathBuffer);
 	WAVPath.erase(0, 5);
@@ -56,22 +55,26 @@ void SneakAtackVoicePath(CachedResponseData* Data, char* VoicePathBuffer)
 	XWMPath.erase(XWMPath.length() - 3, 3);
 	XWMPath.append("xwm");
 
+
 	BSIStream* WAVStream = BSIStream::CreateInstance(WAVPath.c_str());
 	BSIStream* FUZStream = BSIStream::CreateInstance(FUZPath.c_str());
 	BSIStream* XWMStream = BSIStream::CreateInstance(XWMPath.c_str());
 
-#if 0
-	_MESSAGE("Expected: %s", VoicePathBuffer);
-	gLog.Indent();
-	_MESSAGE("WAV Stream [%s] Validity = %d", WAVPath.c_str(), WAVStream->valid);
-	_MESSAGE("FUZ Stream [%s] Validity = %d", FUZPath.c_str(), FUZStream->valid);
-	_MESSAGE("XWM Stream [%s] Validity = %d", XWMPath.c_str(), XWMStream->valid);
-	gLog.Outdent();
-#endif
+
+//	_MESSAGE("Expected: %s", VoicePathBuffer);
+//	gLog.Indent();
+//	_MESSAGE("WAV Stream [%s] Validity = %d", WAVPath.c_str(), WAVStream->valid);
+//	_MESSAGE("FUZ Stream [%s] Validity = %d", FUZPath.c_str(), FUZStream->valid);
+//	_MESSAGE("XWM Stream [%s] Validity = %d", XWMPath.c_str(), XWMStream->valid);
+//	gLog.Outdent();
+
+//	_MESSAGE("Checking if valid:");
+
+//	_MESSAGE("valid %d, %d, %d", WAVStream->valid, FUZStream->valid, XWMStream->valid);
 
 	if (WAVStream->valid == 0 && FUZStream->valid == 0 && XWMStream->valid == 0)
 	{
-		//_MESSAGE("2");
+		_MESSAGE("No valid voice file, processing");
 		static const int kWordsPerSecond = kWordsPerSecondSilence.GetData().i;
 		static const int kMaxSeconds = 10;
 
@@ -81,7 +84,7 @@ void SneakAtackVoicePath(CachedResponseData* Data, char* VoicePathBuffer)
 
 		if (ResponseText.length() > 4 && strncmp(ResponseText.c_str(), "<ID=", 4))
 		{
-			//_MESSAGE("3");
+			_MESSAGE("Got response subtitle");
 			SME::StringHelpers::Tokenizer TextParser(ResponseText.c_str(), " ");
 			int WordCount = 0;
 
@@ -103,12 +106,10 @@ void SneakAtackVoicePath(CachedResponseData* Data, char* VoicePathBuffer)
 
 		if (ResponseText.length() > 1 || (ResponseText.length() == 1 && ResponseText[0] == ' ' && kSkipEmptyResponses.GetData().i == 0))
 		{
-			//_MESSAGE("5");
+			_MESSAGE("Missing Asset");
 			FORMAT_STR(ShimAssetFilePath, "Data\\Sound\\Voice\\Fuz Ro Doh\\Stock_%d.xwm", SecondsOfSilence);
 			CALL_MEMBER_FN(&Data->voiceFilePath, Set)(ShimAssetFilePath);
-#ifndef NDEBUG
 			_MESSAGE("Missing Asset - Switching to '%s'", ShimAssetFilePath);
-#endif
 		}
 	}
 	//_MESSAGE("6");

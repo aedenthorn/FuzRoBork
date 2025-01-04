@@ -106,8 +106,10 @@ extern SME::INI::INISetting				kNarratorVoicePitch;
 extern SME::INI::INISetting				kxVASynthGame;
 extern SME::INI::INISetting				kxVASynthVoice;
 
+// START IMPORT FROM FRD
 
 #define MAKE_RVA(addr)		addr - 0x140000000i64
+
 
 class FuzRoBorkINIManager : public SME::INI::INIManager
 {
@@ -149,7 +151,7 @@ public:
 	MEMBER_FN_PREFIX(BSIStream);
 
 	// E8 ? ? ? ? 90 33 DB 38 5C 24 38
-	DEFINE_MEMBER_FN(Ctor, BSIStream*, MAKE_RVA(0x0000000140D93090), const char* FilePath, void* ParentLocation);
+	DEFINE_MEMBER_FN(Ctor, BSIStream*, MAKE_RVA(0x0000000140E1F1F0), const char* FilePath, void* ParentLocation);
 
 	// members
 	///*00*/ void**					vtbl;
@@ -297,6 +299,9 @@ namespace override
 std::string			MakeSillyName();
 bool				CanShowDialogSubtitles();
 bool				CanShowGeneralSubtitles();
+
+// END IMPORT FROM FRD
+
 
 //TTS Additions
 

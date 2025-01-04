@@ -12,7 +12,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>FuzRoBork</ProjectName>
-    <PluginPath>H:\tmp\ga\MO2Mods\SkyrimSE\mods\Fuz Ro Bork - Text-To-Speech Mod for Skyrim\SKSE\Plugins\</PluginPath>
+    <PluginPath>C:\tmp\lotf\mods\Fuz Ro Bork - Text-To-Speech Mod for Skyrim\SKSE\Plugins\</PluginPath>
+    <PluginPath2>C:\Users\User\source\repos\FuzRoBork\Fuz Ro Bork - Skyrim Text-To-Speech\SKSE\Plugins\</PluginPath2>
     <ProjectGuid>{FC9A1EE6-D9DB-47F6-B0ED-8867439C43CE}</ProjectGuid>
     <RootNamespace>FuzRoBork</RootNamespace>
     <Keyword>Win32Proj</Keyword>
@@ -52,14 +53,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\skse64;..\common;$(SMESundriesIncludePath);$(IncludePath)</IncludePath>
+    <IncludePath>..\skse64;..\skse64\skse64;..\skse64\skse64_common;..\common;$(SMESundriesIncludePath);$(IncludePath)</IncludePath>
     <TargetName>FuzRoBork</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\..;$(ProjectDir)include;$(SolutionDir)\skse64;$(SolutionDir)\jsoncpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;PLUGIN_EXAMPLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\..;$(SolutionDir)\skse64;$(SolutionDir)\jsoncpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
@@ -72,7 +72,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -81,9 +82,12 @@
       <Command>copy "$(TargetDir)$(TargetFileName)" "$(PluginPath)$(TargetFileName)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
+      <Command>copy "$(TargetDir)$(TargetFileName)" "$(PluginPath)$(TargetFileName)"
+copy "$(TargetDir)$(TargetFileName)" "$(PluginPath2)$(TargetFileName)"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
       <Message>Installing DLL...</Message>
     </PostBuildEvent>
-    <ProjectReference />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -91,18 +95,20 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\..;$(SolutionDir)\skse64;$(SolutionDir)\jsoncpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGIN_EXAMPLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ForcedIncludeFiles>common/IPrefix.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>
+      </LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -113,38 +119,62 @@
       <Command>copy "$(TargetDir)$(TargetFileName)" "$(PluginPath)$(TargetFileName)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
+      <Command>copy "$(TargetDir)$(TargetFileName)" "$(PluginPath2)$(TargetFileName)"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
       <Message>Installing DLL...</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\skse64\skse64\GameAPI.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameBSExtraData.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameData.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameExtraData.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameFormComponents.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameForms.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameObjects.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameReferences.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameRTTI.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameSettings.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameStreams.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameTypes.cpp" />
+    <ClCompile Include="..\skse64\skse64\GameUtilities.cpp" />
+    <ClCompile Include="..\skse64\skse64\HashUtil.cpp" />
+    <ClCompile Include="..\skse64\skse64\NiObjects.cpp" />
+    <ClCompile Include="..\skse64\skse64\NiTypes.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\skse64\skse64\GameAPI.h" />
+    <ClInclude Include="..\skse64\skse64\GameBSExtraData.h" />
+    <ClInclude Include="..\skse64\skse64\GameData.h" />
+    <ClInclude Include="..\skse64\skse64\GameExtraData.h" />
+    <ClInclude Include="..\skse64\skse64\GameFormComponents.h" />
+    <ClInclude Include="..\skse64\skse64\GameForms.h" />
+    <ClInclude Include="..\skse64\skse64\GameObjects.h" />
+    <ClInclude Include="..\skse64\skse64\GameReferences.h" />
+    <ClInclude Include="..\skse64\skse64\GameRTTI.h" />
+    <ClInclude Include="..\skse64\skse64\GameSettings.h" />
+    <ClInclude Include="..\skse64\skse64\GameStreams.h" />
+    <ClInclude Include="..\skse64\skse64\GameTypes.h" />
+    <ClInclude Include="..\skse64\skse64\GameUtilities.h" />
+    <ClInclude Include="..\skse64\skse64\HashUtil.h" />
+    <ClInclude Include="..\skse64\skse64\NiObjects.h" />
+    <ClInclude Include="..\skse64\skse64\NiTypes.h" />
+    <ClInclude Include="..\skse64\skse64\PluginAPI.h" />
+    <ClInclude Include="..\skse64\xbyak\xbyak.h" />
+    <ClInclude Include="..\skse64\xbyak\xbyak_bin2hex.h" />
+    <ClInclude Include="..\skse64\xbyak\xbyak_mnemonic.h" />
+    <ClInclude Include="..\skse64\xbyak\xbyak_util.h" />
+    <ClInclude Include="FuzRoBorkInternals.h" />
+    <ClInclude Include="Hooks.h" />
+    <ClInclude Include="VersionInfo.h" />
+  </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FuzRoBorkInternals.cpp" />
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="include\detour.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="BuildInfo.h" />
-    <ClInclude Include="FuzRoBorkInternals.h" />
-    <ClInclude Include="Hooks.h" />
-    <ClInclude Include="include\BuildInfo.h" />
-    <ClInclude Include="include\detour.h" />
-    <ClInclude Include="include\Functors.h" />
-    <ClInclude Include="include\FuzRoBorkInternals.h" />
-    <ClInclude Include="include\Hooks.h" />
-    <ClInclude Include="include\INIEditGUI.h" />
-    <ClInclude Include="include\INIEditGUI_Res.h" />
-    <ClInclude Include="include\INIManager.h" />
-    <ClInclude Include="include\MemoryHandler.h" />
-    <ClInclude Include="include\MersenneTwister.h" />
-    <ClInclude Include="include\MiscGunk.h" />
-    <ClInclude Include="include\SME_Prefix.h" />
-    <ClInclude Include="include\StringHelpers.h" />
-    <ClInclude Include="include\tinyxml2.h" />
-    <ClInclude Include="include\UIHelpers.h" />
-    <ClInclude Include="include\version.h" />
-    <ClInclude Include="include\VersionInfo.h" />
-    <ClInclude Include="VersionInfo.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
