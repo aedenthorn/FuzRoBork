@@ -12,8 +12,6 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>FuzRoBork</ProjectName>
-    <PluginPath>C:\tmp\lotf\mods\Fuz Ro Bork - Text-To-Speech Mod for Skyrim\SKSE\Plugins\</PluginPath>
-    <PluginPath2>C:\Users\User\source\repos\FuzRoBork\Fuz Ro Bork - Skyrim Text-To-Speech\SKSE\Plugins\</PluginPath2>
     <ProjectGuid>{FC9A1EE6-D9DB-47F6-B0ED-8867439C43CE}</ProjectGuid>
     <RootNamespace>FuzRoBork</RootNamespace>
     <Keyword>Win32Proj</Keyword>
@@ -48,12 +46,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\skse64;..\skse64\skse64;..\skse64\skse64_common;..\common;$(SMESundriesIncludePath);$(IncludePath)</IncludePath>
+    <IncludePath>..\skse64;..\skse64\skse64;..\skse64\skse64_common;..\common;$(IncludePath)</IncludePath>
     <TargetName>FuzRoBork</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\skse64;..\skse64\skse64;..\skse64\skse64_common;..\common;$(SMESundriesIncludePath);$(IncludePath)</IncludePath>
+    <IncludePath>..\skse64;..\skse64\skse64;..\skse64\skse64_common;..\common;$(IncludePath)</IncludePath>
     <TargetName>FuzRoBork</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -116,10 +114,8 @@ copy "$(TargetDir)$(TargetFileName)" "$(PluginPath2)$(TargetFileName)"</Command>
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetDir)$(TargetFileName)" "$(PluginPath)$(TargetFileName)"</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Command>copy "$(TargetDir)$(TargetFileName)" "$(PluginPath2)$(TargetFileName)"</Command>
+      <Command>copy "$(TargetDir)$(TargetFileName)" "$(PluginPath)$(TargetFileName)"
+copy "$(TargetDir)$(TargetFileName)" "$(PluginPath2)$(TargetFileName)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Installing DLL...</Message>
