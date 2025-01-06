@@ -190,7 +190,7 @@ event OnPageReset(string page)
         AddToggleOptionST("playActionsST","Voice Player Actions", PlayActionsVal)
 
         AddHeaderOption("Options")
-        AddSliderOptionST("msST","Text duration", msVal, "{0} ms / word")
+        AddSliderOptionST("msST","Text Duration", msVal, "{0} ms / word")
         AddToggleOptionST("playParaST","Speak Parentheticals", playParaVal)
         AddToggleOptionST("enableKeysST","Enable Keys", enableKeysVal)
         AddTextOptionST("reloadXMLST", "", "Reload XML")
@@ -404,7 +404,6 @@ state reloadXMLST; TEXT
     endEvent
 endState
 
-
 state enableKeysST; TOGGLE
     event OnSelectST()
         enableKeysVal= !enableKeysVal
@@ -481,7 +480,7 @@ state enableKeysST; TOGGLE
     endEvent
 
     event OnHighlightST()
-        SetInfoText("Play parenthetical speech, e.g. (Persuade) or (10 Gold)")
+        SetInfoText("Enable speech hotkeys")
     endEvent
 endState
 

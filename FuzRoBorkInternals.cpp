@@ -62,7 +62,7 @@ SME::INI::INISetting	kMsPerWordSilence("MsPerWordSilence",
 	"General",
 	"BLEH",
 	(float)-1);
-SME::INI::INISetting	kCustomTempPath("PlayerLanguage",
+SME::INI::INISetting	kCustomTempPath("CustomTempPath",
 	"General",
 	"BLEH",
 	(char*)"");
@@ -342,14 +342,6 @@ namespace FuzRoBorkNamespace {
 		wstring key4(SPCAT_VOICES); 
 		key4.replace(19, 9, L"SOFTWARE\\Wow6432Node\\");
 
-
-		_MESSAGE(string(key0.begin(), key0.end()).c_str());
-		_MESSAGE(string(key1.begin(), key1.end()).c_str());
-		_MESSAGE(string(key2.begin(), key2.end()).c_str());
-		_MESSAGE(string(key3.begin(), key3.end()).c_str());
-		_MESSAGE(string(key4.begin(), key4.end()).c_str());
-
-
 		vector<wstring> s = { key0, key1, key2, key3, key4};
 		return s;
 	}
@@ -473,9 +465,10 @@ namespace FuzRoBorkNamespace {
 			else {
 				const char* c = kCustomTempPath.GetData().s;
 				wstring str(c, c + strlen(c));
-				XVAFolder = str + L"\\";
+				XVAFolder = str;
+				_MESSAGE("Custom xVASynth path: %s", string(str.begin(), str.end()).c_str());
 			}
-			//_MESSAGE("Folder set to %s", XVAFolder.c_str());
+			_MESSAGE("Folder set to %s", string(XVAFolder.begin(), XVAFolder.end()).c_str());
 		}
 		return XVAFolder;
 	}
@@ -563,18 +556,15 @@ namespace FuzRoBorkNamespace {
 		BSResourceNiBinaryStream fileStream(path.c_str());
 		if (!fileStream.IsValid())
 			return;
-		else
-			_MESSAGE("Reading translations from %s...", path.c_str());
 
 		// Check if file is empty, if not check if the BOM is UTF-16
 		UInt16	bom = 0;
 		UInt32	ret = fileStream.Read(&bom, sizeof(UInt16));
 		if (ret == 0) {
-			_MESSAGE("Empty translation file.");
 			return;
 		}
 		if (bom != 0xFEFF) {
-			_MESSAGE("BOM Error, file must be encoded in UCS-2 LE.");
+			_MESSAGE("BOM Error, file must be encoded in UCS-2 LE: %s", path.c_str());
 			return;
 		}
 		wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
@@ -630,18 +620,6 @@ namespace FuzRoBorkNamespace {
 
 	void LoadXML()
 	{
-
-		wstring s1 = wstring(speechPaths[0]);
-		wstring s2 = wstring(speechPaths[1]);
-		wstring s3 = wstring(speechPaths[2]);
-		wstring s4 = wstring(speechPaths[3]);
-		wstring s5 = wstring(speechPaths[4]);
-
-		_MESSAGE(string(s1.begin(), s1.end()).c_str());
-		_MESSAGE(string(s2.begin(), s2.end()).c_str());
-		_MESSAGE(string(s3.begin(), s3.end()).c_str());
-		_MESSAGE(string(s4.begin(), s4.end()).c_str());
-		_MESSAGE(string(s5.begin(), s5.end()).c_str());
 
 		wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
 
@@ -1672,11 +1650,6 @@ namespace FuzRoBorkNamespace {
 
 		_MESSAGE("Sending games for xVASynth");
 
-
-
-
-		CHAR my_documents[MAX_PATH];
-		HRESULT result = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, my_documents);
 		
 		wstring path = GetXVAFolder();
 
