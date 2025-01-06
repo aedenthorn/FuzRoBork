@@ -358,7 +358,7 @@ namespace FuzRoBorkNamespace {
 	map<string, vector<string>> actionList;
 	map< string, string> fixes;
 	map< string, string> transMap;
-	map<string, json > gameVoices;
+	map<string, string > gameVoices;
 
 	wstring XVAFolder = L"";
 
@@ -960,7 +960,7 @@ namespace FuzRoBorkNamespace {
 		string speech = nSpeech.speech;
 		replaceUnspeakables(speech);
 
-		if (nSpeech.lang == "xVASynth") {
+		if (strcmp(nSpeech.lang, "xVASynth") == 0) {
 			_MESSAGE("Sending text to xVASynth");
 			sendToxVASynth(nSpeech);
 			return;
@@ -1146,31 +1146,44 @@ namespace FuzRoBorkNamespace {
 			}
 
 			if (gameVoices.count(game) == 0) {
-				_MESSAGE("Game %s not found", game);
+				_MESSAGE("Game %s not found", game.c_str());
 				sendingXVAS = false;
 				return;
 			}
-			if (gameVoices[game].size() == 0) {
+			_MESSAGE("Checking voices for game %s", game.c_str());
+
+			StringStream s(gameVoices[game].c_str());
+			Document d;
+			d.ParseStream(s);
+			if (d.HasParseError()) {
+				_MESSAGE("Error parsing file: %s", d.GetParseError());
+				return;
+			}
+			_MESSAGE("got json from %s", gameVoices[game].c_str());
+			auto array = d.GetArray();
+
+			if (array.Size() == 0) {
 				_MESSAGE("Game %s has no voices", game);
 				sendingXVAS = false;
 				return;
 			}
+			_MESSAGE("Game %s has voices", game.c_str());
 
 			UInt32 idx = kxVASynthVoice.GetData().u;
 
-			if (idx >= gameVoices[game].size())
+			if (idx >= array.Size())
 				idx = 0;
 
 			_MESSAGE("Voice id is %d", idx);
 
-			if (idx >= gameVoices[game].size()) {
-				_MESSAGE("Index %d out of bounds for game %s", idx, game);
+			if (idx >= array.Size()) {
+				_MESSAGE("Index %d out of bounds for game %s", idx, game.c_str());
 				return;
 			}
 			
-			voice = gameVoices[game][idx]["id"];
+			voice = string(array[idx]["id"].GetString());
 
-			_MESSAGE("Voice name is %s", string(gameVoices[game][idx]["name"]).c_str());
+			_MESSAGE("Voice name is %s", array[idx]["name"].GetString());
 		}
 		else {
 			_MESSAGE("Sending initialization data only");
@@ -1181,19 +1194,19 @@ namespace FuzRoBorkNamespace {
 
 		string speech(obj.speech);
 
-		json j;
-		j["voiceId"] = voice;
-		j["gameId"] = game;
-		//j["xVA_pitch"] = 1 + obj.pitch / 10 * 3.33;
-		j["ffmpeg_pitchMult"] = 1 + obj.pitch / 10;
-		//j["xVA_pace"] = rate;
-		j["vol"] = obj.vol / 100 * 3.33;
-		j["text"] = speech;
-		j["done"] = false;
-		j["use_ffmpeg"] = true;
-		j["pad_start"] = 0;
-		j["pad_end"] = 200;
-		j["ffmpeg_tempo"] = 1 + obj.rate / 10;
+		string j = "{";
+		j += "\"voiceId\":\"" + voice + "\",";
+		j += "\"gameId\":\"" + game + "\",";
+		j += "\"ffmpeg_pitchMult\":" + to_string(1 + obj.pitch / 10.0) +",";
+		j += "\"vol\":" + to_string(obj.vol / 100.0 * 3.33) +",";
+		j += "\"text\":\"" + speech + "\",";
+
+		j += "\"done\":false,";
+		j += "\"use_ffmpeg\":true,";
+		j += "\"pad_start\":0,";
+		j += "\"pad_end\":200,";
+
+		j += "\"ffmpeg_tempo\":" + to_string(1 + obj.rate / 10.0) +"}";
 
 		wstring fpath = GetXVAFolder();
 
@@ -1284,7 +1297,7 @@ namespace FuzRoBorkNamespace {
 	}
 
 	void startPlayerSpeech(const char* text) {
-		//_MESSAGE("Starting Player Speech: %s", _title.c_str());
+		// _MESSAGE("Starting Player Speech: %s", text);
 
 		TESNPC* pc = DYNAMIC_CAST((*g_thePlayer)->baseForm, TESForm, TESNPC);
 
@@ -1316,9 +1329,8 @@ namespace FuzRoBorkNamespace {
 		if (isSpeaking() || isXVASpeaking())
 			return;
 
-		string which(_which.data);
 
-		if (which.compare("XX") == 0 || which.compare("xx") == 0) {
+		if (strcmp(_which.data, "XX") == 0 || strcmp(_which.data, "xx") == 0) {
 			if (sendingXVAS || playingXVAS)
 				return;
 			SpeakObj pSpeech("", "xVASynth", kPlayerVoiceRate.GetData().f, kPlayerVoiceVolume.GetData().f, kPlayerVoicePitch.GetData().i);
@@ -1332,34 +1344,36 @@ namespace FuzRoBorkNamespace {
 
 		const char* speech = randomTexts[r].c_str();
 
-		_MESSAGE("Speaking random %s text", which.c_str());
+		_MESSAGE("Speaking random %s text", _which.data);
 
-		if (which.compare("P") == 0 || which.compare("p") == 0) {
+		if (strcmp(_which.data, "P") == 0 || strcmp(_which.data, "p") == 0) {
 			startPlayerSpeech(speech);
 		}
-		else if (which.compare("F") == 0 || which.compare("f") == 0) {
+		else if (strcmp(_which.data, "F") == 0 || strcmp(_which.data, "f") == 0) {
 			SpeakObj pSpeech(speech, kFemaleLanguage.GetData().s, kFemaleVoiceRate.GetData().f, kFemaleVoiceVolume.GetData().f, kFemaleVoicePitch.GetData().i);
 			thread t3(speakTask, pSpeech);
 			t3.detach();
 		}
-		else if (which.compare("M") == 0 || which.compare("m") == 0) {
+		else if (strcmp(_which.data, "M") == 0 || strcmp(_which.data, "m") == 0) {
 			SpeakObj pSpeech(speech, kMaleLanguage.GetData().s, kMaleVoiceRate.GetData().f, kMaleVoiceVolume.GetData().f, kMaleVoicePitch.GetData().i);
 			thread t3(speakTask, pSpeech);
 			t3.detach();
 		}
-		else if (which.compare("N") == 0 || which.compare("n") == 0) {
+		else if (strcmp(_which.data, "N") == 0 || strcmp(_which.data, "n") == 0) {
 			SpeakObj pSpeech(speech, kNarratorLanguage.GetData().s, kNarratorVoiceRate.GetData().f, kNarratorVoiceVolume.GetData().f, kNarratorVoicePitch.GetData().i);
 			thread t3(speakTask, pSpeech);
 			t3.detach();
 		}
-		else if (which.compare("S") == 0 || which.compare("s") == 0) {
+		else if (strcmp(_which.data, "S") == 0 || strcmp(_which.data, "s") == 0) {
 			SpeakObj pSpeech("Bork bork bork!", "eSpeak-en", 0, 100.0, 0);
 			thread t3(speakTask, pSpeech);
 			t3.detach();
 		}
-		else if (which.compare("X") == 0 || which.compare("x") == 0) {
-			if (sendingXVAS || playingXVAS)
+		else if (strcmp(_which.data, "X") == 0 || strcmp(_which.data, "x") == 0) {
+			if (sendingXVAS || playingXVAS) {
+				_MESSAGE("xVASynth already speaking");
 				return;
+			}
 			SpeakObj pSpeech(speech, "xVASynth", kPlayerVoiceRate.GetData().f, kPlayerVoiceVolume.GetData().f, kPlayerVoicePitch.GetData().i);
 			thread t1(speakTask, pSpeech);
 			t1.detach();
@@ -1659,39 +1673,44 @@ namespace FuzRoBorkNamespace {
 		}
 		path += L"xVASynthVoices.json";
 
-		std::ifstream i(path);
+		std::ifstream file(path);
 
-		if (i.good()) {
+		if (file.good()) {
 			//_MESSAGE("File exists %s", path.c_str());
+			string fromFile((istreambuf_iterator<char>(file)),
+				istreambuf_iterator<char>());
+			Document doc;
+			doc.Parse(fromFile.c_str());
 
-			json j;
-			i >> j;
-			if (j.is_object()) {
-
-				_MESSAGE("adding xVASynth voices");
-
-				json jg = j["games"];
-				if (jg.is_object()) {
-					_MESSAGE("got games");
-					UInt32 gameIndex = 0;
-					for (json::iterator it = jg.begin(); it != jg.end(); ++it) {
-						string key = it.key();
-						_MESSAGE("got %d voices for %s", it.value().size(), key);
-
-						BSFixedString vs;
-						vs.data = key.c_str();
-						xGames.Set(&vs, gameIndex);
-
-						gameIndex++;
-
-						StringToLower(key);
-
-						gameVoices[key] = it.value();
-					}
-					_MESSAGE("Sent voices");
-
-				}
+			if (doc.HasParseError()) {
+				_MESSAGE("Error parsing file: %s", doc.GetParseError());
+				return;
 			}
+
+			_MESSAGE("adding xVASynth voices");
+
+			UInt32 gameIndex = 0;
+
+			for (Value::ConstMemberIterator itr = doc["games"].MemberBegin(); itr != doc["games"].MemberEnd(); ++itr) {
+				_MESSAGE("game %s", itr->name.GetString());
+
+				BSFixedString vs;
+				vs.data = itr->name.GetString();
+				xGames.Set(&vs, gameIndex);
+
+				gameIndex++;
+
+				string key = string(itr->name.GetString());
+				StringToLower(key);
+
+				StringBuffer buffer;
+				buffer.Clear();
+				Writer<StringBuffer> writer(buffer);
+				itr->value.Accept(writer);
+
+				gameVoices[key] = string(buffer.GetString());
+			}
+			_MESSAGE("Sent voices");
 		}
 		else {
 			_MESSAGE("xVAFolder not found");
@@ -1706,17 +1725,27 @@ namespace FuzRoBorkNamespace {
 			_MESSAGE("No voices for %s", game.data);
 			return;
 		}
-		_MESSAGE("Sending %d voices for game %s", gameVoices.count(gameData), game.data);
+		_MESSAGE("Sending voices for game %s", game.data);
 
-		json vlist = gameVoices[gameData];
+		StringStream s(gameVoices[gameData].c_str());
 
-		for (UINT32 i = 0; i < vlist.size(); i++) {
+		Document doc;
+		doc.ParseStream(s);
 
-			string voice = vlist[i]["name"];
+		if (doc.HasParseError()) {
+			_MESSAGE("Error parsing file: %s", doc.GetParseError());
+			return;
+		}
+
+		auto vlist = doc.GetArray();
+
+		for (UINT32 i = 0; i < vlist.Size(); i++) {
+
+			const char* voice = vlist[(int)i]["name"].GetString();
 
 			BSFixedString bst;
-			bst.data = voice.c_str();
-			_MESSAGE("adding xVASynth voice %s", voice.c_str());
+			bst.data = voice;
+			_MESSAGE("adding xVASynth voice %s", voice);	
 
 			xVoices.Set(&bst, i);
 		}

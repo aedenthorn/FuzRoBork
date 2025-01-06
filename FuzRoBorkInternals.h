@@ -8,24 +8,16 @@
 #include "skse64/GameForms.h"
 #include <skse64/GameEvents.h>
 #include <skse64/GameData.h>
-#include "skse64/GameSettings.h"
 #include <skse64/GameStreams.h>
 #include <skse64/ScaleformState.h>
 #include <skse64/PapyrusArgs.h>
 #include <skse64_common/skse_version.h>
-#include <skse64/GameData.h>
-#include <skse64/GameForms.h>
 #include <skse64/GameInput.h>
 #include <skse64/GameObjects.h>
 #include <skse64/GameRTTI.h>
-#include <skse64/GameSettings.h>
-#include <skse64/GameStreams.h>
 #include <skse64/GameUtilities.h>
-#include <skse64/PapyrusArgs.h>
 #include <skse64/PapyrusNativeFunctions.h>
-#include <skse64/PluginAPI.h>
 #include <skse64/ScaleformMovie.h>
-#include <skse64/ScaleformState.h>
 
 #include "include/tinyxml2.h"
 #include "json/single_include/nlohmann/json.hpp"
@@ -43,7 +35,6 @@
 #include <filesystem>
 #include <common/common/IFileStream.h>
 #include <shlobj.h>
-#include <filesystem>
 #include <cstdio>
 #include <sstream>
 #include <locale>
@@ -57,8 +48,11 @@
 #include "include/INIManager.h"
 #include "include/StringHelpers.h"
 #include "include/MiscGunk.h"
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
 
-
+using namespace rapidjson;
 using json = nlohmann::json;
 using namespace std;
 using namespace tinyxml2;
